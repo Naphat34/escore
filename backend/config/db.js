@@ -1,37 +1,36 @@
-const { Pool } = require('pg');
-const path = require('path');
+const { Pool } = require("pg");
+const path = require("path");
 
-// โหลดค่าจากไฟล์ .env
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+// โหลด .env
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
-// เช็คค่า (Debug) - ดูว่าอ่านเจอไหม
-console.log("Check Env:", {
-    Host: process.env.DB_HOST,
-    User: process.env.DB_USER,
-    // เช็คว่า Password มาไหม (ไม่ต้องโชว์รหัสจริงเพื่อความปลอดภัย)
-    HasPassword: !!process.env.DB_PASSWORD 
+// ตรวจสอบว่าใช้ Railway หรือ Local
+const isProduction = !!process.env.DATABASE_URL;
+
+const pool = isProduction
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    })
+  : new Pool({
+      user: process.env.DB_USER,
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      password: process.env.DB_PASSWORD,
+      port: process.env.DB_PORT,
+    });
+
+pool.on("connect", () => {
+  console.log("✅ Connected to PostgreSQL Database");
 });
 
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  
-  // 👇 จุดสำคัญ! ต้องแก้เป็น DB_PASSWORD ให้ตรงกับในไฟล์ .env
-  password: process.env.DB_PASSWORD, 
-  
-  port: process.env.DB_PORT,
-});
-
-pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL Database');
-});
-
-pool.on('error', (err) => {
-  console.error('❌ Database Error:', err);
+pool.on("error", (err) => {
+  console.error("❌ Database Error:", err);
 });
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
-  pool
+  pool,
 };
