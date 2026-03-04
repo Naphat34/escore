@@ -1,0 +1,170 @@
+import React, { useState } from 'react';
+import { api } from '../api';
+import { useNavigate, Link } from 'react-router-dom';
+import { setCookie } from '../utils';
+import Swal from 'sweetalert2'; // Import SweetAlert2
+
+export default function Login() {
+  const [formData, setFormData] = useState({ username: '', password: '' });
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await api.login({
+        username: formData.username, 
+        password: formData.password
+      });
+
+      const { user } = response.data;
+      const { role, status, team_id } = user;
+
+      if (role) setCookie('role', role);
+      if (team_id) setCookie('team_id', team_id);
+
+      // --- Logic การตรวจสอบสิทธิ์ ---
+
+      // 1. Admin -> ไปหน้า Admin Dashboard
+      if (role === 'admin') {
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'top-end',
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+        });
+        Toast.fire({
+          icon: 'success',
+          title: 'Welcome Admin'
+        });
+        navigate('/admin');
+        return;
+      }
+
+      // 2. User ที่ยังไม่ Approved
+      if (status !== 'approved') {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'Account Pending',
+          text: 'Your account is pending approval from Admin.',
+          confirmButtonColor: '#f59e0b', // สีเหลือง Amber
+        });
+        
+        // Logout เพื่อความชัวร์
+        await api.logout(); 
+        return;
+      }
+
+      // แสดง Success เล็กน้อยก่อนเปลี่ยนหน้า (Optional)
+      const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+      });
+      Toast.fire({
+        icon: 'success',
+        title: 'Signed in successfully'
+      });
+
+      // 3. Approved แล้ว เช็คทีม
+      if (team_id) {
+        // 4. มีทีมแล้ว -> ไป Team Dashboard
+        navigate('/team-dashboard');
+      } else {
+        // 3. ยังไม่มีทีม -> ไปหน้า Create Team
+        navigate('/create-team');
+      }
+
+    } catch (err) {
+      // ใช้ SweetAlert2 แสดง Error
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: err.response?.data?.error || 'Invalid username or password.',
+        confirmButtonColor: '#4f46e5', // สี Indigo-600 ให้เข้ากับธีม
+      });
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
+      {/* Card Container */}
+      <div className="bg-white/95 backdrop-blur-sm p-8 md:p-10 rounded-2xl shadow-2xl w-full max-w-md transform transition-all hover:scale-[1.01]">
+        
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+            Volley Manager Login
+          </h1>
+          <p className="text-sm text-gray-500 mt-2">
+            ระบบจัดการทีมวอลเลย์บอล
+          </p>
+        </div>
+
+        {/* Form Section */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* Username Input */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">
+              Username
+            </label>
+            <input 
+              name="username" 
+              type="text" 
+              required
+              placeholder="Enter your username"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 bg-gray-50 hover:bg-white"
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Password Input */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-sm font-semibold text-gray-700">
+                Password
+              </label>
+            </div>
+            <input 
+              name="password" 
+              type="password" 
+              required
+              placeholder="••••••••"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 bg-gray-50 hover:bg-white"
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button 
+            type="submit" 
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-lg font-bold shadow-lg hover:shadow-indigo-500/50 hover:from-indigo-700 hover:to-purple-700 transform transition-all duration-200 active:scale-95"
+          >
+            Sign In
+          </button>
+        </form>
+
+        {/* Footer Link */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-600">
+            เจ้าหน้าที่ทีมยังไม่มีทีม?&nbsp;{' '}
+            <Link 
+              to="/register" 
+              className="font-bold text-indigo-600 hover:text-indigo-800 hover:underline transition-colors"
+            >
+              Register here
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
