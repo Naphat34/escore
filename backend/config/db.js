@@ -1,33 +1,8 @@
 const { Pool } = require("pg");
-const path = require("path");
 
-// โหลด .env
-require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
-
-// ตรวจสอบว่าใช้ Railway หรือ Local
-const isProduction = !!process.env.DATABASE_URL;
-
-const pool = isProduction
-  ? new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    })
-  : new Pool({
-      user: process.env.DB_USER,
-      host: process.env.DB_HOST,
-      database: process.env.DB_NAME,
-      password: process.env.DB_PASSWORD,
-      port: process.env.DB_PORT,
-    });
-
-pool.on("connect", () => {
-  console.log("✅ Connected to PostgreSQL Database");
-});
-
-pool.on("error", (err) => {
-  console.error("❌ Database Error:", err);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
 module.exports = {
