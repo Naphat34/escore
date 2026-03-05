@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = '/api';
+const BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 // สร้าง instance ของ axios
 const apiClient = axios.create({
