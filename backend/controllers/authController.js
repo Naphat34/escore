@@ -1,4 +1,3 @@
-// 5. Get current user info (for frontend session)
 exports.getMe = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -77,8 +76,8 @@ exports.login = async (req, res) => {
     // ส่ง Cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false, // set true in production
-      sameSite: 'strict',
+      secure: true, // set true in production
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000
     });
 
