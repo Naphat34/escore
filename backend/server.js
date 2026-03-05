@@ -13,9 +13,12 @@ const PORT = process.env.PORT || 3000;
 // 1. Setup Middleware FIRST
 // ==========================================
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: [
+    "http://localhost:5173",
+    "https://your-frontend.vercel.app"
+  ],
   credentials: true,
-})); 
+}));
 app.use(cookieParser());
 
 // These parsers must run BEFORE the routes so req.body exists
