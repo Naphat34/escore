@@ -1359,7 +1359,7 @@ export default function ScorerConsole() {
                                                                 {/* Score */}
                                                                 <div className="flex items-center gap-1 font-mono font-bold text-base">
                                                                     <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>{homeScore}</span>
-                                                                    <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>-</span>
+                                                                    <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>:</span>
                                                                     <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-rose-900/50 text-rose-300' : 'bg-rose-100 text-rose-700'}`}>{awayScore}</span>
                                                                 </div>
                                                                 {/* Description */}
