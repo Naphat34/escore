@@ -117,7 +117,7 @@ export default function ScorerConsole() {
     const [setsWon, setSetsWon] = useState(() => loadState('setsWon', { home: 0, away: 0 }));
     const [completedSets, setCompletedSets] = useState(() => loadState('completedSets', []));
 
-    
+    const [substitutions, setSubstitutions] = useState([]);
     
 
     // Lineup State
