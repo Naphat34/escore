@@ -157,21 +157,37 @@ export default function ScorerConsole() {
             <main className="flex-1 relative flex flex-col">
                 
                 {/* COURT VIEW AREA (Always Visible but dimmed when modal is open) */}
-                <div className="flex-1 bg-slate-900 flex flex-col items-center pt-4 relative">
-                    {/* Team Names above court */}
-                    <div className="w-full max-w-3xl flex justify-between px-8 mb-1 font-bold text-xl uppercase tracking-widest drop-shadow-lg">
-                        <div className={isHomeLeft ? "text-indigo-400" : "text-rose-400"}>{leftTeamName}</div>
-                        <div className={!isHomeLeft ? "text-indigo-400" : "text-rose-400"}>{rightTeamName}</div>
-                    </div>
-                    
-                    {/* The Court */}
-                    <CourtView homePositions={courtPositionsLeft} awayPositions={courtPositionsRight} />
-                    
-                    {/* Footer / Status Bar */}
-                    <div className="absolute bottom-4 text-slate-500 text-xs">
-                        Waiting for match start...
-                    </div>
-                </div>
+                {step !== 'LINEUP' && (
+                    <>
+                        <div className="flex-1 bg-slate-900 flex flex-col items-center pt-4 relative">
+                            {/* Team Names above court */}
+                            <div className="w-full max-w-3xl flex justify-between px-8 mb-1 font-bold text-xl uppercase tracking-widest drop-shadow-lg">
+                                <div className={isHomeLeft ? "text-indigo-400" : "text-rose-400"}>{leftTeamName}</div>
+                                <div className={!isHomeLeft ? "text-indigo-400" : "text-rose-400"}>{rightTeamName}</div>
+                            </div>
+                            
+                            {/* The Court */}
+                            <CourtView homePositions={courtPositionsLeft} awayPositions={courtPositionsRight} />
+                            
+                            {/* Footer / Status Bar */}
+                            {step !== 'READY' && (
+                                <div className="absolute bottom-4 text-slate-500 text-xs">
+                                    Waiting for match start...
+                                </div>
+                            )}
+                        </div>
+                        {/* 4. GAME READY CONTROLS (Bottom Panel) */}
+                        {step === 'READY' && (
+                            <div className="absolute bottom-0 w-full bg-slate-800 border-t border-slate-700 p-4 z-30 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+                                <div className="max-w-4xl mx-auto flex items-center justify-center gap-8 h-24 text-slate-500">
+                                    <div className="border border-dashed border-slate-600 rounded-lg px-8 py-4 bg-slate-900/50">
+                                        Score Controls & Match Log Component
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
 
                 {/* === MODAL LAYER === */}
 
@@ -226,7 +242,7 @@ export default function ScorerConsole() {
 
                 {/* 2. LINEUP SELECTION MODAL */}
                 {step === 'LINEUP' && (
-                    <div className="absolute inset-0 z-40 bg-slate-950/90 backdrop-blur-md flex flex-col">
+                    <div className="flex-1 bg-slate-950 flex flex-col">
                         {/* Modal Header */}
                         <div className="p-4 flex justify-between items-center max-w-6xl mx-auto w-full">
                             <h2 className="text-2xl font-bold flex items-center gap-3 text-white">
@@ -279,19 +295,6 @@ export default function ScorerConsole() {
                         </div>
                     </div>
                 )}
-
-                {/* 4. GAME READY CONTROLS (Bottom Panel) */}
-                {step === 'READY' && (
-                     <div className="absolute bottom-0 w-full bg-slate-800 border-t border-slate-700 p-4 z-30 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
-                        <div className="max-w-4xl mx-auto flex items-center justify-center gap-8 h-24 text-slate-500">
-                            {/* Placeholder for Score Controls */}
-                            <div className="border border-dashed border-slate-600 rounded-lg px-8 py-4 bg-slate-900/50">
-                                Score Controls & Match Log Component
-                            </div>
-                        </div>
-                     </div>
-                )}
-
             </main>
         </div>
     );
@@ -301,11 +304,12 @@ export default function ScorerConsole() {
 const LineupCard = ({ teamLabel, teamName, lineup, liberos, onSelectPos, onClearPos, color, sideLabel }) => {
     const themeColor = color === 'indigo' ? 'text-indigo-400 border-indigo-500/30' : 'text-rose-400 border-rose-500/30';
     const btnColor = color === 'indigo' ? 'bg-indigo-600 hover:bg-indigo-500' : 'bg-rose-600 hover:bg-rose-500';
+    const decoColor = color === 'indigo' ? 'bg-indigo-500/10' : 'bg-rose-500/10';
 
     return (
         <div className={`bg-slate-800/80 rounded-2xl p-5 border ${themeColor} shadow-xl relative overflow-hidden`}>
             {/* Background Decoration */}
-            <div className={`absolute -top-10 -right-10 w-32 h-32 bg-${color}-500/10 rounded-full blur-2xl pointer-events-none`}></div>
+            <div className={`absolute -top-10 -right-10 w-32 h-32 ${decoColor} rounded-full blur-2xl pointer-events-none`}></div>
 
             <div className="flex justify-between items-start mb-6 border-b border-white/5 pb-4">
                 <div>
