@@ -339,7 +339,7 @@ export default function ScorerConsole() {
         let metadata = null;
         const teamName = teamCode === 'home' ? matchData.teamHome : (teamCode === 'away' ? matchData.teamAway : '');
         
-        if (eventType === 'POINT') description = `Point for ${teamName}`;
+        if (eventType === 'POINT') description = `Point ${teamName}`;
         else if (eventType === 'TIMEOUT') {
             description = `Timeout ${teamName}`;
             metadata = { type: 'TIMEOUT', team: teamName };
@@ -1345,37 +1345,41 @@ export default function ScorerConsole() {
                                             {setEvents.map((ev) => {
                                                 const isHome = ev.metadata?.team === matchData.teamHome;
                                                 const isAway = ev.metadata?.team === matchData.teamAway;
-                                                // Determine border color based on team
-                                                let borderColor = 'border-gray-300';
+                                                let borderColor = 'border-gray-200 dark:border-gray-700';
                                                 if (isHome) borderColor = 'border-indigo-500';
                                                 else if (isAway) borderColor = 'border-rose-500';
 
+                                                const [homeScore, awayScore] = ev.score.split('-');
+
                                                 return (
-                                                    <div key={ev.id} className={`p-2 rounded-r-md border-l-4 ${borderColor} shadow-sm transition-colors ${isDarkMode ? 'bg-slate-700/40 text-gray-200' : 'bg-white text-gray-800'}`}>
-                                                        <div className="flex justify-between items-center mb-1">
-                                                            <span className="text-[10px] font-bold text-gray-400 flex items-center gap-1">
-                                                                <Clock size={10}/> {ev.time}
-                                                            </span>
-                                                            {ev.metadata?.team && (
-                                                                <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${isHome ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300' : (isAway ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300' : 'bg-gray-100 text-gray-600')}`}>
-                                                                    {ev.metadata.team}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className="text-xs font-bold leading-tight mb-1">
-                                                            {ev.metadata && (ev.metadata.type === 'SUBSTITUTION' || ev.metadata.type === 'LIBERO') ? (
-                                                                <div className="flex flex-wrap gap-1 items-center">
-                                                                    <span className="text-green-600 dark:text-green-400">IN {ev.metadata.in}</span>
-                                                                    <span className="text-gray-400">/</span>
-                                                                    <span className="text-red-600 dark:text-red-400">OUT {ev.metadata.out}</span>
-                                                                    {ev.metadata.type === 'LIBERO' && <span className="text-[9px] bg-blue-100 text-blue-800 px-1 rounded ml-1">Libero</span>}
+                                                    <div key={ev.id} className={`p-2 rounded-md border-l-4 ${borderColor} shadow-sm transition-colors ${isDarkMode ? 'bg-slate-700/40' : 'bg-white'}`}>
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            {/* Left side: Score + Description */}
+                                                            <div className="flex items-center gap-3">
+                                                                {/* Score */}
+                                                                <div className="flex items-center gap-1 font-mono font-bold text-base">
+                                                                    <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>{homeScore}</span>
+                                                                    <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>-</span>
+                                                                    <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-rose-900/50 text-rose-300' : 'bg-rose-100 text-rose-700'}`}>{awayScore}</span>
                                                                 </div>
-                                                            ) : (
-                                                                ev.description
-                                                            )}
-                                                        </div>
-                                                        <div className="text-[10px] text-gray-500 flex justify-end">
-                                                            Score: <span className={`font-mono font-bold ml-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-900'}`}>{ev.score}</span>
+                                                                {/* Description */}
+                                                                <div className={`text-xs font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                                                                    {ev.metadata && (ev.metadata.type === 'SUBSTITUTION' || ev.metadata.type === 'LIBERO') ? (
+                                                                        <div className="flex flex-wrap gap-1 items-center">
+                                                                            <span className="text-green-600 dark:text-green-400">IN {ev.metadata.in}</span>
+                                                                            <span className="text-gray-400">/</span>
+                                                                            <span className="text-red-600 dark:text-red-400">OUT {ev.metadata.out}</span>
+                                                                            {ev.metadata.type === 'LIBERO' && <span className="text-[9px] bg-blue-100 text-blue-800 px-1 rounded ml-1">Libero</span>}
+                                                                        </div>
+                                                                    ) : (
+                                                                        ev.description
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            {/* Right side: Time */}
+                                                            <div className={`text-[10px] font-bold text-gray-400 flex items-center gap-1 shrink-0`}>
+                                                                <Clock size={10}/> {ev.time}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 );
