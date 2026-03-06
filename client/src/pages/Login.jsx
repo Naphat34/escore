@@ -41,7 +41,10 @@ export default function Login() {
     // =========================
     // ADMIN
     // =========================
+    console.log("ROLE =", role);
     if (role === "admin") {
+
+      navigate("/admin");
 
       Swal.fire({
         toast: true,
@@ -52,7 +55,7 @@ export default function Login() {
         timer: 1500
       });
 
-      navigate("/admin");
+      
       return;
     }
 
