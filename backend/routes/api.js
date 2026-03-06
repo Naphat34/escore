@@ -14,6 +14,7 @@ const ageGroupController = require('../controllers/ageGroupController');
 const playerController = require('../controllers/playerController');
 const stadiumsController = require('../controllers/stadiumsController');
 const officialRoutes = require('./officialRoutes');
+const scorerRoutes = require('./scorerRoutes');
 
 // ==================================================================
 // 1. 🔓 PUBLIC ROUTES (โซนนี้เข้าได้ทุกคน ไม่ต้อง Login)
@@ -43,6 +44,9 @@ router.get('/public/teams/:teamId/staff', publicController.getTeamStaff);
 // 🚧 MIDDLEWARE BARRIER (หลังจากบรรทัดนี้ ต้อง Login เท่านั้น)
 // ==================================================================
 router.use(authMiddleware.verifyToken); 
+
+// --- Scorer Routes (เพิ่มส่วนนี้) ---
+router.use('/scorer', scorerRoutes);
 
 
 // ==================================================================

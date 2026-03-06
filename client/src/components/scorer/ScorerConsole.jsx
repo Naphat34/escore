@@ -637,11 +637,34 @@ export default function ScorerConsole() {
         setWorkflowStep('SERVER_SELECT');
     };
 
-    const handleLineupConfirm = () => {
+    const handleLineupConfirm = async () => {
         if (homeLineup.some(p => !p) || awayLineup.some(p => !p)) {
             alert("กรุณาเลือกผู้เล่นตัวจริงให้ครบทั้ง 6 ตำแหน่ง");
             return;
         }
+
+        // ✅ บันทึก Lineup ลงฐานข้อมูล
+        try {
+            await Promise.all([
+                api.saveLineup(matchId, {
+                    team_id: matchData.teamHomeId,
+                    set_number: matchData.currentSet,
+                    player_positions: homeLineup,
+                    libero_id: homeLiberos.l1?.id
+                }),
+                api.saveLineup(matchId, {
+                    team_id: matchData.teamAwayId,
+                    set_number: matchData.currentSet,
+                    player_positions: awayLineup,
+                    libero_id: awayLiberos.l1?.id
+                })
+            ]);
+        } catch (error) {
+            console.error("Failed to save lineups to DB:", error);
+            // แจ้งเตือนแต่ยอมให้ทำงานต่อได้ (หรือจะ return เพื่อบังคับบันทึกก็ได้)
+            Swal.fire('Warning', 'บันทึก Lineup ลงฐานข้อมูลไม่สำเร็จ (แต่ยังเล่นต่อได้)', 'warning');
+        }
+
         // Save Lineups for next set reuse
         setLastSetHomeLineup([...homeLineup]);
         setLastSetAwayLineup([...awayLineup]);
