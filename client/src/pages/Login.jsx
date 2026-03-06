@@ -22,76 +22,32 @@ export default function Login() {
       password: formData.password
     });
 
-    if (!response.data) {
-      throw new Error("No response from server");
-    }
+    console.log("LOGIN RESPONSE", response.data);
 
-    const { token, user } = response.data;
-
-    if (!token) {
-      throw new Error("Token not received from server");
-    }
-
+    const { user, token } = response.data;
     const { role, status, team_id } = user;
 
-    // 🔐 Save Token
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
 
-    // =========================
-    // ADMIN
-    // =========================
     console.log("ROLE =", role);
+
     if (role === "admin") {
-
       navigate("/admin");
-
-      Swal.fire({
-        toast: true,
-        position: "top-end",
-        icon: "success",
-        title: "Welcome Admin",
-        showConfirmButton: false,
-        timer: 1500
-      });
-
-      
       return;
     }
 
-    // =========================
-    // USER NOT APPROVED
-    // =========================
     if (status !== "approved") {
-
       await Swal.fire({
         icon: "warning",
         title: "Account Pending",
-        text: "Your account is pending approval from Admin.",
-        confirmButtonColor: "#f59e0b"
+        text: "Your account is pending approval from Admin."
       });
 
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-
+      await api.logout();
       return;
     }
 
-    // =========================
-    // SUCCESS
-    // =========================
-    Swal.fire({
-      toast: true,
-      position: "top-end",
-      icon: "success",
-      title: "Signed in successfully",
-      showConfirmButton: false,
-      timer: 1500
-    });
-
-    // =========================
-    // TEAM CHECK
-    // =========================
     if (team_id) {
       navigate("/team-dashboard");
     } else {
@@ -100,13 +56,10 @@ export default function Login() {
 
   } catch (err) {
 
-    console.error("Login error:", err);
-
     Swal.fire({
       icon: "error",
       title: "Login Failed",
-      text: err.response?.data?.error || err.message || "Invalid username or password.",
-      confirmButtonColor: "#4f46e5"
+      text: err.response?.data?.error || "Invalid username or password."
     });
 
   }

@@ -80,16 +80,16 @@ exports.login = async (req, res) => {
 
    // ส่งข้อมูลกลับไปให้ Frontend ตัดสินใจ Routing
     res.json({
-      message: "Login successful",
-      token: token,
-      user: {
-        id: user.id,
-        username: user.username,
-        role: user.role,
-        status: user.status,   // ส่ง Status ไปเช็ค approved
-        team_id: user.team_id  // ส่ง Team ID ไปเช็คว่าสร้างทีมยัง
-      }
-    });
+  message: "Login successful",
+  token: token,
+  user: {
+    id: user.id,
+    username: user.username,
+    role: user.role,
+    status: user.status,
+    team_id: user.team_id
+  }
+});
 
   } catch (err) {
     res.status(500).json({ error: err.message });
