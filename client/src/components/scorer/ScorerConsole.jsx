@@ -1034,7 +1034,7 @@ export default function ScorerConsole() {
 
         if (response.data.success) {
             if (response.data.isMatchFinished) {
-                alert(`จบการแข่งขัน! ทีมชนะคือทีม ID: ${response.data.winnerId}`);
+                alert(`จบการแข่งขัน! ทีมชนะคือทีม  ${response.data.winnerId}`);
                 // Redirect ไปหน้าสรุปผล หรือ กลับหน้าหลัก
                 navigate('/dashboard'); 
             } else {
@@ -1120,9 +1120,9 @@ export default function ScorerConsole() {
                     {/* COURT VIEW */}
                     <div className="flex-1 flex items-center justify-center pt-24 pb-4 px-4 relative">
                         <CourtView 
-                            homePositions={isHomeLeft ? homeLineup : awayLineup}
-                            awayPositions={isHomeLeft ? awayLineup : homeLineup}
-                            servingSide={servingTeam ? ((servingTeam === 'home' && isHomeLeft) || (servingTeam === 'away' && !isHomeLeft) ? 'left' : 'right') : null}
+                            homePositions={!isSetupPhase ? (isHomeLeft ? homeLineup : awayLineup) : Array(6).fill(null)}
+                            awayPositions={!isSetupPhase ? (isHomeLeft ? awayLineup : homeLineup) : Array(6).fill(null)}
+                            servingSide={!isSetupPhase && servingTeam ? ((servingTeam === 'home' && isHomeLeft) || (servingTeam === 'away' && !isHomeLeft) ? 'left' : 'right') : null}
                             onPlayerClick={handleCourtPlayerClick}
                             onLiberoClick={(team) => setLiberoActionData({ isOpen: true, team })}
                             leftTeam={getLeftTeam()}
@@ -1312,7 +1312,7 @@ export default function ScorerConsole() {
                                     {/* Summary Box */}
                                     <div className={`p-3 border-b text-xs ${isDarkMode ? 'border-slate-700 bg-slate-800/50' : 'border-gray-100 bg-gray-50/50'}`}>
                                         <div className="flex justify-between items-center mb-2 pb-2 border-b border-dashed border-gray-200 dark:border-gray-700">
-                                            <span className={`font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Set {activeHistoryTab} Summary</span>
+                                            <span className={`font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Set {activeHistoryTab} </span>
                                             <span className="font-mono font-bold text-lg">{stats.score}</span>
                                         </div>
                                         <div className="grid grid-cols-3 gap-y-1 gap-x-2 text-center items-center">
