@@ -24,8 +24,8 @@ export default function Login() {
       const { user } = response.data;
       const { role, status, team_id } = user;
 
-      if (role) setCookie('role', role);
-      if (team_id) setCookie('team_id', team_id);
+      localStorage.setItem('token', response.data.token); // เก็บ Token ใน Local Storage
+      localStorage.setItem('user', JSON.stringify(response.data.user)); // เก็บข้อมูล User ไว้เช็คสถานะและสิทธิ์
 
       // --- Logic การตรวจสอบสิทธิ์ ---
 

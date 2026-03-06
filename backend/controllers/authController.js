@@ -50,12 +50,17 @@ exports.login = async (req, res) => {
     const { username, password } = req.body;
 
     // ดึงข้อมูล User รวมถึงสถานะและ Team ID
-    const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+    const result = await db.query(
+      'SELECT * FROM users WHERE username = $1', 
+      [username]
+    );
+
     if (result.rows.length === 0) {
       return res.status(400).json({ error: 'User not found' });
     }
 
     const user = result.rows[0];
+
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid password' });
@@ -69,23 +74,14 @@ exports.login = async (req, res) => {
         role: user.role,
         team_id: user.team_id
       },
-      SECRET_KEY,
-      { expiresIn: '1d' }
+      process.env.JWT_SECRET,
+      { expiresIn: '2d' }
     );
 
-    // ส่ง Cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true, // set true in production
-      sameSite: 'none',
-      maxAge: 24 * 60 * 60 * 1000
-    });
-
-    res.cookie('role', user.role, { maxAge: 24 * 60 * 60 * 1000 });
-
-    // ✅ ส่งข้อมูลกลับไปให้ Frontend ตัดสินใจ Routing
+   // ส่งข้อมูลกลับไปให้ Frontend ตัดสินใจ Routing
     res.json({
       message: "Login successful",
+      token: token,
       user: {
         id: user.id,
         username: user.username,
@@ -96,7 +92,6 @@ exports.login = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };

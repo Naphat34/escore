@@ -5,28 +5,26 @@ const SECRET_KEY = process.env.JWT_SECRET || 'mySuperSecretKey123'; // ควร
 
 // 1. เช็คว่า Login หรือยัง (Verify Token)
 exports.verifyToken = (req, res, next) => {
-  const token = req.cookies.token;
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Access Denied: No Token Provided' });
   }
+  const token = authHeader && authHeader.split(' ')[1]; // แยก Token ออกจาก "Bearer "
 
   try {
-    const verified = jwt.verify(token, SECRET_KEY);
-    req.user = verified;
+    const decoded = jwt.verify(token, SECRET_KEY);
+    req.user = decoded;
     next();
   } catch (err) {
-    // ถ้า Token หมดอายุหรือไม่ถูกต้อง ให้เคลียร์ Cookie ทิ้งเลย
-    res.clearCookie('token');
-    res.clearCookie('role');
-    res.status(400).json({ error: 'Invalid Token' });
+    return res.status(403).json({ error: 'Invalid Token' });
   }
 };
 
 // 2. เช็คว่าเป็น Admin ไหม
 exports.isAdmin = (req, res, next) => {
   if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Require Admin Role!' });
+    return res.status(403).json({ error: 'Admin Only' });
   }
   next();
 };
