@@ -203,7 +203,7 @@ const PlayerButton = ({
     }
 
     // Different text sizes based on location
-    const numberSize = onCourt ? 'text-4xl' : (onBench ? 'text-2xl' : 'text-3xl');
+    const numberSize = onCourt ? 'text-xl md:text-2xl lg:text-4xl' : (onBench ? 'text-lg md:text-xl lg:text-2xl' : 'text-2xl md:text-3xl');
 
     return (
         <button 
@@ -268,7 +268,7 @@ const CourtLayout = ({
 
     const renderPlayerButton = (player) => (
         <div className="relative w-full h-full flex items-center justify-center p-1">
-            <div className="w-20 h-20">
+            <div className="w-10 h-10 md:w-14 md:h-14 lg:w-20 lg:h-20">
                 <PlayerButton
                     team={team}
                     player={player}
@@ -1126,7 +1126,7 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
             <div className="flex flex-1 overflow-hidden">
                 
                 {/* LEFT BENCH */}
-                <div className="w-72 bg-gray-800 border-r border-gray-700 flex flex-col">
+                <div className="hidden md:flex md:w-48 lg:w-72 bg-gray-800 border-r border-gray-700 flex-col">
                     <div className={`p-4 border-b text-center bg-gradient-to-r ${
                         leftTeamData.color === 'indigo' 
                             ? 'from-indigo-900/40 to-indigo-800/40 border-indigo-900/50' 
@@ -1161,8 +1161,8 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
                 <div className="flex-1 flex flex-col min-w-0 bg-gray-900">
                     
                     {/* Court Visual - Fixed 800x400px */}
-                    <div className="flex-1 relative bg-gradient-to-br from-[#d4a574] to-[#c99660] overflow-hidden flex items-center justify-center">
-                        <div className="flex relative border-4 border-white shadow-2xl rounded-lg overflow-hidden" style={{ width: '800px', height: '400px' }}>
+                    <div className="flex-1 relative bg-gradient-to-br from-[#d4a574] to-[#c99660] overflow-hidden flex items-center justify-center p-2">
+                        <div className="flex relative border-4 border-white shadow-2xl rounded-lg overflow-hidden w-full max-w-[800px] aspect-[2/1]">
                             
                             {/* Net - White Center Line */}
                             <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-white z-20 
@@ -1400,7 +1400,7 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
                 </div>
 
                 {/* RIGHT BENCH */}
-                <div className="w-72 bg-gray-800 border-l border-gray-700 flex flex-col">
+                <div className="hidden md:flex md:w-48 lg:w-72 bg-gray-800 border-l border-gray-700 flex-col">
                     <div className={`p-4 border-b text-center bg-gradient-to-r ${
                         rightTeamData.color === 'indigo' 
                             ? 'from-indigo-900/40 to-indigo-800/40 border-indigo-900/50' 
