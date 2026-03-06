@@ -22,7 +22,6 @@ import StadiumsTab from './StadiumsTab';
 import TeamRankingTab from './TeamRankingTab';
 import LiveScorerTab from './LiveScorerTab';
 import OfficialsTab from './OfficialsTab';
-import ScoreViewReferee from '../components/viewer/ScoreViewReferee';
 //import RefereesTab from './RefereesTab';
 
 
@@ -95,7 +94,6 @@ export default function AdminDashboard() {
                         <MenuButton active={activeTab === 'matches'} onClick={() => setActiveTab('matches')} icon={<Swords size={20} />} label="Matches" darkMode={darkMode} />
                         <MenuButton active={activeTab === 'escore'} onClick={() => setActiveTab('escore')} icon={<Star size={20} />} label="VIS" darkMode={darkMode} />
                         <MenuButton active={activeTab === 'live_scorer'} onClick={() => setActiveTab('live_scorer')} icon={<PlayCircle size={20} />} label="Live Scorer" darkMode={darkMode} />
-                        <MenuButton active={activeTab === 'ScoreViewReferee'} onClick={() => setActiveTab('ScoreViewReferee')} icon={<Settings size={20} />} label="Score Referee" darkMode={darkMode} />
                     </div>
 
                     <div className={`border-b mx-4 mb-4 ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}></div>
