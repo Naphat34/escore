@@ -74,7 +74,7 @@ exports.login = async (req, res) => {
         role: user.role,
         team_id: user.team_id
       },
-      process.env.JWT_SECRET,
+       SECRET_KEY,
       { expiresIn: '2d' }
     );
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '../api';
 import { useNavigate, Link } from 'react-router-dom';
-import { setCookie } from '../utils';
+
 import Swal from 'sweetalert2'; // Import SweetAlert2
 
 export default function Login() {
@@ -13,85 +13,101 @@ export default function Login() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await api.login({
-        username: formData.username, 
-        password: formData.password
-      });
+  try {
 
-      const { user } = response.data;
-      const { role, status, team_id } = user;
+    const response = await api.login({
+      username: formData.username,
+      password: formData.password
+    });
 
-      localStorage.setItem('token', response.data.token); // เก็บ Token ใน Local Storage
-      localStorage.setItem('user', JSON.stringify(response.data.user)); // เก็บข้อมูล User ไว้เช็คสถานะและสิทธิ์
-
-      // --- Logic การตรวจสอบสิทธิ์ ---
-
-      // 1. Admin -> ไปหน้า Admin Dashboard
-      if (role === 'admin') {
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 1500,
-          timerProgressBar: true,
-        });
-        Toast.fire({
-          icon: 'success',
-          title: 'Welcome Admin'
-        });
-        navigate('/admin');
-        return;
-      }
-
-      // 2. User ที่ยังไม่ Approved
-      if (status !== 'approved') {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'Account Pending',
-          text: 'Your account is pending approval from Admin.',
-          confirmButtonColor: '#f59e0b', // สีเหลือง Amber
-        });
-        
-        // Logout เพื่อความชัวร์
-        await api.logout(); 
-        return;
-      }
-
-      // แสดง Success เล็กน้อยก่อนเปลี่ยนหน้า (Optional)
-      const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-      });
-      Toast.fire({
-        icon: 'success',
-        title: 'Signed in successfully'
-      });
-
-      // 3. Approved แล้ว เช็คทีม
-      if (team_id) {
-        // 4. มีทีมแล้ว -> ไป Team Dashboard
-        navigate('/team-dashboard');
-      } else {
-        // 3. ยังไม่มีทีม -> ไปหน้า Create Team
-        navigate('/create-team');
-      }
-
-    } catch (err) {
-      // ใช้ SweetAlert2 แสดง Error
-      Swal.fire({
-        icon: 'error',
-        title: 'Login Failed',
-        text: err.response?.data?.error || 'Invalid username or password.',
-        confirmButtonColor: '#4f46e5', // สี Indigo-600 ให้เข้ากับธีม
-      });
+    if (!response.data) {
+      throw new Error("No response from server");
     }
-  };
+
+    const { token, user } = response.data;
+
+    if (!token) {
+      throw new Error("Token not received from server");
+    }
+
+    const { role, status, team_id } = user;
+
+    // 🔐 Save Token
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    // =========================
+    // ADMIN
+    // =========================
+    if (role === "admin") {
+
+      Swal.fire({
+        toast: true,
+        position: "top-end",
+        icon: "success",
+        title: "Welcome Admin",
+        showConfirmButton: false,
+        timer: 1500
+      });
+
+      navigate("/admin");
+      return;
+    }
+
+    // =========================
+    // USER NOT APPROVED
+    // =========================
+    if (status !== "approved") {
+
+      await Swal.fire({
+        icon: "warning",
+        title: "Account Pending",
+        text: "Your account is pending approval from Admin.",
+        confirmButtonColor: "#f59e0b"
+      });
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      return;
+    }
+
+    // =========================
+    // SUCCESS
+    // =========================
+    Swal.fire({
+      toast: true,
+      position: "top-end",
+      icon: "success",
+      title: "Signed in successfully",
+      showConfirmButton: false,
+      timer: 1500
+    });
+
+    // =========================
+    // TEAM CHECK
+    // =========================
+    if (team_id) {
+      navigate("/team-dashboard");
+    } else {
+      navigate("/create-team");
+    }
+
+  } catch (err) {
+
+    console.error("Login error:", err);
+
+    Swal.fire({
+      icon: "error",
+      title: "Login Failed",
+      text: err.response?.data?.error || err.message || "Invalid username or password.",
+      confirmButtonColor: "#4f46e5"
+    });
+
+  }
+};
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
