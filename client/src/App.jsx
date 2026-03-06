@@ -1,5 +1,4 @@
 import React from 'react';
-import { getCookie } from './utils';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -18,10 +17,21 @@ import ScorerConsole from './components/scorer/ScorerConsole';
 
 // Component ช่วยเช็คว่า Login หรือยัง (Private Route)
 const PrivateRoute = ({ children, roleRequired }) => {
-  const role = getCookie('role');
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  let role = null;
 
-  // ถ้ายังไม่ Login ให้เด้งไป Login
-  if (!role) return <Navigate to="/login" />;
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      role = user.role;
+    } catch (e) {
+      console.error("Error parsing user data", e);
+    }
+  }
+
+  // ถ้าไม่มี Token หรือ Role ให้ถือว่ายังไม่ Login
+  if (!token || !role) return <Navigate to="/login" />;
 
   // ถ้าไม่ใช่ Role ที่ต้องการ (เช่น Admin) ให้เด้งไป Login
   if (roleRequired && role !== roleRequired) return <Navigate to="/login" />;
