@@ -11,6 +11,7 @@ import PublicStandings from './pages/guest/PublicStandings';
 import PublicTeams from './pages/guest/PublicTeams'; 
 import PublicMatches from './pages/guest/PublicMatches';
 import ScorerConsole from './components/scorer/ScorerConsole';
+import ScoreViewReferee from './components/viewer/ScoreViewReferee';
 
 // import App (หน้าเดิมที่เป็น Scoreboard) ไว้ใช้ทีหลัง
 // import ScoreboardApp from './App_Original'; 
@@ -89,6 +90,7 @@ function App() {
                 </PrivateRoute>
             } 
         />
+        <Route path="/match/:matchId/referee" element={<ScoreViewReferee />} />
 
         {/* ✅ ย้ายมาไว้ตรงนี้ครับ (ต้องอยู่ก่อนตัว * เสมอ) */}
         <Route path="/stats" element={<PublicStatistics />} />

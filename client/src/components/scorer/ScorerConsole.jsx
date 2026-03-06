@@ -117,7 +117,7 @@ export default function ScorerConsole() {
     const [setsWon, setSetsWon] = useState(() => loadState('setsWon', { home: 0, away: 0 }));
     const [completedSets, setCompletedSets] = useState(() => loadState('completedSets', []));
 
-    const [substitutions, setSubstitutions] = useState([]);
+    const [substitutions, setSubstitutions] = useState(() => loadState('substitutions', { home: 0, away: 0 }));
     
 
     // Lineup State
@@ -140,8 +140,6 @@ export default function ScorerConsole() {
     const [liberoLogs, setLiberoLogs] = useState(() => loadState('liberoLogs', []));
 
     // Limits & Quotas
-
-    const [subCounts, setSubCounts] = useState(() => loadState('subCounts', { home: 0, away: 0 }));
     
     // Modals Control State
     const [showRosterModal, setShowRosterModal] = useState(true);
@@ -223,7 +221,7 @@ export default function ScorerConsole() {
     useEffect(() => {
         const stateToSave = {
             matchData, workflowStep, score, setsWon, completedSets, activeAction,
-            timeouts, challenges, subCounts, matchEvents, servingTeam, isHomeLeft, 
+            timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, 
             homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, 
             history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap,
             homeLiberoSwaps, awayLiberoSwaps
@@ -231,7 +229,7 @@ export default function ScorerConsole() {
         Object.entries(stateToSave).forEach(([key, value]) => {
             localStorage.setItem(`match_${matchId}_${key}`, JSON.stringify(value));
         });
-    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, subCounts, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap]);
+    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap]);
 
     // เก็บ ID ผู้เล่นที่ถูกเปลี่ยนตัวออกด้วยกรณีพิเศษ (บาดเจ็บ/ให้ออก) ห้ามลงเล่นทั้งนัด
     const [disqualifiedPlayers, setDisqualifiedPlayers] = useState(() => {
@@ -415,7 +413,7 @@ export default function ScorerConsole() {
             workflowStep,
             timeouts: { ...timeouts },
             challenges: { ...challenges },
-            subCounts: { ...subCounts },
+            substitutions: { ...substitutions },
             matchEvents: [...matchEvents],
             homeLiberoSwaps: { ...homeLiberoSwaps },
             awayLiberoSwaps: { ...awayLiberoSwaps },
@@ -515,7 +513,7 @@ export default function ScorerConsole() {
         setScore({ home: 0, away: 0 });
         setTimeouts({ home: 0, away: 0 });
         setChallenges({ home: 2, away: 2 });
-        setSubCounts({ home: 0, away: 0 });
+        setSubstitutions({ home: 0, away: 0 });
         setSubTracker({ // Reset substitution tracker
             home: { count: 0, positions: {}, usedPlayers: [] },
             away: { count: 0, positions: {}, usedPlayers: [] }
@@ -582,7 +580,7 @@ export default function ScorerConsole() {
                 if (lastState.workflowStep) setWorkflowStep(lastState.workflowStep);
                 if (lastState.timeouts) setTimeouts(lastState.timeouts);
                 if (lastState.challenges) setChallenges(lastState.challenges);
-                if (lastState.subCounts) setSubCounts(lastState.subCounts);
+                if (lastState.substitutions) setSubstitutions(lastState.substitutions);
                 if (lastState.matchEvents) setMatchEvents(lastState.matchEvents);
                 if (lastState.homeLiberoSwaps) setHomeLiberoSwaps(lastState.homeLiberoSwaps);
                 if (lastState.awayLiberoSwaps) setAwayLiberoSwaps(lastState.awayLiberoSwaps);
@@ -1227,15 +1225,9 @@ export default function ScorerConsole() {
                                     <div className="flex flex-col gap-1 w-24">
                                         <button onClick={() => handleActionSelect(getLeftTeam().code, 'TIMEOUT')} disabled={timeouts[getLeftTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold border ${secondaryBtnClass}`}>TIMEOUT ({2 - timeouts[getLeftTeam().code]})</button>
                                         <button 
-                                            onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')} 
-                                            className="flex items-center justify-center gap-2 p-3 bg-blue-900/40 hover:bg-blue-600 border border-blue-700 rounded-xl text-blue-200 hover:text-white transition-all shadow-sm"
-                                        >
-                                            <ArrowRightLeft size={18} /> 
-                                            <div className="flex flex-col items-center">
-                                                <span>Subs</span>
-                                                <span className="text-[10px] font-bold opacity-80">({substitutions.home}/6)</span>
-                                            </div>
-                                        </button>
+                                        onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')}
+                                        className={`flex-1 rounded text-xs font-bold text-blue-600 border ${secondaryBtnClass}`}
+                                    >SUBS ({substitutions[getLeftTeam().code]}/6)</button>
                                         <button onClick={() => { setChallengeData({ team: getLeftTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getLeftTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-yellow-600 border ${secondaryBtnClass}`}>CHALLENGE</button>
                                         <button onClick={() => { setSanctionTeam(getLeftTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-red-600 border ${secondaryBtnClass}`}>SANCTION</button>
                                     </div>
@@ -1261,15 +1253,9 @@ export default function ScorerConsole() {
                                     <div className="flex flex-col gap-1 w-24">
                                         <button onClick={() => handleActionSelect(getRightTeam().code, 'TIMEOUT')} disabled={timeouts[getRightTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold border ${secondaryBtnClass}`}>TIMEOUT ({2 - timeouts[getRightTeam().code]})</button>
                                         <button 
-                                            onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')} 
-                                            className="flex items-center justify-center gap-2 p-3 bg-red-900/40 hover:bg-red-600 border border-red-700 rounded-xl text-red-200 hover:text-white transition-all shadow-sm"
-                                        >
-                                            <ArrowRightLeft size={18} /> 
-                                            <div className="flex flex-col items-center">
-                                                <span>Subs</span>
-                                                <span className="text-[10px] font-bold opacity-80">({substitutions.away}/6)</span>
-                                            </div>
-                                        </button>
+                                            onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')}
+                                            className={`flex-1 rounded text-xs font-bold text-blue-600 border ${secondaryBtnClass}`}
+                                        >SUBS ({substitutions[getRightTeam().code]}/6)</button>
                                         <button onClick={() => { setChallengeData({ team: getRightTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getRightTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-yellow-600 border ${secondaryBtnClass}`}>CHALLENGE</button>
                                         <button onClick={() => { setSanctionTeam(getRightTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-red-600 border ${secondaryBtnClass}`}>SANCTION</button>
                                     </div>
