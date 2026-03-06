@@ -323,7 +323,7 @@ export default function ScorerConsole() {
 
         try {
             const teamId = teamCode === 'home' ? matchData.teamHomeId : matchData.teamAwayId;
-            await client.post(`/scorer/matche/${matchId}/event`, {
+            await client.post(`/scorer/match/${matchId}/event`, {
                 set_number: matchData.currentSet,
                 event_type: eventType,
                 team_id: teamId,
