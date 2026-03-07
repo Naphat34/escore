@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../api';
 import { useNavigate, Link } from 'react-router-dom';
-import volleyballImage from '../assets/img/bg_vb.png';
 
 import Swal from 'sweetalert2'; // Import SweetAlert2
 
@@ -67,7 +66,7 @@ export default function Login() {
       {/* Left Pane */}
       <div className="hidden lg:flex items-center justify-center flex-1 bg-white text-black">
         <img
-          src={volleyballImage}
+          src="/assets/img/bg_vb.png"
           alt="Volleyball"
           className="w-full h-full object-cover"
         />
@@ -81,7 +80,7 @@ export default function Login() {
               Volley Manager Login
             </h1>
             <p className="text-sm text-gray-500 mt-2">
-              ระบบจัดการทีมวอลเลย์บอล
+              ระบบจัดการแข่งขันวอลเลย์บอล
             </p>
           </div>
 
