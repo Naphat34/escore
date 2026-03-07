@@ -66,7 +66,7 @@ export default function Login() {
       {/* Left Pane */}
       <div className="hidden lg:flex items-center justify-center flex-1 bg-white text-black">
         <img
-          src="https://images.pexels.com/photos/1263426/pexels-photo-1263426.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+          src="./assets/img/bg_vb.png"
           alt="Volleyball"
           className="w-full h-full object-cover"
         />
