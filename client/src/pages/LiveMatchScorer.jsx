@@ -420,6 +420,47 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     const [history, setHistory] = useState([]);
 
     // ------------------------------------------------------------------------
+    // LOCAL STORAGE SYNC FOR REFEREE VIEW
+    // ------------------------------------------------------------------------
+    useEffect(() => {
+        const syncData = () => {
+            if (!match?.id) return;
+
+            const matchId = match.id;
+
+            // Helper to set item
+            const setItem = (key, value) => {
+                try {
+                    localStorage.setItem(`match_${matchId}_${key}`, JSON.stringify(value));
+                } catch (e) {
+                    console.error(`Failed to save ${key} to localStorage`, e);
+                }
+            };
+
+            setItem('matchData', {
+                teamHome: matchData.home_team,
+                teamAway: matchData.away_team,
+                currentSet: currentSet,
+            });
+            setItem('score', pointScore);
+            setItem('setsWon', setWins);
+            setItem('timeouts', timeouts);
+            setItem('substitutions', subCounts);
+            setItem('servingTeam', servingTeam);
+            setItem('isHomeLeft', isHomeLeft);
+            setItem('homeLineup', homeRotation);
+            setItem('awayLineup', awayRotation);
+            setItem('homeLiberos', { l1: homeLibero, l2: null });
+            setItem('awayLiberos', { l1: awayLibero, l2: null });
+        };
+
+        syncData();
+    }, [
+        match, matchData, currentSet, pointScore, setWins, timeouts, subCounts,
+        servingTeam, isHomeLeft, homeRotation, awayRotation, homeLibero, awayLibero
+    ]);
+
+    // ------------------------------------------------------------------------
     // CONSTANTS
     // ------------------------------------------------------------------------
     
