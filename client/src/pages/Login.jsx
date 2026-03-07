@@ -66,7 +66,7 @@ export default function Login() {
       {/* Left Pane */}
       <div className="hidden lg:flex items-center justify-center flex-1 bg-white text-black">
         <img
-          src="/assets/img/bg_vb.png"
+          src="https://img2.pic.in.th/Gemini_Generated_Image_nxb2q2nxb2q2nxb2.png"
           alt="Volleyball"
           className="w-full h-full object-cover"
         />
