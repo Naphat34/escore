@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Clock, RefreshCw, ArrowRightLeft, Wifi, WifiOff } from 'lucide-react';
+import { Clock, RefreshCw, ArrowRightLeft, Wifi, WifiOff, MonitorPlay, PauseCircle } from 'lucide-react';
 import CourtView from '../CourtView.jsx';
 
 export default function ScoreViewReferee() {
@@ -113,7 +113,7 @@ export default function ScoreViewReferee() {
             </div>
 
             {/* 2. Court View */}
-            <div className="flex-1 relative bg-slate-900 flex items-center justify-center p-4 overflow-hidden mt-5">
+            <div className="flex-1 relative bg-slate-900 flex items-center justify-center p-4 mt-8 overflow-hidden">
                 <div className="w-full max-w-5xl aspect-[1.8/1] relative">
                      <CourtView 
                         homePositions={effectiveIsHomeLeft ? homeLineup : awayLineup}
@@ -129,7 +129,7 @@ export default function ScoreViewReferee() {
 
             {/* 3. Set Indicator */}
             <div className="bg-slate-800 py-2 text-center border-y border-slate-700 shrink-0">
-                <span className="text-xl font-bold text-slate-500">SET {matchData.currentSet}</span>
+                <span className="text-3xl font-bold text-slate-500">SET {matchData.currentSet}</span>
             </div>
 
             {/* 4. Stats Table */}
@@ -147,21 +147,27 @@ export default function ScoreViewReferee() {
                         {/* Row 1: VC (Challenges) */}
                         <div className="grid grid-cols-3 border-b border-slate-700">
                             <div className="p-3 text-center text-2xl font-bold text-blue-400">{challenges[leftTeam.code]}</div>
-                            <div className="p-3 flex items-center justify-center bg-slate-700/30 text-slate-500 font-bold text-xs">VC (Challenges)</div>
+                            <div className="p-3 flex items-center justify-center gap-2 bg-slate-700/30 text-slate-500 font-bold text-xs">
+                                <MonitorPlay size={16} /> VC
+                            </div>
                             <div className="p-3 text-center text-2xl font-bold text-blue-400">{challenges[rightTeam.code]}</div>
                         </div>
 
                         {/* Row 2: TO (Timeouts) */}
                         <div className="grid grid-cols-3 border-b border-slate-700">
                             <div className="p-3 text-center text-2xl font-bold text-yellow-500">{timeouts[leftTeam.code]}</div>
-                            <div className="p-3 flex items-center justify-center bg-slate-700/30 text-slate-500 font-bold text-xs">TO (Timeouts)</div>
+                            <div className="p-3 flex items-center justify-center gap-2 bg-slate-700/30 text-slate-500 font-bold text-xs">
+                                <PauseCircle size={16} /> TO
+                            </div>
                             <div className="p-3 text-center text-2xl font-bold text-yellow-500">{timeouts[rightTeam.code]}</div>
                         </div>
 
                         {/* Row 3: SUB (Substitutions) */}
                         <div className="grid grid-cols-3">
                             <div className="p-3 text-center text-2xl font-bold text-green-500">{substitutions[leftTeam.code]}</div>
-                            <div className="p-3 flex items-center justify-center bg-slate-700/30 text-slate-500 font-bold text-xs">SUB (Substitutions)</div>
+                            <div className="p-3 flex items-center justify-center gap-2 bg-slate-700/30 text-slate-500 font-bold text-xs">
+                                <ArrowRightLeft size={16} /> SUB
+                            </div>
                             <div className="p-3 text-center text-2xl font-bold text-green-500">{substitutions[rightTeam.code]}</div>
                         </div>
                     </div>
