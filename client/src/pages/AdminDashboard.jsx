@@ -73,7 +73,7 @@ export default function AdminDashboard() {
                     <div className="px-3 space-y-1 mb-4">
                         <MenuButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={<LayoutDashboard size={20} />} label="Home" darkMode={darkMode} />
                         <MenuButton active={activeTab === 'competitions'} onClick={() => setActiveTab('competitions')} icon={<Trophy size={20} />} label="Competitions" darkMode={darkMode} />
-                        <MenuButton active={activeTab === 'clubs'} onClick={() => setActiveTab('clubs')} icon={<Shield size={20} />} label="Clubs" darkMode={darkMode} />
+                        <MenuButton active={activeTab === 'clubs'} onClick={() => setActiveTab('clubs')} icon={<Shield size={20} />} label="Teams" darkMode={darkMode} />
                         <MenuButton active={activeTab === 'stadium'} onClick={() => setActiveTab('stadium')} icon={<MapPin size={20} />} label="Stadium" darkMode={darkMode} />
                         <MenuButton active={activeTab === 'team_ranking'} onClick={() => setActiveTab('team_ranking')} icon={<BarChart2 size={20} />} label="Team Ranking" darkMode={darkMode} />
                     </div>
