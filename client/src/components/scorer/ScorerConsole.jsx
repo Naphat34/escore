@@ -236,7 +236,7 @@ export default function ScorerConsole() {
                 timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, 
                 homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, 
                 history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap, teamColors,
-                homeLiberoSwaps, awayLiberoSwaps
+                homeLiberoSwaps, awayLiberoSwaps, showTimeoutTimer
             };
 
             // 1. Save to localStorage for local persistence on refresh
@@ -253,7 +253,7 @@ export default function ScorerConsole() {
         return () => {
             clearTimeout(debounceTimeoutRef.current);
         };
-    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors]);
+    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors, showTimeoutTimer]);
 
     // เก็บ ID ผู้เล่นที่ถูกเปลี่ยนตัวออกด้วยกรณีพิเศษ (บาดเจ็บ/ให้ออก) ห้ามลงเล่นทั้งนัด
     const [disqualifiedPlayers, setDisqualifiedPlayers] = useState(() => {

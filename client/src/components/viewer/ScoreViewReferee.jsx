@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Clock, RefreshCw, ArrowRightLeft, Wifi, WifiOff, MonitorPlay, PauseCircle } from 'lucide-react';
 import { api } from '../../api';
 import CourtView from '../CourtView.jsx';
+import TimeoutTimerModal from '../scorer/modals/TimeoutTimerModal';
 
 export default function ScoreViewReferee() {
     const { matchId } = useParams();
@@ -37,6 +38,7 @@ export default function ScoreViewReferee() {
     const [homeLiberos, setHomeLiberos] = useState(() => loadState('homeLiberos', { l1: null, l2: null }));
     const [awayLiberos, setAwayLiberos] = useState(() => loadState('awayLiberos', { l1: null, l2: null }));
     const [teamColors, setTeamColors] = useState(() => loadState('teamColors', { home: '#4f46e5', away: '#e11d48' }));
+    const [showTimeoutTimer, setShowTimeoutTimer] = useState(false);
 
     const refreshData = async () => {
         try {
@@ -59,6 +61,7 @@ export default function ScoreViewReferee() {
             setHomeLiberos(state.homeLiberos || { l1: null, l2: null });
             setAwayLiberos(state.awayLiberos || { l1: null, l2: null });
             setTeamColors(state.teamColors || { home: '#4f46e5', away: '#e11d48' });
+            setShowTimeoutTimer(state.showTimeoutTimer || false);
 
             setLastUpdated(Date.now());
         } catch (error) {
@@ -222,6 +225,12 @@ export default function ScoreViewReferee() {
                     </button>
                 </div>
             </div>
+
+            {/* Timeout Modal Overlay */}
+            <TimeoutTimerModal 
+                isOpen={showTimeoutTimer} 
+                onClose={() => {}} // Referee cannot close it manually, controlled by Scorer
+            />
         </div>
     );
 }
