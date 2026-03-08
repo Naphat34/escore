@@ -138,7 +138,7 @@ export default function ScoreViewReferee() {
                     
                     {/* Left Score */}
                     <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4">
-                        <div className="text-10xl font-black text-white">{leftTeam.score}</div>
+                        <div className="text-8xl font-black text-white">{leftTeam.score}</div>
                     </div>
 
                     {/* Center Stats */}
@@ -173,7 +173,7 @@ export default function ScoreViewReferee() {
 
                     {/* Right Score */}
                     <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4">
-                        <div className="text-10xl font-black text-white">{rightTeam.score}</div>
+                        <div className="text-8xl font-black text-white">{rightTeam.score}</div>
                     </div>
                 </div>
             </div>
