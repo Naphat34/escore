@@ -196,6 +196,8 @@ export default function ScorerConsole() {
     // --- THEME STATE (Dark/Light Mode) ---
     const [isDarkMode, setIsDarkMode] = useState(() => {
         try {
+            // This part seems to be for a different feature (theme), 
+            // but it's good practice to keep error handling.
             const saved = localStorage.getItem('theme_mode');
             return saved ? JSON.parse(saved) : false;
         } catch (e) { return false; }
@@ -219,18 +221,38 @@ export default function ScorerConsole() {
         setActiveHistoryTab(matchData.currentSet);
     }, [matchData.currentSet]);
 
+    const debounceTimeoutRef = useRef(null);
+
     // --- EFFECT: SAVE STATE ---
     useEffect(() => {
-        const stateToSave = {
-            matchData, workflowStep, score, setsWon, completedSets, activeAction,
-            timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, 
-            homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, 
-            history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap, teamColors,
-            homeLiberoSwaps, awayLiberoSwaps
+        // Debounce to prevent spamming the server on rapid state changes
+        if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current);
+        }
+
+        debounceTimeoutRef.current = setTimeout(() => {
+            const stateToSave = {
+                matchData, workflowStep, score, setsWon, completedSets, activeAction,
+                timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, 
+                homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, 
+                history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap, teamColors,
+                homeLiberoSwaps, awayLiberoSwaps
+            };
+
+            // 1. Save to localStorage for local persistence on refresh
+            Object.entries(stateToSave).forEach(([key, value]) => {
+                localStorage.setItem(`match_${matchId}_${key}`, JSON.stringify(value));
+            });
+
+            // 2. Save to backend for real-time sync with other devices
+            api.updateLiveState(matchId, stateToSave).catch(err => {
+                console.error("Failed to sync state to server:", err);
+            });
+        }, 500); // 500ms debounce delay
+
+        return () => {
+            clearTimeout(debounceTimeoutRef.current);
         };
-        Object.entries(stateToSave).forEach(([key, value]) => {
-            localStorage.setItem(`match_${matchId}_${key}`, JSON.stringify(value));
-        });
     }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors]);
 
     // เก็บ ID ผู้เล่นที่ถูกเปลี่ยนตัวออกด้วยกรณีพิเศษ (บาดเจ็บ/ให้ออก) ห้ามลงเล่นทั้งนัด

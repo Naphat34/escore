@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Clock, RefreshCw, ArrowRightLeft, Wifi, WifiOff, MonitorPlay, PauseCircle } from 'lucide-react';
+import { api } from '../../api';
 import CourtView from '../CourtView.jsx';
 
 export default function ScoreViewReferee() {
@@ -37,27 +38,38 @@ export default function ScoreViewReferee() {
     const [awayLiberos, setAwayLiberos] = useState(() => loadState('awayLiberos', { l1: null, l2: null }));
     const [teamColors, setTeamColors] = useState(() => loadState('teamColors', { home: '#4f46e5', away: '#e11d48' }));
 
-    const refreshData = () => {
-        setMatchData(loadState('matchData', { teamHome: "HOME", teamAway: "AWAY", currentSet: 1 }));
-        setScore(loadState('score', { home: 0, away: 0 }));
-        setSetsWon(loadState('setsWon', { home: 0, away: 0 }));
-        setTimeouts(loadState('timeouts', { home: 0, away: 0 }));
-        setChallenges(loadState('challenges', { home: 2, away: 2 }));
-        setSubstitutions(loadState('substitutions', { home: 0, away: 0 }));
-        setServingTeam(loadState('servingTeam', null));
-        setIsHomeLeft(loadState('isHomeLeft', true));
-        setMatchDuration(loadState('matchDuration', 0));
-        setWorkflowStep(loadState('workflowStep', ''));
-        setHomeLineup(loadState('homeLineup', Array(6).fill(null)));
-        setAwayLineup(loadState('awayLineup', Array(6).fill(null)));
-        setHomeLiberos(loadState('homeLiberos', { l1: null, l2: null }));
-        setAwayLiberos(loadState('awayLiberos', { l1: null, l2: null }));
-        setTeamColors(loadState('teamColors', { home: '#4f46e5', away: '#e11d48' }));
-        setLastUpdated(Date.now());
+    const refreshData = async () => {
+        try {
+            const res = await api.getLiveState(matchId);
+            const state = res.data;
+
+            // Set all states from the fetched data, with fallbacks
+            setMatchData(state.matchData || { teamHome: "HOME", teamAway: "AWAY", currentSet: 1 });
+            setScore(state.score || { home: 0, away: 0 });
+            setSetsWon(state.setsWon || { home: 0, away: 0 });
+            setTimeouts(state.timeouts || { home: 0, away: 0 });
+            setChallenges(state.challenges || { home: 2, away: 2 });
+            setSubstitutions(state.substitutions || { home: 0, away: 0 });
+            setServingTeam(state.servingTeam || null);
+            setIsHomeLeft(state.isHomeLeft !== undefined ? state.isHomeLeft : true);
+            setMatchDuration(state.matchDuration || 0);
+            setWorkflowStep(state.workflowStep || '');
+            setHomeLineup(state.homeLineup || Array(6).fill(null));
+            setAwayLineup(state.awayLineup || Array(6).fill(null));
+            setHomeLiberos(state.homeLiberos || { l1: null, l2: null });
+            setAwayLiberos(state.awayLiberos || { l1: null, l2: null });
+            setTeamColors(state.teamColors || { home: '#4f46e5', away: '#e11d48' });
+
+            setLastUpdated(Date.now());
+        } catch (error) {
+            console.error("Failed to refresh data from server:", error);
+            // The UI will show "Disconnected" because lastUpdated won't be recent
+        }
     };
 
     // --- EFFECT: LIVE POLLING ---
     useEffect(() => {
+        refreshData(); // Fetch data immediately on load
         const interval = setInterval(refreshData, 1000); // Poll every 1 second
         return () => clearInterval(interval);
     }, [matchId]);

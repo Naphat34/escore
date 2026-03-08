@@ -110,6 +110,8 @@ export const api = {
   getMatchLineup: (matchId) => apiClient.get(`/scorer/match/${matchId}/lineup`,),
   saveMatchEvent: (matchId, data) => apiClient.post(`/scorer/match/${matchId}/event`, data),
   getMatchEvents: (matchId) => apiClient.get(`/scorer/match/${matchId}/events`),
+  updateLiveState: (matchId, state) => apiClient.put(`/scorer/match/${matchId}/state`, { state }),
+  getLiveState: (matchId) => apiClient.get(`/scorer/match/${matchId}/state`),
 
   // --- Officials (Referees/Scorers/LineJudges) ---
   getAllReferees: () => apiClient.get('/admin/referees'),
