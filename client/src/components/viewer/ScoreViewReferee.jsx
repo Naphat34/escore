@@ -35,6 +35,7 @@ export default function ScoreViewReferee() {
     const [awayLineup, setAwayLineup] = useState(() => loadState('awayLineup', Array(6).fill(null)));
     const [homeLiberos, setHomeLiberos] = useState(() => loadState('homeLiberos', { l1: null, l2: null }));
     const [awayLiberos, setAwayLiberos] = useState(() => loadState('awayLiberos', { l1: null, l2: null }));
+    const [teamColors, setTeamColors] = useState(() => loadState('teamColors', { home: '#4f46e5', away: '#e11d48' }));
 
     const refreshData = () => {
         setMatchData(loadState('matchData', { teamHome: "HOME", teamAway: "AWAY", currentSet: 1 }));
@@ -51,6 +52,7 @@ export default function ScoreViewReferee() {
         setAwayLineup(loadState('awayLineup', Array(6).fill(null)));
         setHomeLiberos(loadState('homeLiberos', { l1: null, l2: null }));
         setAwayLiberos(loadState('awayLiberos', { l1: null, l2: null }));
+        setTeamColors(loadState('teamColors', { home: '#4f46e5', away: '#e11d48' }));
         setLastUpdated(Date.now());
     };
 
@@ -64,12 +66,12 @@ export default function ScoreViewReferee() {
     const effectiveIsHomeLeft = localFlip ? !isHomeLeft : isHomeLeft;
 
     const getLeftTeam = () => effectiveIsHomeLeft
-        ? { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: 'text-indigo-700', bg: 'bg-indigo-600', lineup: homeLineup, liberos: homeLiberos }
-        : { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: 'text-rose-700', bg: 'bg-rose-600', lineup: awayLineup, liberos: awayLiberos };
+        ? { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: teamColors.home, bg: teamColors.home, lineup: homeLineup, liberos: homeLiberos }
+        : { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: teamColors.away, bg: teamColors.away, lineup: awayLineup, liberos: awayLiberos };
 
     const getRightTeam = () => effectiveIsHomeLeft
-        ? { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: 'text-rose-700', bg: 'bg-rose-600', lineup: awayLineup, liberos: awayLiberos }
-        : { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: 'text-indigo-700', bg: 'bg-indigo-600', lineup: homeLineup, liberos: homeLiberos };
+        ? { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: teamColors.away, bg: teamColors.away, lineup: awayLineup, liberos: awayLiberos }
+        : { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: teamColors.home, bg: teamColors.home, lineup: homeLineup, liberos: homeLiberos };
 
     const leftTeam = getLeftTeam();
     const rightTeam = getRightTeam();
@@ -89,7 +91,7 @@ export default function ScoreViewReferee() {
                     <div className="bg-slate-700 px-4 py-2 rounded-lg text-3xl font-bold text-yellow-400 border border-slate-600 min-w-[60px] text-center">
                         {leftTeam.sets}
                     </div>
-                    <div className={`text-2xl font-bold truncate ${leftTeam.color.replace('text-', 'text-') === 'text-indigo-700' ? 'text-indigo-400' : 'text-rose-400'}`}>
+                    <div className="text-2xl font-bold truncate" style={{ color: leftTeam.color }}>
                         {leftTeam.name}
                     </div>
                 </div>
@@ -103,7 +105,7 @@ export default function ScoreViewReferee() {
                 </div>
 
                 <div className="flex items-center gap-4 flex-1 justify-end">
-                    <div className={`text-2xl font-bold truncate ${rightTeam.color.replace('text-', 'text-') === 'text-indigo-700' ? 'text-indigo-400' : 'text-rose-400'}`}>
+                    <div className="text-2xl font-bold truncate" style={{ color: rightTeam.color }}>
                         {rightTeam.name}
                     </div>
                     <div className="bg-slate-700 px-4 py-2 rounded-lg text-3xl font-bold text-yellow-400 border border-slate-600 min-w-[60px] text-center">
@@ -138,7 +140,7 @@ export default function ScoreViewReferee() {
                     
                     {/* Left Score */}
                     <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4">
-                        <div className="text-8xl font-black text-white">{leftTeam.score}</div>
+                        <div className="text-8xl font-black" style={{ color: leftTeam.color }}>{leftTeam.score}</div>
                     </div>
 
                     {/* Center Stats */}
@@ -173,7 +175,7 @@ export default function ScoreViewReferee() {
 
                     {/* Right Score */}
                     <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4">
-                        <div className="text-8xl font-black text-white">{rightTeam.score}</div>
+                        <div className="text-8xl font-black" style={{ color: rightTeam.color }}>{rightTeam.score}</div>
                     </div>
                 </div>
             </div>
