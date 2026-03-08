@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Clock, RefreshCw, ArrowRightLeft, Wifi, WifiOff } from 'lucide-react';
-import CourtView from '../../CourtView';
+import CourtView from '../CourtView';
 
 export default function ScoreViewReferee() {
     const { matchId } = useParams();
