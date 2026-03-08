@@ -445,11 +445,10 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
         const isHome = teamType === 'home';
         const teamId = isHome ? matchData.home_team_id : matchData.away_team_id;
         
-        client.post('/match-data/lineup', {
-            match_id: matchData.id,
+        api.saveLineup(matchData.id, {
             team_id: teamId,
             set_number: currentSet,
-            starters: starters.map(p => p.id),
+            player_positions: starters.map(p => p.id),
             libero_id: libero?.id || null
         }).catch(err => console.error(`Error saving ${teamType} lineup`, err));
 
@@ -564,6 +563,14 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     };
 
     const handleSetEnd = (finalScore, maxSets, winner) => {
+        // 1. Save Set Result to DB
+        api.endSet(matchData.id, {
+            setNumber: currentSet,
+            homeScore: finalScore.home,
+            awayScore: finalScore.away,
+            duration: 0 // TODO: Track duration if needed
+        }).catch(err => console.error("Failed to save set result:", err));
+
         const newSetScores = [...setScores, finalScore];
         setSetScores(newSetScores);
 
@@ -605,8 +612,17 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     };
 
     const logAction = (payload) => {
-        client.post('/match-data/action', payload)
-            .catch(err => console.error("Error saving action", err));
+        api.saveMatchEvent(matchData.id, {
+            set_number: payload.set_number,
+            event_type: payload.skill, // Use skill code as event type
+            team_id: payload.team_id,
+            player_id: payload.player_id,
+            score_home: payload.score_home,
+            score_away: payload.score_away,
+            skill: payload.skill,
+            grade: payload.grade,
+            details: { description: payload.description }
+        }).catch(err => console.error("Error saving action", err));
 
         setActionLog(prev => [payload, ...prev]);
     };
