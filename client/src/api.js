@@ -103,6 +103,11 @@ export const api = {
   getTeamDetails: (id) => apiClient.get(`/admin/teams/${id}`),
   getAllPlayers: () => apiClient.get('/admin/players'),
 
+  // Admin Player Management
+  addPlayerAdmin: (teamId, data) => apiClient.post(`/admin/teams/${teamId}/players`, data),
+  updatePlayerAdmin: (id, data) => apiClient.put(`/admin/players/${id}`, data),
+  deletePlayerAdmin: (id) => apiClient.delete(`/admin/players/${id}`),
+
   // --- ✅ Scorer System (ส่วนที่เพิ่มใหม่) ---
   // ใช้ route /scorer/match/... ตามที่ตั้งค่าไว้ใน backend
   getMatchById: (id) => apiClient.get(`/scorer/match/${id}`),
