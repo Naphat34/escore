@@ -343,7 +343,7 @@ export default function MatchManagementTab({ darkMode }) {
         const payload = {
             home_set_score: homeSetsWon,
             away_set_score: awaySetsWon,
-            set_scores: validSets, // ส่งเฉพาะเซตที่กรอก
+            set_scores: JSON.stringify(validSets), // ส่งเฉพาะเซตที่กรอก (แปลงเป็น String เพื่อความชัวร์)
             status: isCompleted ? 'completed' : 'scheduled',
         };
 
