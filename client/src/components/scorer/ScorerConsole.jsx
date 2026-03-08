@@ -231,7 +231,7 @@ export default function ScorerConsole() {
         }
 
         debounceTimeoutRef.current = setTimeout(() => {
-            const stateToSave = {
+            const stateForLocalStorage = {
                 matchData, workflowStep, score, setsWon, completedSets, activeAction,
                 timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, 
                 homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, 
@@ -240,12 +240,32 @@ export default function ScorerConsole() {
             };
 
             // 1. Save to localStorage for local persistence on refresh
-            Object.entries(stateToSave).forEach(([key, value]) => {
+            Object.entries(stateForLocalStorage).forEach(([key, value]) => {
                 localStorage.setItem(`match_${matchId}_${key}`, JSON.stringify(value));
             });
 
             // 2. Save to backend for real-time sync with other devices
-            api.updateLiveState(matchId, stateToSave).catch(err => {
+            // Create a smaller object for the live state to avoid sending large data like 'history'
+            const liveStateForServer = {
+                matchData,
+                workflowStep,
+                score,
+                setsWon,
+                timeouts,
+                challenges,
+                substitutions,
+                servingTeam,
+                isHomeLeft,
+                homeLineup,
+                awayLineup,
+                homeLiberos,
+                awayLiberos,
+                teamColors,
+                showTimeoutTimer,
+                matchDuration,
+                isTimerRunning,
+            };
+            api.updateLiveState(matchId, liveStateForServer).catch(err => {
                 console.error("Failed to sync state to server:", err);
             });
         }, 500); // 500ms debounce delay
