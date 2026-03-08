@@ -6,6 +6,8 @@ require('dotenv').config();
 
 const apiRoutes = require('./routes/api');
 const scorerRoutes = require('./routes/scorerRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 // ==========================================
 app.use('/api/scorer', scorerRoutes);
 app.use('/api', apiRoutes);
+app.use('/api/admin', adminRoutes);
 
 
 // Start Server
