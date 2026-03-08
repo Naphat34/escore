@@ -381,7 +381,12 @@ export default function TeamDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
             <div className="flex items-center gap-3">
                 {teamInfo?.logo_url ? (
-                    <img src={teamInfo.logo_url} alt={teamInfo.name} className="w-10 h-10 object-contain rounded-lg bg-white border border-gray-200" />
+                    <img 
+                        src={teamInfo.logo_url} 
+                        alt={teamInfo.name} 
+                        className="w-10 h-10 object-contain rounded-lg bg-white border border-gray-200" 
+                        onError={(e) => {e.target.style.display = 'none'}}
+                    />
                 ) : (
                     <div className="bg-indigo-600 p-2 rounded-lg"><Shield className="text-white w-6 h-6"/></div>
                 )}
@@ -585,7 +590,12 @@ export default function TeamDashboard() {
                                                     <div className="flex items-center gap-4">
                                                         <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex-shrink-0 overflow-hidden border-2 border-white dark:border-gray-800 shadow-sm group-hover:shadow-md transition-all">
                                                             {p.photo ? (
-                                                                <img src={p.photo} alt={p.first_name} className="w-full h-full object-cover"/>
+                                                                <img 
+                                                                    src={p.photo} 
+                                                                    alt={p.first_name} 
+                                                                    className="w-full h-full object-cover"
+                                                                    onError={(e) => {e.target.style.display = 'none'}}
+                                                                />
                                                             ) : (
                                                                 <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-500">
                                                                     <User size={24}/>
@@ -1101,7 +1111,12 @@ function TopPlayerCard({ title, icon, player, value, label, color }) {
             <div className="relative">
                 <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-gray-700 shadow-sm">
                     {player.photo ? (
-                        <img src={player.photo} alt={player.first_name} className="w-full h-full object-cover" />
+                        <img 
+                            src={player.photo} 
+                            alt={player.first_name} 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {e.target.style.display = 'none'}}
+                        />
                     ) : (
                         <User size={20} className="text-gray-400" />
                     )}

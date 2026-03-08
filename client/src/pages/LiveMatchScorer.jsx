@@ -542,16 +542,22 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
         }
 
         // Log Action
+    const actionTeamId = selectedTeam === 'home' ? match.home_team_id : match.away_team_id;
+    const skillName = SKILLS.find(s => s.code === skill)?.name || 'Action';
+    const gradeName = GRADES.find(g => g.code === grade)?.name || 'Result';
+    const description = `${skillName} (${gradeName}) by #${player.number}`;
+
         logAction({
             match_id: match.id,
             set_number: currentSet,
-            team_id: winner === 'home' ? match.home_team_id : match.away_team_id,
+        // Log the team of the player who performed the action, not who won the point
+        team_id: actionTeamId,
             player_id: player?.id,
             skill,
             grade,
             score_home: newPointScore.home,
             score_away: newPointScore.away,
-            description: `Point to ${winner === 'home' ? matchData.home_team : matchData.away_team}`
+        description: description
         });
 
         resetSelection();
