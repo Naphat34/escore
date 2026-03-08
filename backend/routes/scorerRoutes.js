@@ -9,6 +9,9 @@ console.log("Scorer Controller Loaded:", scorerController);
 if (!scorerController.saveMatchEvent) {
     console.error("❌ ERROR: saveMatchEvent function is missing in scorerController!");
 }
+if (!scorerController.updateLiveState) {
+    console.error("❌ ERROR: updateLiveState function is missing in scorerController! (Check scorerController.js export)");
+}
 // ---------------------
 
 // GET Data
