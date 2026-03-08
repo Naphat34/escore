@@ -1,44 +1,106 @@
-import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Clock, Play, Pause, RotateCcw } from 'lucide-react';
 
 const TimeoutTimerModal = ({ isOpen, onClose }) => {
-    const [seconds, setSeconds] = useState(30);
+    const [timeLeft, setTimeLeft] = useState(30);
+    const [isRunning, setIsRunning] = useState(true);
+    const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        let interval;
         if (isOpen) {
-            setSeconds(30);
-            interval = setInterval(() => {
-                setSeconds(prev => {
-                    if (prev <= 1) {
-                        clearInterval(interval);
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
+            // Small delay to allow render before transition
+            requestAnimationFrame(() => setVisible(true));
+            setTimeLeft(30);
+            setIsRunning(true);
+        } else {
+            setVisible(false);
         }
-        return () => clearInterval(interval);
     }, [isOpen]);
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        let interval = null;
+        if (isOpen && isRunning && timeLeft > 0) {
+            interval = setInterval(() => {
+                setTimeLeft((prev) => prev - 1);
+            }, 1000);
+        } else if (timeLeft === 0) {
+            setIsRunning(false);
+        }
+        return () => clearInterval(interval);
+    }, [isOpen, isRunning, timeLeft]);
+
+    // Keep component mounted during exit animation
+    if (!isOpen && !visible) return null;
 
     return (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in zoom-in duration-300">
-            <div className="relative flex flex-col items-center">
-                <button onClick={onClose} className="absolute -top-12 right-0 text-white/50 hover:text-white">
-                    <X size={32} />
-                </button>
-                <h2 className="text-3xl font-bold text-white uppercase tracking-widest mb-4 animate-pulse">Timeout</h2>
-                <div className={`text-[12rem] font-black leading-none tabular-nums transition-colors duration-500 ${seconds <= 5 ? 'text-red-500' : 'text-white'}`}>
-                    {seconds}
-                </div>
-                <div className="text-slate-400 text-xl font-bold mt-2">SECONDS REMAINING</div>
-                {seconds === 0 && (
-                    <button onClick={onClose} className="mt-8 px-8 py-3 bg-white text-black font-bold rounded-full hover:scale-105 transition">
-                        Resume Match
+        <div className={`fixed inset-0 z-[100] flex items-end justify-center pointer-events-none transition-all duration-300 ${isOpen ? 'visible' : 'invisible delay-300'}`}>
+            {/* Backdrop */}
+            <div 
+                className={`absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}
+                onClick={onClose} 
+            />
+            
+            {/* Bottom Sheet */}
+            <div 
+                className={`bg-white dark:bg-slate-800 w-full max-w-md mx-auto rounded-t-3xl p-6 shadow-2xl pointer-events-auto transform transition-transform duration-300 ease-out border-t border-gray-200 dark:border-slate-700 ${visible ? 'translate-y-0' : 'translate-y-full'}`}
+            >
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-yellow-100 dark:bg-yellow-900/30 p-2 rounded-full">
+                            <Clock className="text-yellow-600 dark:text-yellow-400" size={24} />
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-wider">Timeout</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-bold">30 Seconds Duration</p>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={onClose}
+                        className="bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-500 dark:text-gray-300 p-2 rounded-full transition-colors"
+                    >
+                        <X size={20} />
                     </button>
-                )}
+                </div>
+
+                {/* Timer Display */}
+                <div className="flex flex-col items-center justify-center py-4">
+                    <div className={`text-9xl font-black font-mono tabular-nums tracking-tighter leading-none mb-2 ${
+                        timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-gray-900 dark:text-white'
+                    }`}>
+                        {timeLeft}
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    <div className="w-full h-4 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden mb-8">
+                        <div 
+                            className={`h-full transition-all duration-1000 ease-linear ${
+                                timeLeft <= 5 ? 'bg-red-500' : 'bg-yellow-500'
+                            }`}
+                            style={{ width: `${(timeLeft / 30) * 100}%` }}
+                        />
+                    </div>
+
+                    {/* Controls */}
+                    <div className="grid grid-cols-3 gap-3 w-full">
+                        <button 
+                            onClick={() => setIsRunning(!isRunning)}
+                            className={`col-span-2 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                                isRunning 
+                                    ? 'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white' 
+                                    : 'bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/30'
+                            }`}
+                        >
+                            {isRunning ? <><Pause size={24}/> PAUSE</> : <><Play size={24}/> RESUME</>}
+                        </button>
+                        <button 
+                            onClick={() => { setTimeLeft(30); setIsRunning(true); }}
+                            className="col-span-1 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-gray-300 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center"
+                        >
+                            <RotateCcw size={24} />
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
