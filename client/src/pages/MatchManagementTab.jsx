@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import client, { api } from '../api'; // ✅ Import api ให้ถูกต้อง
+import client, { api } from '../api'; 
 import {
     Swords, PlusCircle, X, Calendar, MapPin, Edit2, Trash2,
     Printer, ListFilter, Save, Clock, Shield, Trophy
 } from 'lucide-react';
 import Swal from 'sweetalert2';
-import { Toast, Input, Button } from './AdminShared'; // ตรวจสอบ path ว่าถูกต้องไหม
+import { Toast, Input, Button } from './AdminShared';
 
 export default function MatchManagementTab({ darkMode }) {
     // --- State Management ---
@@ -208,7 +208,11 @@ export default function MatchManagementTab({ darkMode }) {
             ? Math.max(...matches.map(m => parseInt(m.match_number) || 0)) + 1 
             : 1;
 
-        setMatchForm({ ...initialForm, match_number: nextMatchNum, gender: filterGender || 'Male' });
+        // FIX: When creating a new match, default to a specific gender, not the 'All' filter.
+        // Use the first available gender for the selected competition, or 'Male' as a fallback.
+        const defaultGender = availableGenders.length > 0 ? availableGenders[0] : 'Male';
+
+        setMatchForm({ ...initialForm, match_number: nextMatchNum, gender: defaultGender });
         setIsEditing(false);
         setShowModal(true);
     };
