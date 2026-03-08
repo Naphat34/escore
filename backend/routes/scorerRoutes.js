@@ -21,6 +21,10 @@ router.get('/match/:matchId/lineup', scorerController.getMatchLineup);
 router.post('/match/:matchId/event', scorerController.saveMatchEvent);
 router.post('/match/:matchId/lineup', scorerController.saveLineup);
 
+// Live State Sync (สำหรับ Real-time Scoreboard)
+router.put('/match/:matchId/state', scorerController.updateLiveState);
+router.get('/match/:matchId/state', scorerController.getLiveState);
+
 // หมายเหตุ: URL จะเป็น /api/scorer/referees (เพราะไฟล์นี้ถูก mount ที่ /api/scorer)
 router.get('/referees', scorerController.getAllReferees);
 router.get('/scorers', scorerController.getAllScorers);
