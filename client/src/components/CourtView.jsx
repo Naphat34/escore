@@ -14,13 +14,18 @@ const CourtView = ({
     disableLibero = false
 }) => {
 
+    const leftColor = leftTeam?.bg || 'bg-blue-600';
+    const rightColor = rightTeam?.bg || 'bg-pink-600';
+
     // Component ย่อย: ตัวผู้เล่นในสนาม
     // ✅ 2. รับ prop onClick เข้ามาใน PlayerToken
     const PlayerToken = ({ player, colorClass, onClick }) => {
         if (hideTokens) return null;
 
         const isLibero = player && player.isLibero;
-        const finalColorClass = isLibero ? 'bg-white' : colorClass;
+        const isHex = colorClass && colorClass.startsWith('#');
+        const finalColorClass = isLibero ? 'bg-white' : (isHex ? '' : colorClass);
+        const finalStyle = (!isLibero && isHex) ? { backgroundColor: colorClass } : {};
         const finalTextColorClass = isLibero ? 'text-black' : 'text-white';
 
         return (
@@ -38,6 +43,7 @@ const CourtView = ({
                     transition-transform transform group-hover:scale-110 hover:border-yellow-400
                     ${finalColorClass}
                 `}
+                style={finalStyle}
             >
                 {player?.isCaptain && (
                     <div className="absolute -top-2 lg:-top-3 bg-yellow-400 text-black text-[10px] lg:text-xs font-black px-1.5 py-0.5 rounded-sm shadow-sm z-10">
@@ -73,19 +79,19 @@ const CourtView = ({
                     <div className="grid grid-cols-2 grid-rows-3 w-full h-full relative">
                         {/* Back Row (Left on court) | Front Row (Right on court, near net) */}
                         {/* Row 1 */}
-                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[4]} colorClass="bg-blue-600" onClick={() => onPlayerClick && onPlayerClick('home', 4)} /></div> {/* P5 */}
-                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[3]} colorClass="bg-blue-600" onClick={() => onPlayerClick && onPlayerClick('home', 3)} /></div> {/* P4 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[4]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 4)} /></div> {/* P5 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[3]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 3)} /></div> {/* P4 */}
                         {/* Row 2 */}
-                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[5]} colorClass="bg-blue-600" onClick={() => onPlayerClick && onPlayerClick('home', 5)} /></div> {/* P6 */}
-                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[2]} colorClass="bg-blue-600" onClick={() => onPlayerClick && onPlayerClick('home', 2)} /></div> {/* P3 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[5]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 5)} /></div> {/* P6 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[2]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 2)} /></div> {/* P3 */}
                         {/* Row 3 */}
                         <div className="flex items-center justify-center relative">
-                            <PlayerToken player={homePositions[0]} colorClass="bg-blue-600" onClick={() => onPlayerClick && onPlayerClick('home', 0)} /> {/* P1 */}
+                            <PlayerToken player={homePositions[0]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 0)} /> {/* P1 */}
                             {servingSide === 'left' && !hideTokens && (
                                 <div className="absolute -left-1 lg:-left-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20">🏐</div>
                             )}
                         </div>
-                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[1]} colorClass="bg-blue-600" onClick={() => onPlayerClick && onPlayerClick('home', 1)} /></div> {/* P2 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={homePositions[1]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 1)} /></div> {/* P2 */}
                     </div>
                 </div>
             </div>
@@ -100,19 +106,19 @@ const CourtView = ({
                     <div className="grid grid-cols-2 grid-rows-3 w-full h-full relative">
                         {/* Front Row (Left on court, near net) | Back Row (Right on court) - Mirrored */}
                         {/* Row 1 */}
-                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[1]} colorClass="bg-pink-600" onClick={() => onPlayerClick && onPlayerClick('away', 1)} /></div> {/* P2 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[1]} colorClass={rightColor} onClick={() => onPlayerClick && onPlayerClick('away', 1)} /></div> {/* P2 */}
                         <div className="flex items-center justify-center relative">
-                            <PlayerToken player={awayPositions[0]} colorClass="bg-pink-600" onClick={() => onPlayerClick && onPlayerClick('away', 0)} /> {/* P1 */}
+                            <PlayerToken player={awayPositions[0]} colorClass={rightColor} onClick={() => onPlayerClick && onPlayerClick('away', 0)} /> {/* P1 */}
                             {servingSide === 'right' && !hideTokens && (
                                 <div className="absolute -right-1 lg:-right-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20">🏐</div>
                             )}
                         </div>
                         {/* Row 2 */}
-                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[2]} colorClass="bg-pink-600" onClick={() => onPlayerClick && onPlayerClick('away', 2)} /></div> {/* P3 */}
-                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[5]} colorClass="bg-pink-600" onClick={() => onPlayerClick && onPlayerClick('away', 5)} /></div> {/* P6 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[2]} colorClass={rightColor} onClick={() => onPlayerClick && onPlayerClick('away', 2)} /></div> {/* P3 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[5]} colorClass={rightColor} onClick={() => onPlayerClick && onPlayerClick('away', 5)} /></div> {/* P6 */}
                         {/* Row 3 */}
-                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[3]} colorClass="bg-pink-600" onClick={() => onPlayerClick && onPlayerClick('away', 3)} /></div> {/* P4 */}
-                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[4]} colorClass="bg-pink-600" onClick={() => onPlayerClick && onPlayerClick('away', 4)} /></div> {/* P5 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[3]} colorClass={rightColor} onClick={() => onPlayerClick && onPlayerClick('away', 3)} /></div> {/* P4 */}
+                        <div className="flex items-center justify-center"><PlayerToken player={awayPositions[4]} colorClass={rightColor} onClick={() => onPlayerClick && onPlayerClick('away', 4)} /></div> {/* P5 */}
                     </div>
                 </div>
             </div>

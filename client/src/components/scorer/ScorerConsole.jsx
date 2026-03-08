@@ -131,6 +131,8 @@ export default function ScorerConsole() {
     const [lastSetAwayLiberos, setLastSetAwayLiberos] = useState(null);
     const [liberoActionData, setLiberoActionData] = useState({ isOpen: false, team: null });
 
+    const [teamColors, setTeamColors] = useState(() => loadState('teamColors', { home: '#4f46e5', away: '#e11d48' }));
+
     // ✅ New State: Track Libero Swaps (Index -> Original Player)
     const [homeLiberoSwaps, setHomeLiberoSwaps] = useState(() => loadState('homeLiberoSwaps', {}));
     const [awayLiberoSwaps, setAwayLiberoSwaps] = useState(() => loadState('awayLiberoSwaps', {}));
@@ -223,13 +225,13 @@ export default function ScorerConsole() {
             matchData, workflowStep, score, setsWon, completedSets, activeAction,
             timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, 
             homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, 
-            history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap,
+            history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap, teamColors,
             homeLiberoSwaps, awayLiberoSwaps
         };
         Object.entries(stateToSave).forEach(([key, value]) => {
             localStorage.setItem(`match_${matchId}_${key}`, JSON.stringify(value));
         });
-    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap]);
+    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors]);
 
     // เก็บ ID ผู้เล่นที่ถูกเปลี่ยนตัวออกด้วยกรณีพิเศษ (บาดเจ็บ/ให้ออก) ห้ามลงเล่นทั้งนัด
     const [disqualifiedPlayers, setDisqualifiedPlayers] = useState(() => {
@@ -836,12 +838,12 @@ export default function ScorerConsole() {
 
     // Helper for UI
     const getLeftTeam = () => isHomeLeft 
-        ? { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: 'text-indigo-700', bg: 'bg-indigo-600', roster: homeRoster, lineup: homeLineup, liberos: homeLiberos, liberoSwaps: homeLiberoSwaps, lastLiberoSwap: lastLiberoSwap } 
-        : { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: 'text-rose-700', bg: 'bg-rose-600', roster: awayRoster, lineup: awayLineup, liberos: awayLiberos, liberoSwaps: awayLiberoSwaps, lastLiberoSwap: lastLiberoSwap };
+        ? { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: teamColors.home, bg: teamColors.home, roster: homeRoster, lineup: homeLineup, liberos: homeLiberos, liberoSwaps: homeLiberoSwaps, lastLiberoSwap: lastLiberoSwap } 
+        : { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: teamColors.away, bg: teamColors.away, roster: awayRoster, lineup: awayLineup, liberos: awayLiberos, liberoSwaps: awayLiberoSwaps, lastLiberoSwap: lastLiberoSwap };
 
     const getRightTeam = () => isHomeLeft 
-        ? { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: 'text-rose-700', bg: 'bg-rose-600', roster: awayRoster, lineup: awayLineup, liberos: awayLiberos, liberoSwaps: awayLiberoSwaps, lastLiberoSwap: lastLiberoSwap } 
-        : { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: 'text-indigo-700', bg: 'bg-indigo-600', roster: homeRoster, lineup: homeLineup, liberos: homeLiberos, liberoSwaps: homeLiberoSwaps, lastLiberoSwap: lastLiberoSwap };
+        ? { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: teamColors.away, bg: teamColors.away, roster: awayRoster, lineup: awayLineup, liberos: awayLiberos, liberoSwaps: awayLiberoSwaps, lastLiberoSwap: lastLiberoSwap } 
+        : { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: teamColors.home, bg: teamColors.home, roster: homeRoster, lineup: homeLineup, liberos: homeLiberos, liberoSwaps: homeLiberoSwaps, lastLiberoSwap: lastLiberoSwap };
 
     // Opens picker for LineupModal
     const openPickerForLineup = (team, index) => {
@@ -1101,10 +1103,10 @@ export default function ScorerConsole() {
                         <div className="flex items-center gap-2">
                             <div className={`backdrop-blur-md border rounded-xl py-3 px-5 text-right min-w-[300px] flex items-center justify-end gap-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
                                 <div className={`text-3xl font-bold px-2 py-1 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getLeftTeam().sets}</div>
-                                <div className={`font-bold text-2xl truncate ${getLeftTeam().color}`}>{getLeftTeam().name}</div>
+                                <div className="font-bold text-2xl truncate" style={{ color: getLeftTeam().color }}>{getLeftTeam().name}</div>
                             </div>
                             <div className={`border rounded-xl p-2 w-24 h-20 flex items-center justify-center shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-200'}`}>
-                                <div className={`text-5xl font-black ${getLeftTeam().color}`}>{getLeftTeam().score}</div>
+                                <div className="text-5xl font-black" style={{ color: getLeftTeam().color }}>{getLeftTeam().score}</div>
                             </div>
                         </div>
 
@@ -1123,10 +1125,10 @@ export default function ScorerConsole() {
 
                         <div className="flex items-center gap-2">
                             <div className={`border rounded-xl p-2 w-24 h-20 flex items-center justify-center shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-200'}`}>
-                                <div className={`text-5xl font-black ${getRightTeam().color}`}>{getRightTeam().score}</div>
+                                <div className="text-5xl font-black" style={{ color: getRightTeam().color }}>{getRightTeam().score}</div>
                             </div>
                             <div className={`backdrop-blur-md border rounded-xl py-3 px-5 text-left min-w-[300px] flex items-center justify-start gap-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
-                                <div className={`font-bold text-2xl truncate ${getRightTeam().color}`}>{getRightTeam().name}</div>
+                                <div className="font-bold text-2xl truncate" style={{ color: getRightTeam().color }}>{getRightTeam().name}</div>
                                 <div className={`text-3xl font-bold px-2 py-1 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getRightTeam().sets}</div>
                             </div>
                         </div>
@@ -1170,6 +1172,16 @@ export default function ScorerConsole() {
                                 <div className="fixed inset-0 z-[60] bg-gray-900/50 backdrop-blur-sm flex items-center justify-center pointer-events-auto">
                                     <div className="bg-white p-8 rounded-3xl border border-gray-200 max-w-2xl w-full text-center space-y-8 shadow-2xl">
                                         <h2 className="text-3xl font-bold flex items-center justify-center gap-3 text-gray-800"><ArrowRightLeft className="text-yellow-500"/> Coin Toss & Sides</h2>
+                                        <div className="flex justify-around items-center px-4">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="font-bold text-gray-700">{matchData.teamHome} Color</span>
+                                                <input type="color" value={teamColors.home} onChange={(e) => setTeamColors({...teamColors, home: e.target.value})} className="w-16 h-10 cursor-pointer rounded border" />
+                                            </div>
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="font-bold text-gray-700">{matchData.teamAway} Color</span>
+                                                <input type="color" value={teamColors.away} onChange={(e) => setTeamColors({...teamColors, away: e.target.value})} className="w-16 h-10 cursor-pointer rounded border" />
+                                            </div>
+                                        </div>
                                         <div className="flex gap-4 h-32">
                                             <button onClick={() => setIsHomeLeft(true)} className={`flex-1 border-2 rounded-xl flex items-center justify-center text-2xl font-bold transition-all ${isHomeLeft ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400'}`}>Left: {matchData.teamHome}</button>
                                             <div className="flex items-center"><RefreshCcw className="cursor-pointer hover:rotate-180 transition-transform text-gray-500" onClick={() => setIsHomeLeft(!isHomeLeft)}/></div>
@@ -1221,7 +1233,7 @@ export default function ScorerConsole() {
                             <div className="max-w-6xl mx-auto flex items-stretch gap-4 h-full">
                                 {/* Left Controls */}
                                 <div className="flex-1 flex items-stretch gap-2">
-                                    <button onClick={() => handlePoint(getLeftTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all ${getLeftTeam().bg} border-${getLeftTeam().code === 'home' ? 'indigo' : 'rose'}-800 disabled:opacity-50 disabled:cursor-not-allowed`}><span className="font-black text-3xl">POINT</span></button>
+                                    <button onClick={() => handlePoint(getLeftTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed`} style={{ backgroundColor: getLeftTeam().bg, borderColor: 'rgba(0,0,0,0.2)' }}><span className="font-black text-3xl">POINT</span></button>
                                     <div className="flex flex-col gap-1 w-24">
                                         <button onClick={() => handleActionSelect(getLeftTeam().code, 'TIMEOUT')} disabled={timeouts[getLeftTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold border ${secondaryBtnClass}`}>TIMEOUT ({2 - timeouts[getLeftTeam().code]})</button>
                                         <button 
@@ -1259,7 +1271,7 @@ export default function ScorerConsole() {
                                         <button onClick={() => { setChallengeData({ team: getRightTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getRightTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-yellow-600 border ${secondaryBtnClass}`}>CHALLENGE</button>
                                         <button onClick={() => { setSanctionTeam(getRightTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-red-600 border ${secondaryBtnClass}`}>SANCTION</button>
                                     </div>
-                                    <button onClick={() => handlePoint(getRightTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all ${getRightTeam().bg} border-${getRightTeam().code === 'home' ? 'indigo' : 'rose'}-800 disabled:opacity-50 disabled:cursor-not-allowed`}><span className="font-black text-3xl">POINT</span></button>
+                                    <button onClick={() => handlePoint(getRightTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed`} style={{ backgroundColor: getRightTeam().bg, borderColor: 'rgba(0,0,0,0.2)' }}><span className="font-black text-3xl">POINT</span></button>
                                 </div>
                             </div>
                         ) : (
