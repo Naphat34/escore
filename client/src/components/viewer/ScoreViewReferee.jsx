@@ -108,7 +108,7 @@ export default function ScoreViewReferee() {
                     <div className="bg-slate-700 px-4 py-2 rounded-lg text-3xl font-bold text-yellow-400 border border-slate-600 min-w-[60px] text-center">
                         {leftTeam.sets}
                     </div>
-                    <div className="text-2xl font-bold truncate" style={{ color: leftTeam.color }}>
+                    <div className="text-3xl font-bold truncate" style={{ color: leftTeam.color }}>
                         {leftTeam.name}
                     </div>
                 </div>
@@ -122,7 +122,7 @@ export default function ScoreViewReferee() {
                 </div>
 
                 <div className="flex items-center gap-4 flex-1 justify-end">
-                    <div className="text-2xl font-bold truncate" style={{ color: rightTeam.color }}>
+                    <div className="text-3xl font-bold truncate" style={{ color: rightTeam.color }}>
                         {rightTeam.name}
                     </div>
                     <div className="bg-slate-700 px-4 py-2 rounded-lg text-3xl font-bold text-yellow-400 border border-slate-600 min-w-[60px] text-center">
@@ -156,8 +156,8 @@ export default function ScoreViewReferee() {
                 <div className="max-w-6xl mx-auto flex items-stretch gap-4">
                     
                     {/* Left Score */}
-                    <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4" style={{ color: leftTeam.color }}>
-                        <div className="text-8xl font-white" >{leftTeam.score}</div>
+                    <div className="flex-1 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4 transition-colors duration-300" style={{ backgroundColor: leftTeam.color }}>
+                        <div className="text-9xl font-black text-white drop-shadow-md">{leftTeam.score}</div>
                     </div>
 
                     {/* Center Stats */}
@@ -191,8 +191,8 @@ export default function ScoreViewReferee() {
                     </div>
 
                     {/* Right Score */}
-                    <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4" style={{ color: rightTeam.color }}>
-                        <div className="text-8xl font-white" >{rightTeam.score}</div>
+                    <div className="flex-1 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4 transition-colors duration-300" style={{ backgroundColor: rightTeam.color }}>
+                        <div className="text-9xl font-black text-white drop-shadow-md">{rightTeam.score}</div>
                     </div>
                 </div>
             </div>
