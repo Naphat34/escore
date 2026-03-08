@@ -171,8 +171,8 @@ export default function ScorerConsole() {
     // Roster Data
     const [masterHomeRoster, setMasterHomeRoster] = useState([]);
     const [masterAwayRoster, setMasterAwayRoster] = useState([]);
-    const [homeRoster, setHomeRoster] = useState([]); 
-    const [awayRoster, setAwayRoster] = useState([]); 
+    const [homeRoster, setHomeRoster] = useState(() => loadState('homeRoster', [])); 
+    const [awayRoster, setAwayRoster] = useState(() => loadState('awayRoster', [])); 
 
     // Timer
     const [matchDuration, setMatchDuration] = useState(() => loadState('matchDuration', 0));
