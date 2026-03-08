@@ -113,7 +113,7 @@ export default function ScoreViewReferee() {
             </div>
 
             {/* 2. Court View */}
-            <div className="flex-1 relative bg-slate-900 flex items-center justify-center p-4 overflow-hidden">
+            <div className="flex-1 relative bg-slate-900 flex items-center justify-center p-4 overflow-hidden mt-5">
                 <div className="w-full max-w-5xl aspect-[1.8/1] relative">
                      <CourtView 
                         homePositions={effectiveIsHomeLeft ? homeLineup : awayLineup}
@@ -129,38 +129,47 @@ export default function ScoreViewReferee() {
 
             {/* 3. Set Indicator */}
             <div className="bg-slate-800 py-2 text-center border-y border-slate-700 shrink-0">
-                <span className="text-xl font-bold text-slate-300">SET {matchData.currentSet}</span>
+                <span className="text-xl font-bold text-slate-500">SET {matchData.currentSet}</span>
             </div>
 
             {/* 4. Stats Table */}
             <div className="bg-slate-900 p-4 shrink-0">
-                <div className="max-w-4xl mx-auto bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg">
-                    {/* Row 1: Points */}
-                    <div className="grid grid-cols-3 border-b border-slate-700">
-                        <div className="p-4 text-center text-6xl font-black text-white bg-slate-800/50">{leftTeam.score}</div>
-                        <div className="p-4 flex items-center justify-center bg-slate-700/30 text-slate-400 font-bold text-sm uppercase tracking-wider">POINTS</div>
-                        <div className="p-4 text-center text-6xl font-black text-white bg-slate-800/50">{rightTeam.score}</div>
-                    </div>
+                <div className="max-w-6xl mx-auto flex items-stretch gap-4">
                     
-                    {/* Row 2: VC (Challenges) */}
-                    <div className="grid grid-cols-3 border-b border-slate-700">
-                        <div className="p-3 text-center text-2xl font-bold text-blue-400">{challenges[leftTeam.code]}</div>
-                        <div className="p-3 flex items-center justify-center bg-slate-700/30 text-slate-500 font-bold text-xs">VC (Challenges)</div>
-                        <div className="p-3 text-center text-2xl font-bold text-blue-400">{challenges[rightTeam.code]}</div>
+                    {/* Left Score */}
+                    <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4">
+                        <div className="text-8xl font-black text-white">{leftTeam.score}</div>
+                        <div className="text-slate-500 font-bold text-sm uppercase tracking-wider mt-2">POINTS</div>
                     </div>
 
-                    {/* Row 3: TO (Timeouts) */}
-                    <div className="grid grid-cols-3 border-b border-slate-700">
-                        <div className="p-3 text-center text-2xl font-bold text-yellow-500">{timeouts[leftTeam.code]}</div>
-                        <div className="p-3 flex items-center justify-center bg-slate-700/30 text-slate-500 font-bold text-xs">TO (Timeouts)</div>
-                        <div className="p-3 text-center text-2xl font-bold text-yellow-500">{timeouts[rightTeam.code]}</div>
+                    {/* Center Stats */}
+                    <div className="w-[400px] bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-lg flex flex-col justify-center">
+                        {/* Row 1: VC (Challenges) */}
+                        <div className="grid grid-cols-3 border-b border-slate-700">
+                            <div className="p-3 text-center text-2xl font-bold text-blue-400">{challenges[leftTeam.code]}</div>
+                            <div className="p-3 flex items-center justify-center bg-slate-700/30 text-slate-500 font-bold text-xs">VC (Challenges)</div>
+                            <div className="p-3 text-center text-2xl font-bold text-blue-400">{challenges[rightTeam.code]}</div>
+                        </div>
+
+                        {/* Row 2: TO (Timeouts) */}
+                        <div className="grid grid-cols-3 border-b border-slate-700">
+                            <div className="p-3 text-center text-2xl font-bold text-yellow-500">{timeouts[leftTeam.code]}</div>
+                            <div className="p-3 flex items-center justify-center bg-slate-700/30 text-slate-500 font-bold text-xs">TO (Timeouts)</div>
+                            <div className="p-3 text-center text-2xl font-bold text-yellow-500">{timeouts[rightTeam.code]}</div>
+                        </div>
+
+                        {/* Row 3: SUB (Substitutions) */}
+                        <div className="grid grid-cols-3">
+                            <div className="p-3 text-center text-2xl font-bold text-green-500">{substitutions[leftTeam.code]}</div>
+                            <div className="p-3 flex items-center justify-center bg-slate-700/30 text-slate-500 font-bold text-xs">SUB (Substitutions)</div>
+                            <div className="p-3 text-center text-2xl font-bold text-green-500">{substitutions[rightTeam.code]}</div>
+                        </div>
                     </div>
 
-                    {/* Row 4: SUB (Substitutions) */}
-                    <div className="grid grid-cols-3">
-                        <div className="p-3 text-center text-2xl font-bold text-green-500">{substitutions[leftTeam.code]}</div>
-                        <div className="p-3 flex items-center justify-center bg-slate-700/30 text-slate-500 font-bold text-xs">SUB (Substitutions)</div>
-                        <div className="p-3 text-center text-2xl font-bold text-green-500">{substitutions[rightTeam.code]}</div>
+                    {/* Right Score */}
+                    <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4">
+                        <div className="text-8xl font-black text-white">{rightTeam.score}</div>
+                        <div className="text-slate-500 font-bold text-sm uppercase tracking-wider mt-2">POINTS</div>
                     </div>
                 </div>
             </div>
