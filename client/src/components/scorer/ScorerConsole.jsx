@@ -162,6 +162,7 @@ export default function ScorerConsole() {
 
     const [showTimeoutModal, setShowTimeoutModal] = useState(false);
     const [showTimeoutTimer, setShowTimeoutTimer] = useState(false);
+    const [timeoutStartTime, setTimeoutStartTime] = useState(null);
     const [activeAction, setActiveAction] = useState({ team: null, type: null });
 
     // Settings
@@ -236,7 +237,7 @@ export default function ScorerConsole() {
                 timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, 
                 homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, 
                 history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap, teamColors,
-                homeLiberoSwaps, awayLiberoSwaps, showTimeoutTimer
+                homeLiberoSwaps, awayLiberoSwaps, showTimeoutTimer, timeoutStartTime
             };
 
             // 1. Save to localStorage for local persistence on refresh
@@ -262,6 +263,7 @@ export default function ScorerConsole() {
                 awayLiberos,
                 teamColors,
                 showTimeoutTimer,
+                timeoutStartTime,
                 matchDuration,
                 isTimerRunning,
             };
@@ -273,7 +275,7 @@ export default function ScorerConsole() {
         return () => {
             clearTimeout(debounceTimeoutRef.current);
         };
-    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors, showTimeoutTimer]);
+    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors, showTimeoutTimer, timeoutStartTime]);
 
     // เก็บ ID ผู้เล่นที่ถูกเปลี่ยนตัวออกด้วยกรณีพิเศษ (บาดเจ็บ/ให้ออก) ห้ามลงเล่นทั้งนัด
     const [disqualifiedPlayers, setDisqualifiedPlayers] = useState(() => {
@@ -736,6 +738,7 @@ export default function ScorerConsole() {
             if (timeouts[team] >= 2) return alert("Timeout limit reached.");
             setTimeouts(prev => ({ ...prev, [team]: prev[team] + 1 }));
             saveEventToBackend('TIMEOUT', team);
+            setTimeoutStartTime(Date.now());
             setShowTimeoutTimer(true);
         }
         setShowTimeoutModal(false);
@@ -1528,7 +1531,11 @@ export default function ScorerConsole() {
 
             <TimeoutTimerModal 
                 isOpen={showTimeoutTimer}
-                onClose={() => setShowTimeoutTimer(false)}
+                onClose={() => {
+                    setShowTimeoutTimer(false);
+                    setTimeoutStartTime(null);
+                }}
+                startTime={timeoutStartTime}
             />
 
             <LiberoModal 

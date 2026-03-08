@@ -39,6 +39,7 @@ export default function ScoreViewReferee() {
     const [awayLiberos, setAwayLiberos] = useState(() => loadState('awayLiberos', { l1: null, l2: null }));
     const [teamColors, setTeamColors] = useState(() => loadState('teamColors', { home: '#4f46e5', away: '#e11d48' }));
     const [showTimeoutTimer, setShowTimeoutTimer] = useState(false);
+    const [timeoutStartTime, setTimeoutStartTime] = useState(null);
 
     const refreshData = async () => {
         try {
@@ -62,6 +63,7 @@ export default function ScoreViewReferee() {
             setAwayLiberos(state.awayLiberos || { l1: null, l2: null });
             setTeamColors(state.teamColors || { home: '#4f46e5', away: '#e11d48' });
             setShowTimeoutTimer(state.showTimeoutTimer || false);
+            setTimeoutStartTime(state.timeoutStartTime || null);
 
             setLastUpdated(Date.now());
         } catch (error) {
@@ -154,8 +156,8 @@ export default function ScoreViewReferee() {
                 <div className="max-w-6xl mx-auto flex items-stretch gap-4">
                     
                     {/* Left Score */}
-                    <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4">
-                        <div className="text-8xl font-black" style={{ color: leftTeam.color }}>{leftTeam.score}</div>
+                    <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4" style={{ color: leftTeam.color }}>
+                        <div className="text-8xl font-white" >{leftTeam.score}</div>
                     </div>
 
                     {/* Center Stats */}
@@ -189,8 +191,8 @@ export default function ScoreViewReferee() {
                     </div>
 
                     {/* Right Score */}
-                    <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4">
-                        <div className="text-8xl font-black" style={{ color: rightTeam.color }}>{rightTeam.score}</div>
+                    <div className="flex-1 bg-slate-800 rounded-xl border border-slate-700 flex flex-col items-center justify-center shadow-lg p-4" style={{ color: rightTeam.color }}>
+                        <div className="text-8xl font-white" >{rightTeam.score}</div>
                     </div>
                 </div>
             </div>
@@ -230,6 +232,7 @@ export default function ScoreViewReferee() {
             <TimeoutTimerModal 
                 isOpen={showTimeoutTimer} 
                 onClose={() => {}} // Referee cannot close it manually, controlled by Scorer
+                startTime={timeoutStartTime}
             />
         </div>
     );

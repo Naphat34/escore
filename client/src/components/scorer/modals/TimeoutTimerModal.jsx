@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Clock, Play, Pause, RotateCcw } from 'lucide-react';
 
-const TimeoutTimerModal = ({ isOpen, onClose }) => {
+const TimeoutTimerModal = ({ isOpen, onClose, startTime }) => {
     const [timeLeft, setTimeLeft] = useState(30);
     const [isRunning, setIsRunning] = useState(true);
     const [visible, setVisible] = useState(false);
@@ -10,24 +10,35 @@ const TimeoutTimerModal = ({ isOpen, onClose }) => {
         if (isOpen) {
             // Small delay to allow render before transition
             requestAnimationFrame(() => setVisible(true));
-            setTimeLeft(30);
+            
+            if (startTime) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                setTimeLeft(Math.max(0, 30 - elapsed));
+            } else {
+                setTimeLeft(30);
+            }
             setIsRunning(true);
         } else {
             setVisible(false);
         }
-    }, [isOpen]);
+    }, [isOpen, startTime]);
 
     useEffect(() => {
         let interval = null;
         if (isOpen && isRunning && timeLeft > 0) {
             interval = setInterval(() => {
-                setTimeLeft((prev) => prev - 1);
-            }, 1000);
+                if (startTime) {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    setTimeLeft(Math.max(0, 30 - elapsed));
+                } else {
+                    setTimeLeft((prev) => prev - 1);
+                }
+            }, 200);
         } else if (timeLeft === 0) {
             setIsRunning(false);
         }
         return () => clearInterval(interval);
-    }, [isOpen, isRunning, timeLeft]);
+    }, [isOpen, isRunning, timeLeft, startTime]);
 
     // Keep component mounted during exit animation
     if (!isOpen && !visible) return null;
