@@ -1149,7 +1149,7 @@ export default function ScorerConsole() {
                         <div className="flex items-center gap-2">
                             <div className={`backdrop-blur-md border rounded-xl py-3 px-5 text-right min-w-[300px] flex items-center justify-end gap-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
                                 <div className={`text-3xl font-bold px-2 py-1 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getLeftTeam().sets}</div>
-                                <div className="font-bold text-2xl truncate max-w-[200px] lg:max-w-[260px]" style={{ color: getLeftTeam().color }}>{getLeftTeam().name}</div>
+                                <div className="font-bold text-2xl truncate" style={{ color: getLeftTeam().color }}>{getLeftTeam().name}</div>
                             </div>
                             <div className={`border rounded-xl p-2 w-24 h-20 flex items-center justify-center shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-200'}`}>
                                 <div className="text-5xl font-black" style={{ color: getLeftTeam().color }}>{getLeftTeam().score}</div>
@@ -1174,7 +1174,7 @@ export default function ScorerConsole() {
                                 <div className="text-5xl font-black" style={{ color: getRightTeam().color }}>{getRightTeam().score}</div>
                             </div>
                             <div className={`backdrop-blur-md border rounded-xl py-3 px-5 text-left min-w-[300px] flex items-center justify-start gap-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
-                                <div className="font-bold text-2xl truncate max-w-[200px] lg:max-w-[260px]" style={{ color: getRightTeam().color }}>{getRightTeam().name}</div>
+                                <div className="font-bold text-2xl truncate" style={{ color: getRightTeam().color }}>{getRightTeam().name}</div>
                                 <div className={`text-3xl font-bold px-2 py-1 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getRightTeam().sets}</div>
                             </div>
                         </div>
@@ -1327,7 +1327,7 @@ export default function ScorerConsole() {
                     </div>
                 </section>
 
-                <aside className={`w-80 border-l hidden lg:flex lg:ml-4 flex-col z-10 shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                <aside className={`w-80 border-l hidden lg:flex  flex-col z-10 shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
                      <TeamInfoPanel team={getRightTeam()} align="right" isDarkMode={isDarkMode} onPlayerClick={handleCourtPlayerClick} />
                 </aside>
 
