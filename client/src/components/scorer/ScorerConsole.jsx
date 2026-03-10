@@ -125,7 +125,7 @@ export default function ScorerConsole() {
     const [awayLineup, setAwayLineup] = useState(() => loadState('awayLineup', Array(6).fill(null)));
     const [lastSetHomeLineup, setLastSetHomeLineup] = useState(null);
     const [lastSetAwayLineup, setLastSetAwayLineup] = useState(null);
-    const [isLineupConfirmed, setIsLineupConfirmed] = useState(false);
+    
 
     // Libero State
     const [lastSetHomeLiberos, setLastSetHomeLiberos] = useState(null);
@@ -1194,7 +1194,6 @@ export default function ScorerConsole() {
                             servingSide={!isSetupPhase && servingTeam ? ((servingTeam === 'home' && isHomeLeft) || (servingTeam === 'away' && !isHomeLeft) ? 'left' : 'right') : null}
                             onPlayerClick={handleCourtPlayerClick}
                             onLiberoClick={(team) => setLiberoActionData({ isOpen: true, team })}
-                            hideTokens={!isLineupConfirmed}
                             leftTeam={getLeftTeam()}
                             rightTeam={getRightTeam()}
                             disableLibero={workflowStep === 'RALLY'}
@@ -1327,7 +1326,7 @@ export default function ScorerConsole() {
                     </div>
                 </section>
 
-                <aside className={`w-80 border-l hidden lg:flex  flex-col z-10 shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                <aside className={`w-80 border-l hidden lg:flex flex-col z-10 shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
                      <TeamInfoPanel team={getRightTeam()} align="right" isDarkMode={isDarkMode} onPlayerClick={handleCourtPlayerClick} />
                 </aside>
 
