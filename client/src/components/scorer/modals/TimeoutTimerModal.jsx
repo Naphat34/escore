@@ -1,47 +1,44 @@
 import React, { useEffect, useState } from 'react';
 import { X, Clock, Play, Pause, RotateCcw } from 'lucide-react';
 
-const TimeoutTimerModal = ({ isOpen, onClose, startTime }) => {
-    const [timeLeft, setTimeLeft] = useState(30);
+const TimeoutTimerModal = ({ isOpen, onClose, duration = 30, title = 'Timeout' }) => {
+    const [timeLeft, setTimeLeft] = useState(duration);
     const [isRunning, setIsRunning] = useState(true);
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
-            // Small delay to allow render before transition
-            requestAnimationFrame(() => setVisible(true));
-            
-            if (startTime) {
-                const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                setTimeLeft(Math.max(0, 30 - elapsed));
-            } else {
-                setTimeLeft(30);
-            }
+            setVisible(true);
+            setTimeLeft(duration);
             setIsRunning(true);
         } else {
             setVisible(false);
         }
-    }, [isOpen, startTime]);
+    }, [isOpen, duration]);
 
     useEffect(() => {
         let interval = null;
         if (isOpen && isRunning && timeLeft > 0) {
             interval = setInterval(() => {
-                if (startTime) {
-                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                    setTimeLeft(Math.max(0, 30 - elapsed));
-                } else {
-                    setTimeLeft((prev) => prev - 1);
-                }
-            }, 200);
+                setTimeLeft((prev) => prev - 1);
+            }, 1000);
         } else if (timeLeft === 0) {
             setIsRunning(false);
         }
         return () => clearInterval(interval);
-    }, [isOpen, isRunning, timeLeft, startTime]);
+    }, [isOpen, isRunning, timeLeft]);
 
     // Keep component mounted during exit animation
     if (!isOpen && !visible) return null;
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    };
+
+    const displayTime = duration >= 60 ? formatTime(timeLeft) : timeLeft;
+    const durationText = duration >= 60 ? `${duration / 60} Minute${duration / 60 > 1 ? 's' : ''} Duration` : `${duration} Seconds Duration`;
 
     return (
         <div className={`fixed inset-0 z-[100] flex items-end justify-center pointer-events-none transition-all duration-300 ${isOpen ? 'visible' : 'invisible delay-300'}`}>
@@ -62,8 +59,8 @@ const TimeoutTimerModal = ({ isOpen, onClose, startTime }) => {
                             <Clock className="text-yellow-600 dark:text-yellow-400" size={24} />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-wider">Timeout</h3>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 font-bold">30 Seconds Duration</p>
+                            <h3 className="text-xl font-black text-gray-900 dark:text-white uppercase tracking-wider">{title}</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-bold">{durationText}</p>
                         </div>
                     </div>
                     <button 
@@ -76,10 +73,12 @@ const TimeoutTimerModal = ({ isOpen, onClose, startTime }) => {
 
                 {/* Timer Display */}
                 <div className="flex flex-col items-center justify-center py-4">
-                    <div className={`text-9xl font-black font-mono tabular-nums tracking-tighter leading-none mb-2 ${
+                    <div className={`font-black font-mono tabular-nums tracking-tighter leading-none mb-2 ${
+                        duration >= 60 ? 'text-8xl' : 'text-9xl'
+                    } ${
                         timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-gray-900 dark:text-white'
                     }`}>
-                        {timeLeft}
+                        {displayTime}
                     </div>
                     
                     {/* Progress Bar */}
@@ -88,7 +87,7 @@ const TimeoutTimerModal = ({ isOpen, onClose, startTime }) => {
                             className={`h-full transition-all duration-1000 ease-linear ${
                                 timeLeft <= 5 ? 'bg-red-500' : 'bg-yellow-500'
                             }`}
-                            style={{ width: `${(timeLeft / 30) * 100}%` }}
+                            style={{ width: `${(timeLeft / duration) * 100}%` }}
                         />
                     </div>
 
@@ -105,7 +104,7 @@ const TimeoutTimerModal = ({ isOpen, onClose, startTime }) => {
                             {isRunning ? <><Pause size={24}/> PAUSE</> : <><Play size={24}/> RESUME</>}
                         </button>
                         <button 
-                            onClick={() => { setTimeLeft(30); setIsRunning(true); }}
+                            onClick={() => { setTimeLeft(duration); setIsRunning(true); }}
                             className="col-span-1 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-gray-300 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center"
                         >
                             <RotateCcw size={24} />

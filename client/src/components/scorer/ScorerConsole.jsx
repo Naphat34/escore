@@ -125,6 +125,7 @@ export default function ScorerConsole() {
     const [awayLineup, setAwayLineup] = useState(() => loadState('awayLineup', Array(6).fill(null)));
     const [lastSetHomeLineup, setLastSetHomeLineup] = useState(null);
     const [lastSetAwayLineup, setLastSetAwayLineup] = useState(null);
+    const [isLineupConfirmed, setIsLineupConfirmed] = useState(false);
 
     // Libero State
     const [lastSetHomeLiberos, setLastSetHomeLiberos] = useState(null);
@@ -1193,6 +1194,7 @@ export default function ScorerConsole() {
                             servingSide={!isSetupPhase && servingTeam ? ((servingTeam === 'home' && isHomeLeft) || (servingTeam === 'away' && !isHomeLeft) ? 'left' : 'right') : null}
                             onPlayerClick={handleCourtPlayerClick}
                             onLiberoClick={(team) => setLiberoActionData({ isOpen: true, team })}
+                            hideTokens={!isLineupConfirmed}
                             leftTeam={getLeftTeam()}
                             rightTeam={getRightTeam()}
                             disableLibero={workflowStep === 'RALLY'}
@@ -1256,7 +1258,7 @@ export default function ScorerConsole() {
                             {workflowStep === 'SET_FINISHED' && (
                                 <div className="pointer-events-auto bg-black/90 p-10 rounded-3xl backdrop-blur-md border border-yellow-500/50 text-center">
                                     <h2 className="text-4xl font-black mb-4 text-yellow-500">SET {matchData.currentSet} FINISHED</h2>
-                                    <p className="text-2xl mb-8">Winner: {score.home > score.away ? matchData.teamHome : matchData.teamAway}</p>
+                                    <p className="text-2xl mb-8 text-yellow-500">Winner: {score.home > score.away ? matchData.teamHome : matchData.teamAway}</p>
                                     <button onClick={startNextSet} className="bg-white text-black px-8 py-4 rounded-xl font-bold text-xl hover:bg-gray-200">Start Set {matchData.currentSet + 1}</button>
                                 </div>
                             )}
