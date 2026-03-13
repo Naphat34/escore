@@ -722,7 +722,19 @@ export default function ScorerConsole() {
 
     const handleActionSelect = (teamCode, actionType) => {
         setActiveAction({ team: teamCode, type: actionType });
-        if (actionType === 'TIMEOUT') setShowTimeoutModal(true);
+        if (actionType === 'TIMEOUT') {
+            // Directly start the timeout without showing confirmation modal
+            if (timeouts[teamCode] >= 2) {
+                alert("Timeout limit reached.");
+                return;
+            }
+            saveStateToHistory();
+            setTimeouts(prev => ({ ...prev, [teamCode]: prev[teamCode] + 1 }));
+            saveEventToBackend('TIMEOUT', teamCode);
+            setTimeoutStartTime(Date.now());
+            setShowTimeoutTimer(true);
+            setActiveAction({ team: null, type: null });
+        }
     };
 
     const handleActionCancel = () => {
