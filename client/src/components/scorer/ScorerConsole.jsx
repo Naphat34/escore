@@ -1486,9 +1486,20 @@ export default function ScorerConsole() {
                                                                             {ev.metadata.type === 'LIBERO' && <span className="text-[9px] bg-blue-100 text-blue-800 px-1 rounded ml-1">Libero</span>}
                                                                         </div>
                                                                     ) : ev.metadata?.type === 'POINT' ? (
-                                                                        <span style={{ color: isHome ? teamColors.home : teamColors.away }}>
-                                                                            {ev.description}
-                                                                        </span>
+                                                                        ev.description
+                                                                    ) : ev.metadata?.team ? (
+                                                                        (() => {
+                                                                            const teamName = ev.metadata.team;
+                                                                            const parts = ev.description.split(teamName);
+                                                                            const teamColor = isHome ? teamColors.home : teamColors.away;
+                                                                            return (
+                                                                                <span>
+                                                                                    {parts[0]}
+                                                                                    <span style={{ color: teamColor }}>{teamName}</span>
+                                                                                    {parts[1]}
+                                                                                </span>
+                                                                            );
+                                                                        })()
                                                                     ) : (
                                                                         ev.description
                                                                     )}
