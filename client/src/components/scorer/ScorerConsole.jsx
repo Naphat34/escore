@@ -1145,7 +1145,7 @@ export default function ScorerConsole() {
                     
 
                     {/* SCOREBOARD */}
-                    <div className="absolute top-14 left-0 right-0 z-30 flex justify-center items-center gap-3 pointer-events-none px-4">
+                    <div className="absolute top-4 left-0 right-0 z-30 flex justify-center items-center gap-3 pointer-events-none px-4">
                         <div className="flex items-center gap-2">
                             <div className={`backdrop-blur-md border rounded-xl py-3 px-4 text-right max-w-[320px] flex items-center justify-end gap-3 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
                                 <div className={`text-3xl font-bold px-2 py-1 rounded border shrink-0 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getLeftTeam().sets}</div>
@@ -1156,17 +1156,17 @@ export default function ScorerConsole() {
                             </div>
                         </div>
 
-                        <div className="relative shrink-0">
-                            {isTimerRunning && (
-                                <div className={`absolute -top-13 left-1/2 -translate-x-1/2 py-2 px-5 rounded-xl border flex items-center gap-3 z-40 shadow-md transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-300'}`}>
-                                    <Clock size={28} className="text-green-400 animate-pulse" />
-                                    <span className={`font-bold font-mono text-xl ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{Math.floor(matchDuration/60)}:{String(matchDuration%60).padStart(2,'0')}</span>
-                                </div>
-                            )}
+                        <div className="relative shrink-0 flex flex-col items-center">
                             <div className={`border rounded-xl px-6 py-2 flex flex-col items-center justify-center h-20 min-w-[80px] shadow-lg transition-colors ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-800 border-gray-700'}`}>
                                 <span className="text-xs text-gray-400 font-bold uppercase">SET</span>
                                 <span className="text-4xl font-bold text-white">{matchData.currentSet}</span>
                             </div>
+                            {isTimerRunning && (
+                                <div className={`absolute top-full mt-2 left-1/2 -translate-x-1/2 py-2 px-4 rounded-xl border flex items-center gap-2 z-40 shadow-md transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-300'}`}>
+                                    <Clock size={20} className="text-green-400 animate-pulse" />
+                                    <span className={`font-bold font-mono text-lg ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{Math.floor(matchDuration/60)}:{String(matchDuration%60).padStart(2,'0')}</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-2">
