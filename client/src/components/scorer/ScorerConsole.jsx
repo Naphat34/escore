@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import { 
     ArrowRightLeft, Users, ListChecks, CheckCircle, Shield, X, PlayCircle, Loader, 
     Trophy, RotateCcw, Flag, Clock, RefreshCcw, History, FileText, AlertTriangle, Repeat,
-    Moon, Sun
+    Moon, Sun, Timer, Video, ArrowUpDown, ArrowDown, ArrowUp
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -1377,27 +1377,59 @@ export default function ScorerConsole() {
                             return (
                                 <>
                                     {/* Summary Box */}
-                                    <div className={`p-3 border-b text-xs ${isDarkMode ? 'border-slate-700 bg-slate-800/50' : 'border-gray-100 bg-gray-50/50'}`}>
-                                        <div className="flex justify-between items-center mb-2 pb-2 border-b border-dashed border-gray-200 dark:border-gray-700">
-                                            <span className={`font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Set {activeHistoryTab} </span>
-                                            <span className="font-mono font-bold text-lg">{stats.score}</span>
+                                    <div className={`border-b border-gray-200 dark:border-slate-700 ${isDarkMode ? 'bg-slate-800/50' : 'bg-white'}`}>
+                                        <div className={`py-2 text-center border-b font-black text-xs ${isDarkMode ? 'border-slate-700 text-gray-200' : 'border-gray-200 text-gray-800'}`}>
+                                            END SET {activeHistoryTab} <span className="text-gray-400 font-medium">- {setEvents.length > 0 ? setEvents[0].time : '--:--'}</span>
                                         </div>
-                                        <div className="grid grid-cols-3 gap-y-1 gap-x-2 text-center items-center">
-                                            <div className="col-span-1"></div>
-                                            <div className={`font-bold truncate text-[10px] ${isDarkMode ? 'text-indigo-400' : 'text-indigo-700'}`}>{matchData.teamHome}</div>
-                                            <div className={`font-bold truncate text-[10px] ${isDarkMode ? 'text-rose-400' : 'text-rose-700'}`}>{matchData.teamAway}</div>
+                                        <div className="flex items-center justify-between p-3">
+                                            {/* Home Stats */}
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-1.5 font-bold text-base">
+                                                    <Timer className="text-yellow-400" size={20} strokeWidth={2.5} /> <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.home.timeouts}</span>
+                                                </div>
+                                                <div className="w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
+                                                <div className="flex items-center gap-1.5 font-bold text-base">
+                                                    <Video className="text-yellow-400" size={20} strokeWidth={2.5} /> <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.home.challenges}</span>
+                                                </div>
+                                                <div className="w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
+                                                <div className="flex items-center gap-1 font-bold text-base">
+                                                    <div className="flex -space-x-1">
+                                                        <ArrowDown className="text-red-500" size={16} strokeWidth={3} />
+                                                        <ArrowUp className="text-green-500" size={16} strokeWidth={3} />
+                                                    </div> 
+                                                    <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.home.subs}</span>
+                                                </div>
+                                            </div>
 
-                                            <div className="text-left text-gray-500 font-medium">Timeouts</div>
-                                            <div className="bg-gray-100 dark:bg-slate-700 rounded px-1">{stats.home.timeouts}</div>
-                                            <div className="bg-gray-100 dark:bg-slate-700 rounded px-1">{stats.away.timeouts}</div>
+                                            {/* Score */}
+                                            <div className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg min-w-[80px] ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
+                                                <span className={`font-bold text-lg px-2 rounded-md border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500 text-gray-100' : 'bg-white border-gray-200 text-gray-600'}`}>
+                                                    {stats.score.split('-')[0] || 0}
+                                                </span>
+                                                <span className={`font-bold text-gray-400`}>:</span>
+                                                <span className={`font-bold text-lg px-2 rounded-md border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500 text-gray-100' : 'bg-white border-gray-200 text-gray-600'}`}>
+                                                    {stats.score.split('-')[1] || 0}
+                                                </span>
+                                            </div>
 
-                                            <div className="text-left text-gray-500 font-medium">Challenges</div>
-                                            <div className="bg-gray-100 dark:bg-slate-700 rounded px-1">{stats.home.challenges}</div>
-                                            <div className="bg-gray-100 dark:bg-slate-700 rounded px-1">{stats.away.challenges}</div>
-
-                                            <div className="text-left text-gray-500 font-medium">Subs</div>
-                                            <div className="bg-gray-100 dark:bg-slate-700 rounded px-1">{stats.home.subs}</div>
-                                            <div className="bg-gray-100 dark:bg-slate-700 rounded px-1">{stats.away.subs}</div>
+                                            {/* Away Stats */}
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-1.5 font-bold text-base">
+                                                    <Timer className="text-blue-400" size={20} strokeWidth={2.5} /> <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.away.timeouts}</span>
+                                                </div>
+                                                <div className="w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
+                                                <div className="flex items-center gap-1.5 font-bold text-base">
+                                                    <Video className="text-blue-400" size={20} strokeWidth={2.5} /> <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.away.challenges}</span>
+                                                </div>
+                                                <div className="w-px h-5 bg-gray-200 dark:bg-gray-700"></div>
+                                                <div className="flex items-center gap-1 font-bold text-base">
+                                                    <div className="flex -space-x-1">
+                                                        <ArrowDown className="text-red-500" size={16} strokeWidth={3} />
+                                                        <ArrowUp className="text-green-500" size={16} strokeWidth={3} />
+                                                    </div> 
+                                                    <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.away.subs}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
