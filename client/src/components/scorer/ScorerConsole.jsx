@@ -1451,14 +1451,16 @@ export default function ScorerConsole() {
                                             {setEvents.map((ev) => {
                                                 const isHome = ev.metadata?.team === matchData.teamHome;
                                                 const isAway = ev.metadata?.team === matchData.teamAway;
-                                                let borderColor = 'border-gray-200 dark:border-gray-700';
-                                                if (isHome) borderColor = 'border-indigo-500';
-                                                else if (isAway) borderColor = 'border-rose-500';
+                                                const borderLeftColor = isHome 
+                                                    ? teamColors.home 
+                                                    : isAway 
+                                                        ? teamColors.away 
+                                                        : (isDarkMode ? '#475569' : '#e5e7eb');
 
                                                 const [homeScore, awayScore] = ev.score.split('-');
 
                                                 return (
-                                                    <div key={ev.id} className={`p-2 rounded-md border-l-4 ${borderColor} shadow-sm transition-colors ${isDarkMode ? 'bg-slate-700/40' : 'bg-white'}`}>
+                                                    <div key={ev.id} className={`p-2 rounded-md border-l-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-700/40' : 'bg-white'}`} style={{ borderLeftColor }}>
                                                         <div className="flex items-center justify-between gap-2">
                                                             {/* Left side: Score + Description */}
                                                             <div className="flex items-center gap-2">
