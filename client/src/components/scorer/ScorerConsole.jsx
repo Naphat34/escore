@@ -1147,7 +1147,7 @@ export default function ScorerConsole() {
                     {/* SCOREBOARD */}
                     <div className="absolute top-14 left-0 right-0 z-30 flex justify-center items-center gap-3 pointer-events-none px-4">
                         <div className="flex items-center gap-2">
-                            <div className={`backdrop-blur-md border rounded-xl py-3 px-5 text-right w-[30vw] max-w-[400px] flex items-center justify-end gap-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
+                            <div className={`backdrop-blur-md border rounded-xl py-3 px-4 text-right max-w-[320px] flex items-center justify-end gap-3 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
                                 <div className={`text-3xl font-bold px-2 py-1 rounded border shrink-0 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getLeftTeam().sets}</div>
                                 <div className="font-bold text-2xl truncate min-w-0" style={{ color: getLeftTeam().color }}>{getLeftTeam().name}</div>
                             </div>
@@ -1173,7 +1173,7 @@ export default function ScorerConsole() {
                             <div className={`border rounded-xl p-2 w-24 h-20 flex items-center justify-center shadow-sm shrink-0 transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-200'}`}>
                                 <div className="text-5xl font-black" style={{ color: getRightTeam().color }}>{getRightTeam().score}</div>
                             </div>
-                            <div className={`backdrop-blur-md border rounded-xl py-3 px-5 text-left w-[30vw] max-w-[400px] flex items-center justify-start gap-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
+                            <div className={`backdrop-blur-md border rounded-xl py-3 px-4 text-left max-w-[320px] flex items-center justify-start gap-3 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
                                 <div className="font-bold text-2xl truncate min-w-0" style={{ color: getRightTeam().color }}>{getRightTeam().name}</div>
                                 <div className={`text-3xl font-bold px-2 py-1 rounded border shrink-0 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getRightTeam().sets}</div>
                             </div>
