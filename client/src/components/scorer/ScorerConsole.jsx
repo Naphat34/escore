@@ -1331,7 +1331,7 @@ export default function ScorerConsole() {
                 </aside>
 
                 {/* NEW: Match History Sidebar */}
-                <aside className={`w-80 border-l hidden xl:flex flex-col z-10 shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
+                <aside className={`w-80 ml-4 border-l hidden xl:flex flex-col z-10 shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
                     <div className={`p-4 border-b font-bold flex items-center gap-2 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-700 text-gray-100' : 'bg-gray-50 border-gray-200 text-gray-800'}`}>
                         <History className="text-indigo-600" size={20} /> Match History
                     </div>
