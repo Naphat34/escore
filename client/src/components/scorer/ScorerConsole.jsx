@@ -1480,13 +1480,17 @@ export default function ScorerConsole() {
                                                                 <div className={`text-xs font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                                                                     {ev.metadata && (ev.metadata.type === 'SUBSTITUTION' || ev.metadata.type === 'LIBERO') ? (
                                                                         <div className="flex flex-wrap gap-1 items-center">
-                                                                            <span className="text-green-600 dark:text-green-400">IN {ev.metadata.in}</span>
+                                                                            <span className="text-green-600 dark:text-green-400 font-bold">IN {ev.metadata.in}</span>
                                                                             <span className="text-gray-400">/</span>
-                                                                            <span className="text-red-600 dark:text-red-400">OUT {ev.metadata.out}</span>
-                                                                            {ev.metadata.type === 'LIBERO' && <span className="text-[9px] bg-blue-100 text-blue-800 px-1 rounded ml-1">Libero</span>}
+                                                                            <span className="text-red-600 dark:text-red-400 font-bold">OUT {ev.metadata.out}</span>
+                                                                            {ev.metadata.type === 'LIBERO' && <span className="text-[9px] bg-blue-100 text-blue-800 px-1 rounded">Libero</span>}
+                                                                            <span 
+                                                                                className="px-1.5 py-0.5 rounded text-white font-bold text-[10px] ml-auto shadow-sm"
+                                                                                style={{ backgroundColor: isHome ? teamColors.home : teamColors.away }}
+                                                                            >
+                                                                                {ev.metadata.team}
+                                                                            </span>
                                                                         </div>
-                                                                    ) : ev.metadata?.type === 'POINT' ? (
-                                                                        ev.description
                                                                     ) : ev.metadata?.team ? (
                                                                         (() => {
                                                                             const teamName = ev.metadata.team;
@@ -1495,7 +1499,12 @@ export default function ScorerConsole() {
                                                                             return (
                                                                                 <span>
                                                                                     {parts[0]}
-                                                                                    <span style={{ color: teamColor }}>{teamName}</span>
+                                                                                    <span 
+                                                                                        className="px-2 py-0.5 rounded text-white font-bold mx-1 whitespace-nowrap shadow-sm" 
+                                                                                        style={{ backgroundColor: teamColor }}
+                                                                                    >
+                                                                                        {teamName}
+                                                                                    </span>
                                                                                     {parts[1]}
                                                                                 </span>
                                                                             );
