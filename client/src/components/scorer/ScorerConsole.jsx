@@ -1472,15 +1472,21 @@ export default function ScorerConsole() {
                                                     <div key={ev.id} className={`p-2 rounded-md border-l-4 ${borderColor} shadow-sm transition-colors ${isDarkMode ? 'bg-slate-700/40' : 'bg-white'}`}>
                                                         <div className="flex items-center justify-between gap-2">
                                                             {/* Left side: Score + Description */}
-                                                            <div className="flex items-center gap-3">
+                                                            <div className="flex items-center gap-2">
                                                                 {/* Score */}
-                                                                <div className="flex items-center gap-1 font-mono font-bold text-base">
-                                                                    <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}  style={{ color: teamColors.home }}>{homeScore}</span>
-                                                                    <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>:</span>
-                                                                    <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-rose-900/50 text-rose-300' : 'bg-rose-100 text-rose-700'}`} style={{ color: teamColors.away }}>{awayScore}</span>
+                                                                <div className="flex items-center gap-0.5 font-mono font-bold text-xs shrink-0">
+                                                                    <span 
+                                                                        className={`px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-600 border border-slate-500' : 'bg-gray-50 border border-gray-200'}`}
+                                                                        style={{ color: teamColors.home }}
+                                                                    >{homeScore}</span>
+                                                                    <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>:</span>
+                                                                    <span 
+                                                                        className={`px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-600 border border-slate-500' : 'bg-gray-50 border border-gray-200'}`}
+                                                                        style={{ color: teamColors.away }}
+                                                                    >{awayScore}</span>
                                                                 </div>
                                                                 {/* Description */}
-                                                                <div className={`text-xs font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                                                                <div className={`text-xs font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                                                                     {ev.metadata && (ev.metadata.type === 'SUBSTITUTION' || ev.metadata.type === 'LIBERO') ? (
                                                                         <div className="flex flex-wrap gap-1 items-center">
                                                                             <span className="text-green-600 dark:text-green-400">IN {ev.metadata.in}</span>
@@ -1488,6 +1494,10 @@ export default function ScorerConsole() {
                                                                             <span className="text-red-600 dark:text-red-400">OUT {ev.metadata.out}</span>
                                                                             {ev.metadata.type === 'LIBERO' && <span className="text-[9px] bg-blue-100 text-blue-800 px-1 rounded ml-1">Libero</span>}
                                                                         </div>
+                                                                    ) : ev.metadata?.type === 'POINT' ? (
+                                                                        <span style={{ color: isHome ? teamColors.home : teamColors.away }}>
+                                                                            {ev.description}
+                                                                        </span>
                                                                     ) : (
                                                                         ev.description
                                                                     )}
