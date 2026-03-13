@@ -20,12 +20,13 @@ const PlayerListItem = ({ player, label, align, isActive, isLibero, teamColor, i
     const lastSwapClass = isDarkMode ? 'ring-2 ring-offset-2 ring-offset-slate-800 ring-yellow-400' : 'ring-2 ring-offset-2 ring-offset-white ring-yellow-400';
     const nameActiveClass = isDarkMode ? 'text-slate-200' : 'text-gray-800';
     const nameInactiveClass = isDarkMode ? 'text-slate-500' : 'text-gray-500';
+    const numberActiveClass = isDarkMode ? 'bg-slate-700 text-white' : 'bg-gray-800 text-white';
     const captainClass = isDarkMode ? 'bg-yellow-500 text-black' : 'bg-yellow-400 text-yellow-900';
     const labelClass = isDarkMode ? 'text-slate-500 bg-slate-900' : 'text-gray-500 bg-gray-100';
 
     return (
         <div className={`flex items-center gap-3 p-2 rounded border border-transparent transition-all ${isActive ? activeClass : inactiveClass} ${isRight ? 'flex-row-reverse text-right' : 'flex-row text-left'} ${isLastSwap ? lastSwapClass : ''}`}>
-            <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm shrink-0 ${isSwappedLibero ? swappedLiberoClass : (isLibero ? liberoClass : (isActive && player ? teamColor + ' text-white' : numberInactiveClass))}`}>
+            <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm shrink-0 ${isSwappedLibero ? swappedLiberoClass : (isLibero ? liberoClass : (isActive && player ? numberActiveClass : numberInactiveClass))}`}>
                 {player ? player.number : '-'}
             </div>
             <div className="flex-1 min-w-0 flex flex-col justify-center">
