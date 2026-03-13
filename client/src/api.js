@@ -103,6 +103,11 @@ export const api = {
   getTeamDetails: (id) => apiClient.get(`/admin/teams/${id}`),
   getAllPlayers: () => apiClient.get('/admin/players'),
 
+  // Admin Player Management
+  addPlayerAdmin: (teamId, data) => apiClient.post(`/admin/teams/${teamId}/players`, data),
+  updatePlayerAdmin: (id, data) => apiClient.put(`/admin/players/${id}`, data),
+  deletePlayerAdmin: (id) => apiClient.delete(`/admin/players/${id}`),
+
   // --- ✅ Scorer System (ส่วนที่เพิ่มใหม่) ---
   // ใช้ route /scorer/match/... ตามที่ตั้งค่าไว้ใน backend
   getMatchById: (id) => apiClient.get(`/scorer/match/${id}`),
@@ -110,6 +115,8 @@ export const api = {
   getMatchLineup: (matchId) => apiClient.get(`/scorer/match/${matchId}/lineup`,),
   saveMatchEvent: (matchId, data) => apiClient.post(`/scorer/match/${matchId}/event`, data),
   getMatchEvents: (matchId) => apiClient.get(`/scorer/match/${matchId}/events`),
+  updateLiveState: (matchId, state) => apiClient.put(`/scorer/match/${matchId}/state`, { state }),
+  getLiveState: (matchId) => apiClient.get(`/scorer/match/${matchId}/state`),
 
   // --- Officials (Referees/Scorers/LineJudges) ---
   getAllReferees: () => apiClient.get('/admin/referees'),

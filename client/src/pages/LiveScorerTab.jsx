@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api';
-import { useNavigate } from 'react-router-dom';
-import { Swords, Calendar, MapPin, PlayCircle, Trophy, X, Save, User, CheckCircle, Flag, FileText } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Swords, Calendar, MapPin, PlayCircle, Trophy, X, Save, User, CheckCircle, Flag, FileText, Monitor } from 'lucide-react';
 import { EmptyState } from './AdminShared';
 
 export default function LiveScorerTab({ darkMode }) {
@@ -327,12 +327,22 @@ export default function LiveScorerTab({ darkMode }) {
                                         <div className="text-lg font-bold flex items-center gap-3"><span className={m.home_set_score > m.away_set_score ? 'text-green-600 dark:text-green-400' : ''}>{m.home_team}</span><span className="text-gray-400 text-sm">VS</span><span className={m.away_set_score > m.home_set_score ? 'text-green-600 dark:text-green-400' : ''}>{m.away_team}</span></div>
                                         <div className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-4 mt-1"><span className="flex items-center gap-1"><Calendar size={14} /> {m.start_time ? new Date(m.start_time).toLocaleString() : 'TBD'}</span><span className="flex items-center gap-1"><MapPin size={14} /> {m.location || '-'}</span></div>
                                     </div>
-                                    <button
-                                        onClick={() => handleOpenConsoleClick(m)}
-                                        className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all transform active:scale-95 ${isCompleted ? 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-400' : 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-orange-500/30'}`}
-                                    >
-                                        <PlayCircle size={20} /> {isCompleted ? 'View Console' : 'Open Console'}
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        <Link
+                                            to={`/match/${m.id}/referee`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`px-4 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all transform active:scale-95 bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-500`}
+                                        >
+                                            <Monitor size={20} />
+                                        </Link>
+                                        <button
+                                            onClick={() => handleOpenConsoleClick(m)}
+                                            className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all transform active:scale-95 ${isCompleted ? 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-400' : 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-orange-500/30'}`}
+                                        >
+                                            <PlayCircle size={20} /> {isCompleted ? 'View Console' : 'Open Console'}
+                                        </button>
+                                    </div>
                                 </div>
                             );
                         })

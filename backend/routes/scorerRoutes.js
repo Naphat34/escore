@@ -9,6 +9,9 @@ console.log("Scorer Controller Loaded:", scorerController);
 if (!scorerController.saveMatchEvent) {
     console.error("❌ ERROR: saveMatchEvent function is missing in scorerController!");
 }
+if (!scorerController.updateLiveState) {
+    console.error("❌ ERROR: updateLiveState function is missing in scorerController! (Check scorerController.js export)");
+}
 // ---------------------
 
 // GET Data
@@ -20,6 +23,10 @@ router.get('/match/:matchId/lineup', scorerController.getMatchLineup);
 // เช็คให้แน่ใจว่าชื่อฟังก์ชันตรงกับใน Controller (saveMatchEvent)
 router.post('/match/:matchId/event', scorerController.saveMatchEvent);
 router.post('/match/:matchId/lineup', scorerController.saveLineup);
+
+// Live State Sync (สำหรับ Real-time Scoreboard)
+router.put('/match/:matchId/state', scorerController.updateLiveState);
+router.get('/match/:matchId/state', scorerController.getLiveState);
 
 // หมายเหตุ: URL จะเป็น /api/scorer/referees (เพราะไฟล์นี้ถูก mount ที่ /api/scorer)
 router.get('/referees', scorerController.getAllReferees);

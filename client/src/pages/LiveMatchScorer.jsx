@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
     User, Activity, CheckCircle, XCircle, PlayCircle, RotateCcw, 
-    ArrowRightLeft, Shield, Clock, AlertTriangle, FileText 
+    ArrowRightLeft, Clock, AlertTriangle, FileText 
 } from 'lucide-react';
 import client, { api } from '../api'; 
 import Swal from 'sweetalert2';
+import LineupSelector from '../components/LineupSelector';
 
 // ============================================================================
 // HELPER FUNCTIONS - Volleyball Logic
@@ -25,143 +26,22 @@ const isMatchOver = (homeSets, awaySets, maxSets) => {
     return homeSets >= setsToWin || awaySets >= setsToWin;
 };
 
-// ============================================================================
-// COMPONENT: Lineup Selector
-// ============================================================================
+const SKILLS = [
+    { code: 'S', name: 'Serve', icon: '🏐' },
+    { code: 'R', name: 'Receive', icon: '📥' },
+    { code: 'A', name: 'Attack', icon: '⚡' },
+    { code: 'B', name: 'Block', icon: '🧱' },
+    { code: 'D', name: 'Dig', icon: '🛡️' },
+    { code: 'E', name: 'Set', icon: '🤲' },
+];
 
-const LineupSelector = ({ teamName, players, onConfirm }) => {
-    const [selectedStarters, setSelectedStarters] = useState([]);
-    const [selectedLibero, setSelectedLibero] = useState(null);
-
-    // Auto-select Libero based on position 'L'
-    useEffect(() => {
-        const liberos = players.filter(p => p.position === 'L');
-        if (liberos.length > 0 && !selectedLibero) {
-            setSelectedLibero(liberos[0]);
-        }
-    }, [players, selectedLibero]);
-
-    const toggleStarter = (player) => {
-        // Deselect Libero if selected as starter
-        if (selectedLibero?.id === player.id) {
-            setSelectedLibero(null);
-        }
-        
-        if (selectedStarters.find(p => p.id === player.id)) {
-            setSelectedStarters(selectedStarters.filter(p => p.id !== player.id));
-        } else if (selectedStarters.length < 6) {
-            setSelectedStarters([...selectedStarters, player]);
-        }
-    };
-
-    const selectLibero = (player) => {
-        if (selectedStarters.find(p => p.id === player.id)) return;
-        setSelectedLibero(selectedLibero?.id === player.id ? null : player);
-    };
-
-    return (
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700 shadow-xl">
-            <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
-                <Shield className="text-indigo-400" size={24} />
-                {teamName}
-            </h3>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                {players.map(player => {
-                    const isStarter = selectedStarters.find(s => s.id === player.id);
-                    const isLibero = selectedLibero?.id === player.id;
-                    const isLiberoPos = player.position === 'L';
-                    
-                    let containerClass = 'p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105';
-                    
-                    if (isStarter) {
-                        containerClass += ' bg-gradient-to-br from-indigo-600 to-indigo-700 border-indigo-400 shadow-lg shadow-indigo-500/50';
-                    } else if (isLibero) {
-                        containerClass += ' bg-gradient-to-br from-yellow-600 to-yellow-700 border-yellow-400 shadow-lg shadow-yellow-500/50';
-                    } else {
-                        containerClass += ' bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-gray-500';
-                    }
-                    
-                    if (isLiberoPos) {
-                        containerClass += ' ring-2 ring-yellow-500/40';
-                    }
-
-                    return (
-                        <div key={player.id} className={containerClass}>
-                            <div className="flex justify-between items-start mb-3">
-                                <span className="text-2xl font-black text-white">#{player.number}</span>
-                                <div className="flex items-center gap-1">
-                                    <span className="text-sm text-gray-200 font-medium truncate max-w-[100px]">
-                                        {player.name}
-                                    </span>
-                                    {isLiberoPos && (
-                                        <span className="text-[9px] bg-yellow-400 text-black px-1.5 py-0.5 rounded-full font-bold">
-                                            L
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                            
-                            <div className="flex gap-2">
-                                <button 
-                                    onClick={() => toggleStarter(player)} 
-                                    disabled={isLibero}
-                                    className={`flex-1 text-xs py-2 rounded-lg font-bold transition-all ${
-                                        isStarter 
-                                            ? 'bg-white text-indigo-700 shadow-md' 
-                                            : 'bg-gray-600/50 text-gray-300 hover:bg-gray-600'
-                                    } disabled:opacity-40 disabled:cursor-not-allowed`}
-                                >
-                                    {isStarter ? '✓ Starter' : 'Starter'}
-                                </button>
-                                <button 
-                                    onClick={() => selectLibero(player)} 
-                                    disabled={isStarter}
-                                    className={`flex-1 text-xs py-2 rounded-lg font-bold transition-all ${
-                                        isLibero 
-                                            ? 'bg-white text-yellow-700 shadow-md' 
-                                            : 'bg-gray-600/50 text-gray-300 hover:bg-gray-600'
-                                    } disabled:opacity-40 disabled:cursor-not-allowed`}
-                                >
-                                    {isLibero ? '✓ Libero' : 'Libero'}
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-            
-            <div className="flex justify-between items-center bg-gray-900/50 rounded-xl p-4 border border-gray-700">
-                <div className="flex gap-6 text-sm">
-                    <span className="text-gray-400">
-                        Starters: <span className={`font-bold ${
-                            selectedStarters.length === 6 ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                            {selectedStarters.length}/6
-                        </span>
-                    </span>
-                    <span className="text-gray-400">
-                        Libero: <span className="text-yellow-400 font-bold">
-                            {selectedLibero ? `#${selectedLibero.number}` : 'None'}
-                        </span>
-                    </span>
-                </div>
-                
-                <button 
-                    onClick={() => onConfirm(selectedStarters, selectedLibero)} 
-                    disabled={selectedStarters.length !== 6}
-                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl 
-                             disabled:from-gray-700 disabled:to-gray-700 disabled:text-gray-500 
-                             disabled:cursor-not-allowed font-bold shadow-lg hover:shadow-green-500/50 
-                             transition-all duration-200 flex items-center gap-2"
-                >
-                    <CheckCircle size={18} />
-                    Confirm {teamName}
-                </button>
-            </div>
-        </div>
-    );
-};
+const GRADES = [
+    { code: '#', name: 'Point / Ace / Kill', color: 'bg-gradient-to-r from-green-600 to-green-700', score: true },
+    { code: '+', name: 'Good', color: 'bg-gradient-to-r from-blue-600 to-blue-700', score: false },
+    { code: '!', name: 'Continue / In Play', color: 'bg-gradient-to-r from-yellow-600 to-yellow-700', score: false },
+    { code: '-', name: 'Poor', color: 'bg-gradient-to-r from-orange-600 to-orange-700', score: false },
+    { code: '=', name: 'Error / Fault', color: 'bg-gradient-to-r from-red-600 to-red-700', score: true, opponentScore: true },
+];
 
 // ============================================================================
 // COMPONENT: Player Button
@@ -420,25 +300,45 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     const [history, setHistory] = useState([]);
 
     // ------------------------------------------------------------------------
-    // CONSTANTS
+    // LOCAL STORAGE SYNC FOR REFEREE VIEW
     // ------------------------------------------------------------------------
-    
-    const SKILLS = [
-        { code: 'S', name: 'Serve', icon: '🏐' },
-        { code: 'R', name: 'Receive', icon: '📥' },
-        { code: 'A', name: 'Attack', icon: '⚡' },
-        { code: 'B', name: 'Block', icon: '🧱' },
-        { code: 'D', name: 'Dig', icon: '🛡️' },
-        { code: 'E', name: 'Set', icon: '🤲' },
-    ];
+    useEffect(() => {
+        const syncData = () => {
+            if (!match?.id) return;
 
-    const GRADES = [
-        { code: '#', name: 'Point / Ace / Kill', color: 'bg-gradient-to-r from-green-600 to-green-700', score: true },
-        { code: '+', name: 'Good', color: 'bg-gradient-to-r from-blue-600 to-blue-700', score: false },
-        { code: '!', name: 'Continue / In Play', color: 'bg-gradient-to-r from-yellow-600 to-yellow-700', score: false },
-        { code: '-', name: 'Poor', color: 'bg-gradient-to-r from-orange-600 to-orange-700', score: false },
-        { code: '=', name: 'Error / Fault', color: 'bg-gradient-to-r from-red-600 to-red-700', score: true, opponentScore: true },
-    ];
+            const matchId = match.id;
+
+            // Helper to set item
+            const setItem = (key, value) => {
+                try {
+                    localStorage.setItem(`match_${matchId}_${key}`, JSON.stringify(value));
+                } catch (e) {
+                    console.error(`Failed to save ${key} to localStorage`, e);
+                }
+            };
+
+            setItem('matchData', {
+                teamHome: matchData.home_team,
+                teamAway: matchData.away_team,
+                currentSet: currentSet,
+            });
+            setItem('score', pointScore);
+            setItem('setsWon', setWins);
+            setItem('timeouts', timeouts);
+            setItem('substitutions', subCounts);
+            setItem('servingTeam', servingTeam);
+            setItem('isHomeLeft', isHomeLeft);
+            setItem('homeLineup', homeRotation);
+            setItem('awayLineup', awayRotation);
+            setItem('homeLiberos', { l1: homeLibero, l2: null });
+            setItem('awayLiberos', { l1: awayLibero, l2: null });
+        };
+
+        syncData();
+    }, [
+        match, matchData, currentSet, pointScore, setWins, timeouts, subCounts,
+        servingTeam, isHomeLeft, homeRotation, awayRotation, homeLibero, awayLibero
+    ]);
 
     // ------------------------------------------------------------------------
     // INITIAL DATA LOADING
@@ -541,49 +441,36 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     // LINEUP HANDLERS
     // ------------------------------------------------------------------------
     
-    const handleHomeLineup = (starters, libero) => {
-        console.log("Home lineup confirmed:", { starters, libero });
-
-        client.post('/match-data/lineup', {
-            match_id: matchData.id,
-            team_id: matchData.home_team_id,
-            set_number: currentSet,
-            starters: starters.map(p => p.id),
-            libero_id: libero?.id || null
-        }).catch(err => console.error("Error saving home lineup", err));
-
-        setHomeStarters(starters);
-        setHomeRotation(starters);
-        setHomeLibero(libero);
-        setHomeSubs(homePlayers.filter(p => 
-            !starters.find(s => s.id === p.id) && p.id !== libero?.id
-        ));
-        setHomeLineupConfirmed(true);
+    const handleLineupSubmit = (teamType, starters, libero) => {
+        const isHome = teamType === 'home';
+        const teamId = isHome ? matchData.home_team_id : matchData.away_team_id;
         
-        checkLineupComplete(true, awayLineupConfirmed);
+        api.saveLineup(matchData.id, {
+            team_id: teamId,
+            set_number: currentSet,
+            player_positions: starters.map(p => p.id),
+            libero_id: libero?.id || null
+        }).catch(err => console.error(`Error saving ${teamType} lineup`, err));
+
+        if (isHome) {
+            setHomeStarters(starters);
+            setHomeRotation(starters);
+            setHomeLibero(libero);
+            setHomeSubs(homePlayers.filter(p => !starters.find(s => s.id === p.id) && p.id !== libero?.id));
+            setHomeLineupConfirmed(true);
+            checkLineupComplete(true, awayLineupConfirmed);
+        } else {
+            setAwayStarters(starters);
+            setAwayRotation(starters);
+            setAwayLibero(libero);
+            setAwaySubs(awayPlayers.filter(p => !starters.find(s => s.id === p.id) && p.id !== libero?.id));
+            setAwayLineupConfirmed(true);
+            checkLineupComplete(homeLineupConfirmed, true);
+        }
     };
 
-    const handleAwayLineup = (starters, libero) => {
-        console.log("Away lineup confirmed:", { starters, libero });
-
-        client.post('/match-data/lineup', {
-            match_id: matchData.id,
-            team_id: matchData.away_team_id,
-            set_number: currentSet,
-            starters: starters.map(p => p.id),
-            libero_id: libero?.id || null
-        }).catch(err => console.error("Error saving away lineup", err));
-
-        setAwayStarters(starters);
-        setAwayRotation(starters);
-        setAwayLibero(libero);
-        setAwaySubs(awayPlayers.filter(p => 
-            !starters.find(s => s.id === p.id) && p.id !== libero?.id
-        ));
-        setAwayLineupConfirmed(true);
-        
-        checkLineupComplete(homeLineupConfirmed, true);
-    };
+    const handleHomeLineup = (starters, libero) => handleLineupSubmit('home', starters, libero);
+    const handleAwayLineup = (starters, libero) => handleLineupSubmit('away', starters, libero);
 
     const checkLineupComplete = (homeDone, awayDone) => {
         if (homeDone && awayDone) {
@@ -596,16 +483,16 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     // ------------------------------------------------------------------------
     
     const handleRotate = (teamToRotate) => {
-        const updateRotation = (prev) => {
-            const newRotation = [...prev.slice(1), prev[0]];
-            setServer(newRotation[0]);
-            return newRotation;
-        };
+        const rotateArray = (arr) => [...arr.slice(1), arr[0]];
 
         if (teamToRotate === 'home') {
-            setHomeRotation(updateRotation);
+            const newRot = rotateArray(homeRotation);
+            setHomeRotation(newRot);
+            setServer(newRot[0]);
         } else {
-            setAwayRotation(updateRotation);
+            const newRot = rotateArray(awayRotation);
+            setAwayRotation(newRot);
+            setServer(newRot[0]);
         }
     };
 
@@ -654,22 +541,36 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
         }
 
         // Log Action
+    const actionTeamId = selectedTeam === 'home' ? match.home_team_id : match.away_team_id;
+    const skillName = SKILLS.find(s => s.code === skill)?.name || 'Action';
+    const gradeName = GRADES.find(g => g.code === grade)?.name || 'Result';
+    const description = `${skillName} (${gradeName}) by #${player.number}`;
+
         logAction({
             match_id: match.id,
             set_number: currentSet,
-            team_id: winner === 'home' ? match.home_team_id : match.away_team_id,
+        // Log the team of the player who performed the action, not who won the point
+        team_id: actionTeamId,
             player_id: player?.id,
             skill,
             grade,
             score_home: newPointScore.home,
             score_away: newPointScore.away,
-            description: `Point to ${winner === 'home' ? matchData.home_team : matchData.away_team}`
+        description: description
         });
 
         resetSelection();
     };
 
     const handleSetEnd = (finalScore, maxSets, winner) => {
+        // 1. Save Set Result to DB
+        api.endSet(matchData.id, {
+            setNumber: currentSet,
+            homeScore: finalScore.home,
+            awayScore: finalScore.away,
+            duration: 0 // TODO: Track duration if needed
+        }).catch(err => console.error("Failed to save set result:", err));
+
         const newSetScores = [...setScores, finalScore];
         setSetScores(newSetScores);
 
@@ -711,8 +612,17 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     };
 
     const logAction = (payload) => {
-        client.post('/match-data/action', payload)
-            .catch(err => console.error("Error saving action", err));
+        api.saveMatchEvent(matchData.id, {
+            set_number: payload.set_number,
+            event_type: payload.skill, // Use skill code as event type
+            team_id: payload.team_id,
+            player_id: payload.player_id,
+            score_home: payload.score_home,
+            score_away: payload.score_away,
+            skill: payload.skill,
+            grade: payload.grade,
+            details: { description: payload.description }
+        }).catch(err => console.error("Error saving action", err));
 
         setActionLog(prev => [payload, ...prev]);
     };

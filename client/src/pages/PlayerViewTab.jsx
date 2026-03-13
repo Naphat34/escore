@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api';
-import { Users, Shield, User, Eye, X, CheckCircle, Briefcase } from 'lucide-react';
-import { Toast, EmptyState, DetailItem } from './AdminShared';
+import { Users, Shield, User, Eye, X, CheckCircle, Briefcase, Plus, Edit2, Trash2, Save } from 'lucide-react';
+import { Toast, EmptyState, DetailItem, Input, Button } from './AdminShared';
+import Swal from 'sweetalert2';
 
 export default function PlayerViewTab({ darkMode }) {
     const [competitions, setCompetitions] = useState([]);
@@ -17,6 +18,14 @@ export default function PlayerViewTab({ darkMode }) {
 
     const [selectedTeamId, setSelectedTeamId] = useState('');
     const [viewingPlayer, setViewingPlayer] = useState(null);
+
+    // Player Management State
+    const [isPlayerModalOpen, setIsPlayerModalOpen] = useState(false);
+    const [editingPlayerId, setEditingPlayerId] = useState(null);
+    const [playerForm, setPlayerForm] = useState({
+        number: '', first_name: '', last_name: '', nickname: '', position: 'OH',
+        height_cm: '', weight: '', birth_date: '', nationality: '', photo: '', gender: 'Male', is_captain: false
+    });
 
     // Initial Load
     useEffect(() => {
@@ -132,6 +141,57 @@ export default function PlayerViewTab({ darkMode }) {
         }
     };
 
+    // Handlers for Player Management
+    const handleAddPlayer = () => {
+        setEditingPlayerId(null);
+        setPlayerForm({
+            number: '', first_name: '', last_name: '', nickname: '', position: 'OH',
+            height_cm: '', weight: '', birth_date: '', nationality: '', photo: '', gender: 'Male', is_captain: false
+        });
+        setIsPlayerModalOpen(true);
+    };
+
+    const handleEditPlayer = (p) => {
+        setEditingPlayerId(p.id);
+        setPlayerForm({
+            number: p.number || '', first_name: p.first_name || '', last_name: p.last_name || '', nickname: p.nickname || '',
+            position: p.position || 'OH', height_cm: p.height_cm || '', weight: p.weight || '',
+            birth_date: p.birth_date ? p.birth_date.split('T')[0] : '', nationality: p.nationality || '',
+            photo: p.photo || '', gender: p.gender || 'Male', is_captain: p.is_captain || false
+        });
+        setIsPlayerModalOpen(true);
+    };
+
+    const handleDeletePlayer = async (id) => {
+        const result = await Swal.fire({
+            title: 'Are you sure?', text: "You won't be able to revert this!", icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await api.deletePlayerAdmin(id);
+                Toast.fire({ icon: 'success', title: 'Player deleted' });
+                fetchTeamData(selectedTeamId);
+            } catch (err) {
+                Toast.fire({ icon: 'error', title: 'Failed to delete player' });
+            }
+        }
+    };
+
+    const handlePlayerSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingPlayerId) await api.updatePlayerAdmin(editingPlayerId, playerForm);
+            else await api.addPlayerAdmin(selectedTeamId, playerForm);
+            Toast.fire({ icon: 'success', title: editingPlayerId ? 'Player updated' : 'Player added' });
+            setIsPlayerModalOpen(false);
+            fetchTeamData(selectedTeamId);
+        } catch (err) {
+            Toast.fire({ icon: 'error', title: err.response?.data?.error || 'Failed to save player' });
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Filters */}
@@ -193,6 +253,12 @@ export default function PlayerViewTab({ darkMode }) {
                 <div className={`px-6 py-4 border-b flex justify-between items-center ${darkMode ? 'bg-gray-700/50 border-gray-700' : 'bg-gray-50/50 border-gray-100'}`}>
                     <h3 className="font-bold flex items-center gap-2"><Users size={18} className="text-gray-400"/> Player List</h3>
                     <span className="text-xs font-bold px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">{teamPlayers.length} Players</span>
+                    {selectedTeamId && (
+                        <button onClick={handleAddPlayer} className="ml-auto flex items-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-sm">
+                            <Plus size={14} />
+                            Add Player
+                        </button>
+                    )}
                 </div>
 
                 {!selectedTeamId ? (
@@ -227,9 +293,17 @@ export default function PlayerViewTab({ darkMode }) {
                                         </td>
                                         <td className="px-6 py-4"><span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">{p.position}</span></td>
                                         <td className="px-6 py-4 text-right">
-                                            <button onClick={() => setViewingPlayer(p)} className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition" title="View Details">
-                                                <Eye size={18} />
-                                            </button>
+                                            <div className="flex justify-end gap-2">
+                                                <button onClick={() => setViewingPlayer(p)} className="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition" title="View Details">
+                                                    <Eye size={16} />
+                                                </button>
+                                                <button onClick={() => handleEditPlayer(p)} className="p-2 bg-yellow-50 text-yellow-600 hover:bg-yellow-100 rounded-lg transition" title="Edit">
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button onClick={() => handleDeletePlayer(p.id)} className="p-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition" title="Delete">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -348,6 +422,65 @@ export default function PlayerViewTab({ darkMode }) {
                             </div>
 
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal: Add/Edit Player */}
+            {isPlayerModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                    <div className={`w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+                        <div className="px-6 py-4 border-b flex justify-between items-center dark:border-gray-700">
+                            <h3 className="font-bold text-lg">{editingPlayerId ? 'Edit Player' : 'Add New Player'}</h3>
+                            <button onClick={() => setIsPlayerModalOpen(false)}><X size={20} /></button>
+                        </div>
+                        <form onSubmit={handlePlayerSubmit} className="p-6 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input label="Number" value={playerForm.number} onChange={e => setPlayerForm({...playerForm, number: e.target.value})} required darkMode={darkMode} />
+                                <div>
+                                    <label className={`block text-xs font-bold uppercase mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Position</label>
+                                    <select value={playerForm.position} onChange={e => setPlayerForm({...playerForm, position: e.target.value})} className={`w-full px-3 py-2 border rounded-lg outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}>
+                                        {['OH', 'OPP', 'S', 'MB', 'L'].map(p => <option key={p} value={p}>{p}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input label="First Name" value={playerForm.first_name} onChange={e => setPlayerForm({...playerForm, first_name: e.target.value})} required darkMode={darkMode} />
+                                <Input label="Last Name" value={playerForm.last_name} onChange={e => setPlayerForm({...playerForm, last_name: e.target.value})} required darkMode={darkMode} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input label="Nickname" value={playerForm.nickname} onChange={e => setPlayerForm({...playerForm, nickname: e.target.value})} darkMode={darkMode} />
+                                <Input label="Nationality" value={playerForm.nationality} onChange={e => setPlayerForm({...playerForm, nationality: e.target.value})} darkMode={darkMode} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input label="Height (cm)" type="number" value={playerForm.height_cm} onChange={e => setPlayerForm({...playerForm, height_cm: e.target.value})} darkMode={darkMode} />
+                                <Input label="Weight (kg)" type="number" value={playerForm.weight} onChange={e => setPlayerForm({...playerForm, weight: e.target.value})} darkMode={darkMode} />
+                            </div>
+                            <Input label="Date of Birth" type="date" value={playerForm.birth_date} onChange={e => setPlayerForm({...playerForm, birth_date: e.target.value})} required darkMode={darkMode} />
+                            <Input label="Photo URL" value={playerForm.photo} onChange={e => setPlayerForm({...playerForm, photo: e.target.value})} darkMode={darkMode} />
+                            
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <input type="checkbox" id="is_captain" checked={playerForm.is_captain} onChange={e => setPlayerForm({...playerForm, is_captain: e.target.checked})} className="w-4 h-4" />
+                                    <label htmlFor="is_captain" className={`text-sm font-bold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Captain</label>
+                                </div>
+                                <div className="flex gap-4 ml-auto">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="gender" value="Male" checked={playerForm.gender === 'Male'} onChange={e => setPlayerForm({...playerForm, gender: e.target.value})} />
+                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Male</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="gender" value="Female" checked={playerForm.gender === 'Female'} onChange={e => setPlayerForm({...playerForm, gender: e.target.value})} />
+                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Female</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="pt-2 flex justify-end gap-2">
+                                <button type="button" onClick={() => setIsPlayerModalOpen(false)} className="px-4 py-2 rounded bg-gray-200 text-gray-800 hover:bg-gray-300 font-bold">Cancel</button>
+                                <Button type="submit" label={editingPlayerId ? "Update" : "Add Player"} icon={<Save size={18}/>} />
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

@@ -117,7 +117,7 @@ export default function ScorerConsole() {
     const [setsWon, setSetsWon] = useState(() => loadState('setsWon', { home: 0, away: 0 }));
     const [completedSets, setCompletedSets] = useState(() => loadState('completedSets', []));
 
-    const [substitutions, setSubstitutions] = useState([]);
+    const [substitutions, setSubstitutions] = useState(() => loadState('substitutions', { home: 0, away: 0 }));
     
 
     // Lineup State
@@ -125,11 +125,14 @@ export default function ScorerConsole() {
     const [awayLineup, setAwayLineup] = useState(() => loadState('awayLineup', Array(6).fill(null)));
     const [lastSetHomeLineup, setLastSetHomeLineup] = useState(null);
     const [lastSetAwayLineup, setLastSetAwayLineup] = useState(null);
+    
 
     // Libero State
     const [lastSetHomeLiberos, setLastSetHomeLiberos] = useState(null);
     const [lastSetAwayLiberos, setLastSetAwayLiberos] = useState(null);
     const [liberoActionData, setLiberoActionData] = useState({ isOpen: false, team: null });
+
+    const [teamColors, setTeamColors] = useState(() => loadState('teamColors', { home: '#4f46e5', away: '#e11d48' }));
 
     // ✅ New State: Track Libero Swaps (Index -> Original Player)
     const [homeLiberoSwaps, setHomeLiberoSwaps] = useState(() => loadState('homeLiberoSwaps', {}));
@@ -140,8 +143,6 @@ export default function ScorerConsole() {
     const [liberoLogs, setLiberoLogs] = useState(() => loadState('liberoLogs', []));
 
     // Limits & Quotas
-
-    const [subCounts, setSubCounts] = useState(() => loadState('subCounts', { home: 0, away: 0 }));
     
     // Modals Control State
     const [showRosterModal, setShowRosterModal] = useState(true);
@@ -162,6 +163,7 @@ export default function ScorerConsole() {
 
     const [showTimeoutModal, setShowTimeoutModal] = useState(false);
     const [showTimeoutTimer, setShowTimeoutTimer] = useState(false);
+    const [timeoutStartTime, setTimeoutStartTime] = useState(null);
     const [activeAction, setActiveAction] = useState({ team: null, type: null });
 
     // Settings
@@ -170,8 +172,8 @@ export default function ScorerConsole() {
     // Roster Data
     const [masterHomeRoster, setMasterHomeRoster] = useState([]);
     const [masterAwayRoster, setMasterAwayRoster] = useState([]);
-    const [homeRoster, setHomeRoster] = useState([]); 
-    const [awayRoster, setAwayRoster] = useState([]); 
+    const [homeRoster, setHomeRoster] = useState(() => loadState('homeRoster', [])); 
+    const [awayRoster, setAwayRoster] = useState(() => loadState('awayRoster', [])); 
 
     // Timer
     const [matchDuration, setMatchDuration] = useState(() => loadState('matchDuration', 0));
@@ -196,6 +198,8 @@ export default function ScorerConsole() {
     // --- THEME STATE (Dark/Light Mode) ---
     const [isDarkMode, setIsDarkMode] = useState(() => {
         try {
+            // This part seems to be for a different feature (theme), 
+            // but it's good practice to keep error handling.
             const saved = localStorage.getItem('theme_mode');
             return saved ? JSON.parse(saved) : false;
         } catch (e) { return false; }
@@ -219,19 +223,60 @@ export default function ScorerConsole() {
         setActiveHistoryTab(matchData.currentSet);
     }, [matchData.currentSet]);
 
+    const debounceTimeoutRef = useRef(null);
+
     // --- EFFECT: SAVE STATE ---
     useEffect(() => {
-        const stateToSave = {
-            matchData, workflowStep, score, setsWon, completedSets, activeAction,
-            timeouts, challenges, subCounts, matchEvents, servingTeam, isHomeLeft, 
-            homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, 
-            history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap,
-            homeLiberoSwaps, awayLiberoSwaps
+        // Debounce to prevent spamming the server on rapid state changes
+        if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current);
+        }
+
+        debounceTimeoutRef.current = setTimeout(() => {
+            const stateForLocalStorage = {
+                matchData, workflowStep, score, setsWon, completedSets, activeAction,
+                timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, 
+                homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, 
+                history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap, teamColors,
+                homeLiberoSwaps, awayLiberoSwaps, showTimeoutTimer, timeoutStartTime
+            };
+
+            // 1. Save to localStorage for local persistence on refresh
+            Object.entries(stateForLocalStorage).forEach(([key, value]) => {
+                localStorage.setItem(`match_${matchId}_${key}`, JSON.stringify(value));
+            });
+
+            // 2. Save to backend for real-time sync with other devices
+            // Create a smaller object for the live state to avoid sending large data like 'history'
+            const liveStateForServer = {
+                matchData,
+                workflowStep,
+                score,
+                setsWon,
+                timeouts,
+                challenges,
+                substitutions,
+                servingTeam,
+                isHomeLeft,
+                homeLineup,
+                awayLineup,
+                homeLiberos,
+                awayLiberos,
+                teamColors,
+                showTimeoutTimer,
+                timeoutStartTime,
+                matchDuration,
+                isTimerRunning,
+            };
+            api.updateLiveState(matchId, liveStateForServer).catch(err => {
+                console.error("Failed to sync state to server:", err);
+            });
+        }, 500); // 500ms debounce delay
+
+        return () => {
+            clearTimeout(debounceTimeoutRef.current);
         };
-        Object.entries(stateToSave).forEach(([key, value]) => {
-            localStorage.setItem(`match_${matchId}_${key}`, JSON.stringify(value));
-        });
-    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, subCounts, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap]);
+    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors, showTimeoutTimer, timeoutStartTime]);
 
     // เก็บ ID ผู้เล่นที่ถูกเปลี่ยนตัวออกด้วยกรณีพิเศษ (บาดเจ็บ/ให้ออก) ห้ามลงเล่นทั้งนัด
     const [disqualifiedPlayers, setDisqualifiedPlayers] = useState(() => {
@@ -415,7 +460,7 @@ export default function ScorerConsole() {
             workflowStep,
             timeouts: { ...timeouts },
             challenges: { ...challenges },
-            subCounts: { ...subCounts },
+            substitutions: { ...substitutions },
             matchEvents: [...matchEvents],
             homeLiberoSwaps: { ...homeLiberoSwaps },
             awayLiberoSwaps: { ...awayLiberoSwaps },
@@ -515,7 +560,7 @@ export default function ScorerConsole() {
         setScore({ home: 0, away: 0 });
         setTimeouts({ home: 0, away: 0 });
         setChallenges({ home: 2, away: 2 });
-        setSubCounts({ home: 0, away: 0 });
+        setSubstitutions({ home: 0, away: 0 });
         setSubTracker({ // Reset substitution tracker
             home: { count: 0, positions: {}, usedPlayers: [] },
             away: { count: 0, positions: {}, usedPlayers: [] }
@@ -582,7 +627,7 @@ export default function ScorerConsole() {
                 if (lastState.workflowStep) setWorkflowStep(lastState.workflowStep);
                 if (lastState.timeouts) setTimeouts(lastState.timeouts);
                 if (lastState.challenges) setChallenges(lastState.challenges);
-                if (lastState.subCounts) setSubCounts(lastState.subCounts);
+                if (lastState.substitutions) setSubstitutions(lastState.substitutions);
                 if (lastState.matchEvents) setMatchEvents(lastState.matchEvents);
                 if (lastState.homeLiberoSwaps) setHomeLiberoSwaps(lastState.homeLiberoSwaps);
                 if (lastState.awayLiberoSwaps) setAwayLiberoSwaps(lastState.awayLiberoSwaps);
@@ -694,6 +739,7 @@ export default function ScorerConsole() {
             if (timeouts[team] >= 2) return alert("Timeout limit reached.");
             setTimeouts(prev => ({ ...prev, [team]: prev[team] + 1 }));
             saveEventToBackend('TIMEOUT', team);
+            setTimeoutStartTime(Date.now());
             setShowTimeoutTimer(true);
         }
         setShowTimeoutModal(false);
@@ -838,12 +884,12 @@ export default function ScorerConsole() {
 
     // Helper for UI
     const getLeftTeam = () => isHomeLeft 
-        ? { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: 'text-indigo-700', bg: 'bg-indigo-600', roster: homeRoster, lineup: homeLineup, liberos: homeLiberos, liberoSwaps: homeLiberoSwaps, lastLiberoSwap: lastLiberoSwap } 
-        : { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: 'text-rose-700', bg: 'bg-rose-600', roster: awayRoster, lineup: awayLineup, liberos: awayLiberos, liberoSwaps: awayLiberoSwaps, lastLiberoSwap: lastLiberoSwap };
+        ? { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: teamColors.home, bg: teamColors.home, roster: homeRoster, lineup: homeLineup, liberos: homeLiberos, liberoSwaps: homeLiberoSwaps, lastLiberoSwap: lastLiberoSwap } 
+        : { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: teamColors.away, bg: teamColors.away, roster: awayRoster, lineup: awayLineup, liberos: awayLiberos, liberoSwaps: awayLiberoSwaps, lastLiberoSwap: lastLiberoSwap };
 
     const getRightTeam = () => isHomeLeft 
-        ? { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: 'text-rose-700', bg: 'bg-rose-600', roster: awayRoster, lineup: awayLineup, liberos: awayLiberos, liberoSwaps: awayLiberoSwaps, lastLiberoSwap: lastLiberoSwap } 
-        : { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: 'text-indigo-700', bg: 'bg-indigo-600', roster: homeRoster, lineup: homeLineup, liberos: homeLiberos, liberoSwaps: homeLiberoSwaps, lastLiberoSwap: lastLiberoSwap };
+        ? { name: matchData.teamAway, score: score.away, sets: setsWon.away, code: 'away', color: teamColors.away, bg: teamColors.away, roster: awayRoster, lineup: awayLineup, liberos: awayLiberos, liberoSwaps: awayLiberoSwaps, lastLiberoSwap: lastLiberoSwap } 
+        : { name: matchData.teamHome, score: score.home, sets: setsWon.home, code: 'home', color: teamColors.home, bg: teamColors.home, roster: homeRoster, lineup: homeLineup, liberos: homeLiberos, liberoSwaps: homeLiberoSwaps, lastLiberoSwap: lastLiberoSwap };
 
     // Opens picker for LineupModal
     const openPickerForLineup = (team, index) => {
@@ -1103,10 +1149,10 @@ export default function ScorerConsole() {
                         <div className="flex items-center gap-2">
                             <div className={`backdrop-blur-md border rounded-xl py-3 px-5 text-right min-w-[300px] flex items-center justify-end gap-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
                                 <div className={`text-3xl font-bold px-2 py-1 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getLeftTeam().sets}</div>
-                                <div className={`font-bold text-2xl truncate ${getLeftTeam().color}`}>{getLeftTeam().name}</div>
+                                <div className="font-bold text-2xl truncate" style={{ color: getLeftTeam().color }}>{getLeftTeam().name}</div>
                             </div>
                             <div className={`border rounded-xl p-2 w-24 h-20 flex items-center justify-center shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-200'}`}>
-                                <div className={`text-5xl font-black ${getLeftTeam().color}`}>{getLeftTeam().score}</div>
+                                <div className="text-5xl font-black" style={{ color: getLeftTeam().color }}>{getLeftTeam().score}</div>
                             </div>
                         </div>
 
@@ -1125,10 +1171,10 @@ export default function ScorerConsole() {
 
                         <div className="flex items-center gap-2">
                             <div className={`border rounded-xl p-2 w-24 h-20 flex items-center justify-center shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-200'}`}>
-                                <div className={`text-5xl font-black ${getRightTeam().color}`}>{getRightTeam().score}</div>
+                                <div className="text-5xl font-black" style={{ color: getRightTeam().color }}>{getRightTeam().score}</div>
                             </div>
                             <div className={`backdrop-blur-md border rounded-xl py-3 px-5 text-left min-w-[300px] flex items-center justify-start gap-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
-                                <div className={`font-bold text-2xl truncate ${getRightTeam().color}`}>{getRightTeam().name}</div>
+                                <div className="font-bold text-2xl truncate" style={{ color: getRightTeam().color }}>{getRightTeam().name}</div>
                                 <div className={`text-3xl font-bold px-2 py-1 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getRightTeam().sets}</div>
                             </div>
                         </div>
@@ -1172,6 +1218,16 @@ export default function ScorerConsole() {
                                 <div className="fixed inset-0 z-[60] bg-gray-900/50 backdrop-blur-sm flex items-center justify-center pointer-events-auto">
                                     <div className="bg-white p-8 rounded-3xl border border-gray-200 max-w-2xl w-full text-center space-y-8 shadow-2xl">
                                         <h2 className="text-3xl font-bold flex items-center justify-center gap-3 text-gray-800"><ArrowRightLeft className="text-yellow-500"/> Coin Toss & Sides</h2>
+                                        <div className="flex justify-around items-center px-4">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="font-bold text-gray-700">{matchData.teamHome} Color</span>
+                                                <input type="color" value={teamColors.home} onChange={(e) => setTeamColors({...teamColors, home: e.target.value})} className="w-16 h-10 cursor-pointer rounded border" />
+                                            </div>
+                                            <div className="flex flex-col items-center gap-2">
+                                                <span className="font-bold text-gray-700">{matchData.teamAway} Color</span>
+                                                <input type="color" value={teamColors.away} onChange={(e) => setTeamColors({...teamColors, away: e.target.value})} className="w-16 h-10 cursor-pointer rounded border" />
+                                            </div>
+                                        </div>
                                         <div className="flex gap-4 h-32">
                                             <button onClick={() => setIsHomeLeft(true)} className={`flex-1 border-2 rounded-xl flex items-center justify-center text-2xl font-bold transition-all ${isHomeLeft ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400'}`}>Left: {matchData.teamHome}</button>
                                             <div className="flex items-center"><RefreshCcw className="cursor-pointer hover:rotate-180 transition-transform text-gray-500" onClick={() => setIsHomeLeft(!isHomeLeft)}/></div>
@@ -1201,7 +1257,7 @@ export default function ScorerConsole() {
                             {workflowStep === 'SET_FINISHED' && (
                                 <div className="pointer-events-auto bg-black/90 p-10 rounded-3xl backdrop-blur-md border border-yellow-500/50 text-center">
                                     <h2 className="text-4xl font-black mb-4 text-yellow-500">SET {matchData.currentSet} FINISHED</h2>
-                                    <p className="text-2xl mb-8">Winner: {score.home > score.away ? matchData.teamHome : matchData.teamAway}</p>
+                                    <p className="text-2xl mb-8 text-yellow-500">Winner: {score.home > score.away ? matchData.teamHome : matchData.teamAway}</p>
                                     <button onClick={startNextSet} className="bg-white text-black px-8 py-4 rounded-xl font-bold text-xl hover:bg-gray-200">Start Set {matchData.currentSet + 1}</button>
                                 </div>
                             )}
@@ -1223,19 +1279,13 @@ export default function ScorerConsole() {
                             <div className="max-w-6xl mx-auto flex items-stretch gap-4 h-full">
                                 {/* Left Controls */}
                                 <div className="flex-1 flex items-stretch gap-2">
-                                    <button onClick={() => handlePoint(getLeftTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all ${getLeftTeam().bg} border-${getLeftTeam().code === 'home' ? 'indigo' : 'rose'}-800 disabled:opacity-50 disabled:cursor-not-allowed`}><span className="font-black text-3xl">POINT</span></button>
+                                    <button onClick={() => handlePoint(getLeftTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed`} style={{ backgroundColor: getLeftTeam().bg, borderColor: 'rgba(0,0,0,0.2)' }}><span className="font-black text-3xl">POINT</span></button>
                                     <div className="flex flex-col gap-1 w-24">
                                         <button onClick={() => handleActionSelect(getLeftTeam().code, 'TIMEOUT')} disabled={timeouts[getLeftTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold border ${secondaryBtnClass}`}>TIMEOUT ({2 - timeouts[getLeftTeam().code]})</button>
                                         <button 
-                                            onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')} 
-                                            className="flex items-center justify-center gap-2 p-3 bg-blue-900/40 hover:bg-blue-600 border border-blue-700 rounded-xl text-blue-200 hover:text-white transition-all shadow-sm"
-                                        >
-                                            <ArrowRightLeft size={18} /> 
-                                            <div className="flex flex-col items-center">
-                                                <span>Subs</span>
-                                                <span className="text-[10px] font-bold opacity-80">({substitutions.home}/6)</span>
-                                            </div>
-                                        </button>
+                                        onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')}
+                                        className={`flex-1 rounded text-xs font-bold text-blue-600 border ${secondaryBtnClass}`}
+                                    >SUBS ({substitutions[getLeftTeam().code]}/6)</button>
                                         <button onClick={() => { setChallengeData({ team: getLeftTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getLeftTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-yellow-600 border ${secondaryBtnClass}`}>CHALLENGE</button>
                                         <button onClick={() => { setSanctionTeam(getLeftTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-red-600 border ${secondaryBtnClass}`}>SANCTION</button>
                                     </div>
@@ -1261,19 +1311,13 @@ export default function ScorerConsole() {
                                     <div className="flex flex-col gap-1 w-24">
                                         <button onClick={() => handleActionSelect(getRightTeam().code, 'TIMEOUT')} disabled={timeouts[getRightTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold border ${secondaryBtnClass}`}>TIMEOUT ({2 - timeouts[getRightTeam().code]})</button>
                                         <button 
-                                            onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')} 
-                                            className="flex items-center justify-center gap-2 p-3 bg-red-900/40 hover:bg-red-600 border border-red-700 rounded-xl text-red-200 hover:text-white transition-all shadow-sm"
-                                        >
-                                            <ArrowRightLeft size={18} /> 
-                                            <div className="flex flex-col items-center">
-                                                <span>Subs</span>
-                                                <span className="text-[10px] font-bold opacity-80">({substitutions.away}/6)</span>
-                                            </div>
-                                        </button>
+                                            onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')}
+                                            className={`flex-1 rounded text-xs font-bold text-blue-600 border ${secondaryBtnClass}`}
+                                        >SUBS ({substitutions[getRightTeam().code]}/6)</button>
                                         <button onClick={() => { setChallengeData({ team: getRightTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getRightTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-yellow-600 border ${secondaryBtnClass}`}>CHALLENGE</button>
                                         <button onClick={() => { setSanctionTeam(getRightTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-red-600 border ${secondaryBtnClass}`}>SANCTION</button>
                                     </div>
-                                    <button onClick={() => handlePoint(getRightTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all ${getRightTeam().bg} border-${getRightTeam().code === 'home' ? 'indigo' : 'rose'}-800 disabled:opacity-50 disabled:cursor-not-allowed`}><span className="font-black text-3xl">POINT</span></button>
+                                    <button onClick={() => handlePoint(getRightTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed`} style={{ backgroundColor: getRightTeam().bg, borderColor: 'rgba(0,0,0,0.2)' }}><span className="font-black text-3xl">POINT</span></button>
                                 </div>
                             </div>
                         ) : (
@@ -1488,7 +1532,11 @@ export default function ScorerConsole() {
 
             <TimeoutTimerModal 
                 isOpen={showTimeoutTimer}
-                onClose={() => setShowTimeoutTimer(false)}
+                onClose={() => {
+                    setShowTimeoutTimer(false);
+                    setTimeoutStartTime(null);
+                }}
+                startTime={timeoutStartTime}
             />
 
             <LiberoModal 
