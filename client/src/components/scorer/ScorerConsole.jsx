@@ -384,7 +384,10 @@ export default function ScorerConsole() {
         let metadata = null;
         const teamName = teamCode === 'home' ? matchData.teamHome : (teamCode === 'away' ? matchData.teamAway : '');
         
-        if (eventType === 'POINT') description = `Point ${teamName}`;
+        if (eventType === 'POINT') {
+            description = `Point ${teamName}`;
+            metadata = { type: 'POINT', team: teamName };
+        }
         else if (eventType === 'TIMEOUT') {
             description = `Timeout ${teamName}`;
             metadata = { type: 'TIMEOUT', team: teamName };
@@ -1393,60 +1396,46 @@ export default function ScorerConsole() {
                                         <div className={`py-2 text-center border-b font-black text-xs ${isDarkMode ? 'border-slate-700 text-gray-200' : 'border-gray-200 text-gray-800'}`}>
                                             END SET {activeHistoryTab} <span className="text-gray-400 font-medium">- {setEvents.length > 0 ? setEvents[0].time : '--:--'}</span>
                                         </div>
-                                        <div className="flex items-center justify-between p-2">
+                                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1 px-2 py-1.5">
                                             {/* Home Stats */}
-                                            <div className="flex items-center gap-1.5">
-                                                <div className="flex items-center gap-1 font-bold text-sm">
-                                                    <Timer className="text-yellow-500" size={16} strokeWidth={2.5} /> <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.home.timeouts}</span>
+                                            <div className="flex items-center gap-1 justify-start">
+                                                <Timer className="text-yellow-500 shrink-0" size={12} strokeWidth={2.5} />
+                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.home.timeouts}</span>
+                                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5"></div>
+                                                <Video className="text-yellow-500 shrink-0" size={12} strokeWidth={2.5} />
+                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.home.challenges}</span>
+                                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5"></div>
+                                                <div className="flex -space-x-1 shrink-0">
+                                                    <ArrowDown className="text-red-500" size={11} strokeWidth={3} />
+                                                    <ArrowUp className="text-green-500" size={11} strokeWidth={3} />
                                                 </div>
-                                                <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-0.5"></div>
-                                                <div className="flex items-center gap-1 font-bold text-sm">
-                                                    <Video className="text-yellow-500" size={16} strokeWidth={2.5} /> <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.home.challenges}</span>
-                                                </div>
-                                                <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-0.5"></div>
-                                                <div className="flex items-center gap-0.5 font-bold text-sm">
-                                                    <div className="flex -space-x-1 shrink-0">
-                                                        <ArrowDown className="text-red-500" size={14} strokeWidth={3} />
-                                                        <ArrowUp className="text-green-500" size={14} strokeWidth={3} />
-                                                    </div> 
-                                                    <span className={`ml-0.5 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.home.subs}</span>
-                                                </div>
+                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.home.subs}</span>
                                             </div>
 
                                             {/* Score */}
-                                            <div className={`flex items-center justify-center gap-1 px-2 py-1 rounded-md min-w-[60px] mx-1 ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
-                                                <span 
-                                                    className={`font-bold text-base px-1.5 rounded border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`}
-                                                   
-                                                >
+                                            <div className={`flex items-center justify-center gap-0.5 px-1.5 py-1 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
+                                                <span className={`font-bold text-sm px-1 rounded border ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`} style={{ color: teamColors.home }}>
                                                     {stats.score.split('-')[0] || 0}
                                                 </span>
-                                                <span className={`font-bold text-gray-400 text-sm`}>:</span>
-                                                <span 
-                                                    className={`font-bold text-base px-1.5 rounded border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`}
-                                                    
-                                                >
+                                                <span className="text-[10px] font-bold text-gray-400">:</span>
+                                                <span className={`font-bold text-sm px-1 rounded border ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`} style={{ color: teamColors.away }}>
                                                     {stats.score.split('-')[1] || 0}
                                                 </span>
                                             </div>
 
                                             {/* Away Stats */}
-                                            <div className="flex items-center gap-1.5">
-                                                <div className="flex items-center gap-1 font-bold text-sm">
-                                                    <Timer className="text-blue-500" size={16} strokeWidth={2.5} /> <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.away.timeouts}</span>
+                                            <div className="flex items-center gap-1 justify-end">
+                                                <Timer className="text-blue-500 shrink-0" size={12} strokeWidth={2.5} />
+                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.away.timeouts}</span>
+                                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5"></div>
+                                                <Video className="text-blue-500 shrink-0" size={12} strokeWidth={2.5} />
+                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.away.challenges}</span>
+                                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5"></div>
+                                                <div className="flex -space-x-1 shrink-0">
+                                                    <ArrowDown className="text-red-500" size={11} strokeWidth={3} />
+                                                    <ArrowUp className="text-green-500" size={11} strokeWidth={3} />
                                                 </div>
-                                                <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-0.5"></div>
-                                                <div className="flex items-center gap-1 font-bold text-sm">
-                                                    <Video className="text-blue-500" size={16} strokeWidth={2.5} /> <span className={isDarkMode ? 'text-gray-200' : 'text-gray-800'}>{stats.away.challenges}</span>
-                                                </div>
-                                                <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-0.5"></div>
-                                                <div className="flex items-center gap-0.5 font-bold text-sm">
-                                                    <div className="flex -space-x-1 shrink-0">
-                                                        <ArrowDown className="text-red-500" size={14} strokeWidth={3} />
-                                                        <ArrowUp className="text-green-500" size={14} strokeWidth={3} />
-                                                    </div> 
-                                                    <span className={`ml-0.5 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.away.subs}</span>
-                                                </div>
+                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.away.subs}</span>
                                             </div>
                                         </div>
                                     </div>
