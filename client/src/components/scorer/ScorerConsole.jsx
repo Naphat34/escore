@@ -1417,14 +1417,14 @@ export default function ScorerConsole() {
                                             <div className={`flex items-center justify-center gap-1 px-2 py-1 rounded-md min-w-[60px] mx-1 ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
                                                 <span 
                                                     className={`font-bold text-base px-1.5 rounded border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`}
-                                                    style={{ color: teamColors.home }}
+                                                   
                                                 >
                                                     {stats.score.split('-')[0] || 0}
                                                 </span>
                                                 <span className={`font-bold text-gray-400 text-sm`}>:</span>
                                                 <span 
                                                     className={`font-bold text-base px-1.5 rounded border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`}
-                                                    style={{ color: teamColors.away }}
+                                                    
                                                 >
                                                     {stats.score.split('-')[1] || 0}
                                                 </span>
@@ -1475,9 +1475,9 @@ export default function ScorerConsole() {
                                                             <div className="flex items-center gap-3">
                                                                 {/* Score */}
                                                                 <div className="flex items-center gap-1 font-mono font-bold text-base">
-                                                                    <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>{homeScore}</span>
+                                                                    <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}  style={{ color: teamColors.home }}>{homeScore}</span>
                                                                     <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>:</span>
-                                                                    <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-rose-900/50 text-rose-300' : 'bg-rose-100 text-rose-700'}`}>{awayScore}</span>
+                                                                    <span className={`px-2 py-0.5 rounded ${isDarkMode ? 'bg-rose-900/50 text-rose-300' : 'bg-rose-100 text-rose-700'}`} style={{ color: teamColors.away }}>{awayScore}</span>
                                                                 </div>
                                                                 {/* Description */}
                                                                 <div className={`text-xs font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
