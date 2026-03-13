@@ -1403,11 +1403,17 @@ export default function ScorerConsole() {
 
                                             {/* Score */}
                                             <div className={`flex items-center justify-center gap-1 px-2 py-1 rounded-md min-w-[60px] mx-1 ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
-                                                <span className={`font-bold text-base px-1.5 rounded border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500 text-gray-100' : 'bg-white border-gray-200 text-gray-600'}`}>
+                                                <span 
+                                                    className={`font-bold text-base px-1.5 rounded border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`}
+                                                    style={{ color: teamColors.home }}
+                                                >
                                                     {stats.score.split('-')[0] || 0}
                                                 </span>
                                                 <span className={`font-bold text-gray-400 text-sm`}>:</span>
-                                                <span className={`font-bold text-base px-1.5 rounded border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500 text-gray-100' : 'bg-white border-gray-200 text-gray-600'}`}>
+                                                <span 
+                                                    className={`font-bold text-base px-1.5 rounded border shadow-sm ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`}
+                                                    style={{ color: teamColors.away }}
+                                                >
                                                     {stats.score.split('-')[1] || 0}
                                                 </span>
                                             </div>
