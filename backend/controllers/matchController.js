@@ -47,7 +47,11 @@ module.exports = {
                     m.id DESC
             `);
 
-            res.json(result.rows);
+            const normalizedRows = result.rows.map(row => ({
+                ...row,
+                status: row.status ? row.status.toLowerCase() : row.status
+            }));
+            res.json(normalizedRows);
         } catch (err) {
             console.error("Get All Matches Error:", err);
             res.status(500).json({ error: err.message });
@@ -88,7 +92,11 @@ module.exports = {
                     m.id ASC
             `, [competitionId]);
 
-            res.json(result.rows);
+            const normalizedRows = result.rows.map(row => ({
+                ...row,
+                status: row.status ? row.status.toLowerCase() : row.status
+            }));
+            res.json(normalizedRows);
         } catch (err) {
             console.error("Get Matches Error:", err);
             res.status(500).json({ error: err.message });
