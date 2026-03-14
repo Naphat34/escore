@@ -135,7 +135,11 @@ const CourtView = ({
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-lg font-bold text-sm ${disableLibero ? 'bg-slate-800 text-slate-600 border border-slate-700 cursor-not-allowed' : 'bg-slate-900 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30'}`}
                         >
                             <Repeat size={16} />
-                            <span>เปลี่ยน Libero</span>
+                            <span>
+                                {leftTeam.liberos?.l1 || leftTeam.liberos?.l2 
+                                    ? `L: ${[leftTeam.liberos.l1?.number, leftTeam.liberos.l2?.number].filter(Boolean).join(',')}` 
+                                    : 'เปลี่ยน Libero'}
+                            </span>
                         </button>
                     </div>
 
@@ -147,7 +151,11 @@ const CourtView = ({
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-lg font-bold text-sm ${disableLibero ? 'bg-slate-800 text-slate-600 border border-slate-700 cursor-not-allowed' : 'bg-slate-900 hover:bg-pink-600 text-pink-400 hover:text-white border border-pink-500/30'}`}
                         >
                             <Repeat size={16} />
-                            <span>เปลี่ยน Libero</span>
+                            <span>
+                                {rightTeam.liberos?.l1 || rightTeam.liberos?.l2 
+                                    ? `L: ${[rightTeam.liberos.l1?.number, rightTeam.liberos.l2?.number].filter(Boolean).join(',')}` 
+                                    : 'เปลี่ยน Libero'}
+                            </span>
                         </button>
                     </div>
                 </div>
