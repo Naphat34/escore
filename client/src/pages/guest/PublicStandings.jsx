@@ -17,9 +17,10 @@ export default function PublicStandings() {
         const fetchComps = async () => {
             try {
                 const res = await client.get('/public/competitions');
-                setCompetitions(res.data);
-                if (res.data.length > 0) {
-                    setSelectedCompId(res.data[0].id);
+                const openComps = res.data.filter(c => c.status?.toLowerCase() === 'open');
+                setCompetitions(openComps);
+                if (openComps.length > 0) {
+                    setSelectedCompId(openComps[0].id);
                 }
             } catch (err) {
                 console.error("Error fetching competitions:", err);

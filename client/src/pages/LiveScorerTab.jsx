@@ -61,7 +61,7 @@ export default function LiveScorerTab({ darkMode }) {
     const fetchCompetitions = async () => {
         try {
             const res = await api.getAllCompetitions();
-            setCompetitions(res.data);
+            setCompetitions(res.data.filter(c => c.status?.toLowerCase() === 'open'));
             
             // Extract unique base names
             const bases = new Set();

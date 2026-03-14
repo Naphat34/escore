@@ -15,9 +15,10 @@ export default function PublicMatches() {
         const fetchComps = async () => {
             try {
                 const res = await client.get('/public/competitions');
-                setCompetitions(res.data);
-                if (res.data.length > 0) {
-                    setSelectedComp(res.data[0].id); // Default เลือกอันแรก
+                const openComps = res.data.filter(c => c.status?.toLowerCase() === 'open');
+                setCompetitions(openComps);
+                if (openComps.length > 0) {
+                    setSelectedComp(openComps[0].id); // Default เลือกอันแรก
                 }
             } catch (err) {
                 console.error("Error fetching competitions:", err);

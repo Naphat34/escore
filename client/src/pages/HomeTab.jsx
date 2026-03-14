@@ -28,15 +28,10 @@ export default function HomeTab({ darkMode }) {
     const fetchCompetitions = async () => {
         try {
             const res = await client.get('/admin/competitions');
-            setCompetitions(res.data);
-            // Optional: Auto-select the first open competition or the most recent one
-            if (res.data.length > 0) {
-                const openComp = res.data.find(c => c.status === 'open');
-                if (openComp) {
-                    setSelectedCompetition(openComp);
-                } else {
-                    setSelectedCompetition(res.data[0]);
-                }
+            const openComps = res.data.filter(c => c.status?.toLowerCase() === 'open');
+            setCompetitions(openComps);
+            if (openComps.length > 0) {
+                setSelectedCompetition(openComps[0]);
             }
         } catch (err) { console.error(err); }
     };
