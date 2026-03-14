@@ -334,15 +334,18 @@ export default function ScorerConsole() {
                 if (!currentMatch.teamHomeId || !currentMatch.teamAwayId) {
                     const resMatch = await api.getMatchById(matchId);
                     const m = resMatch.data;
+                    const calculatedSetsToWin = Math.ceil((m.max_sets || 5) / 2);
                     currentMatch = {
                         ...matchData,
                         teamHome: m.home_team_name,
                         teamAway: m.away_team_name,
                         teamHomeId: m.home_team_id,
                         teamAwayId: m.away_team_id,
-                        currentSet: m.current_set || 1
+                        currentSet: m.current_set || 1,
+                        maxSets: m.max_sets || 5
                     };
                     setMatchData(currentMatch);
+                    setSetsToWin(calculatedSetsToWin);
                 }
 
                 if (currentMatch.teamHomeId) {
@@ -540,21 +543,38 @@ export default function ScorerConsole() {
         }
     };
 
-    const finishSet = (winnerCode, finalScore) => {
-        const newSetsWon = { ...setsWon, [winnerCode]: setsWon[winnerCode] + 1 };
-        setSetsWon(newSetsWon);
-        setCompletedSets(prev => [...prev, {
-            set: matchData.currentSet,
-            home: finalScore.home,
-            away: finalScore.away,
-            winner: winnerCode
-        }]);
+    const finishSet = async (winnerCode, finalScore) => {
+        // 1. Call API to save set result
+        try {
+            const response = await api.endSet(matchId, {
+                setNumber: matchData.currentSet,
+                homeScore: finalScore.home,
+                awayScore: finalScore.away,
+                duration: Math.ceil(matchDuration / 60) // Send duration in minutes
+            });
 
-        if (newSetsWon[winnerCode] >= setsToWin) {
-            setWorkflowStep('MATCH_FINISHED');
-            setIsTimerRunning(false);
-        } else {
-            setWorkflowStep('SET_FINISHED');
+            if (response.data.success) {
+                const { isMatchFinished, winnerId, currentScore, nextSet } = response.data;
+
+                // 2. Update Local State based on backend response
+                setSetsWon(currentScore);
+                setCompletedSets(prev => [...prev, {
+                    set: matchData.currentSet,
+                    home: finalScore.home,
+                    away: finalScore.away,
+                    winner: winnerCode
+                }]);
+
+                if (isMatchFinished) {
+                    setWorkflowStep('MATCH_FINISHED');
+                    setIsTimerRunning(false);
+                } else {
+                    setWorkflowStep('SET_FINISHED');
+                }
+            }
+        } catch (error) {
+            console.error("Error ending set:", error);
+            Swal.fire('Error', 'ไม่สามารถบันทึกผลเซตลงฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
         }
     };
 
@@ -1104,42 +1124,6 @@ export default function ScorerConsole() {
         setSubData({ isOpen: false, team: null, posIndex: null, playerOut: null });
     };
 
-    const handleSetFinish = async () => {
-    // ตรวจสอบคะแนนก่อนจบ (เช่น ต้องห่าง 2 แต้ม และเกิน 25)
-    // ... logic ตรวจสอบ ...
-
-    try {
-        const response = await api.endSet(matchId, {
-            setNumber: matchSetupData.currentSet,
-            homeScore: score.home,
-            awayScore: score.away,
-            duration: 25 // ส่งเวลาที่จับได้จริงไป (นาที)
-        });
-
-        if (response.data.success) {
-            if (response.data.isMatchFinished) {
-                alert(`จบการแข่งขัน! ทีมชนะคือทีม  ${response.data.winnerId}`);
-                // Redirect ไปหน้าสรุปผล หรือ กลับหน้าหลัก
-                navigate('/dashboard'); 
-            } else {
-                alert(`จบเซตที่ ${matchSetupData.currentSet} เริ่มเซตต่อไป...`);
-                // รีเซ็ตค่าสำหรับเซตใหม่
-                setScore({ home: 0, away: 0 });
-                setMatchData(prev => ({
-                    ...prev,
-                    currentSet: response.data.nextSet,
-                    setsWonHome: response.data.currentScore.home,
-                    setsWonAway: response.data.currentScore.away
-                }));
-                // อาจจะต้องเคลียร์ Lineup หรือเริ่ม process Roster Check ใหม่อีกรอบสำหรับเซตใหม่
-                setWorkflowStep('LINEUP_SELECT'); 
-            }
-        }
-    } catch (error) {
-        console.error("Error ending set:", error);
-        alert("เกิดข้อผิดพลาดในการบันทึกผลเซต");
-    }
-};
 
     if (isLoading) return <div className="h-screen bg-slate-950 text-white flex items-center justify-center"><Loader className="animate-spin" /></div>;
     const isSetupPhase = ['ROSTER_CHECK', 'SERVER_SELECT', 'LINEUP_SELECT'].includes(workflowStep);
