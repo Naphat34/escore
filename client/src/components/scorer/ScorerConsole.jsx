@@ -554,10 +554,10 @@ export default function ScorerConsole() {
             });
 
             if (response.data.success) {
-                const { isMatchFinished, winnerId, currentScore, nextSet } = response.data;
+                const { isMatchFinished, winnerId, currentSets, nextSet } = response.data;
 
                 // 2. Update Local State based on backend response
-                setSetsWon(currentScore);
+                setSetsWon(currentSets);
                 setCompletedSets(prev => [...prev, {
                     set: matchData.currentSet,
                     home: finalScore.home,
@@ -603,7 +603,7 @@ export default function ScorerConsole() {
             time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
         }, ...prev]);
 
-        const isTieBreak = (setsWon.home === setsToWin - 1) && (setsWon.away === setsToWin - 1);
+        const isTieBreak = (setsWon?.home === setsToWin - 1) && (setsWon.away === setsToWin - 1);
         setMatchData(prev => ({ ...prev, currentSet: nextSetNumber }));
 
         if (!isTieBreak) setIsHomeLeft(prev => !prev);
@@ -686,9 +686,41 @@ export default function ScorerConsole() {
     };
 
     const handleFinishMatch = () => {
-        // Clear logic would go here
-        navigate('/admin');
-    };
+    // 1. เรียกแสดง Popup สรุปผลและยืนยันการจบการแข่งขัน
+    Swal.fire({
+        title: 'จบการแข่งขันสมบูรณ์!',
+        html: `
+            <p>สรุปผลเซต: <b>${matchData.teamHome}</b> ${setsWon?.home || 0} - ${setsWon?.away || 0} <b>${matchData.teamAway}</b></p>
+            <p style="font-size: 0.9em; color: gray;">คุณต้องการออกจากหน้านี้และกลับสู่หน้าหลักใช่หรือไม่?<br/>(ระบบจะทำการล้างข้อมูลแคชชั่วคราวของแมตช์นี้)</p>
+        `,
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ตกลง, กลับสู่หน้าหลัก',
+        cancelButtonText: 'ยกเลิก'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            
+            // 2. ล้างข้อมูล LocalStorage เฉพาะของแมตช์นี้ (ป้องกันขยะตกค้างและบั๊กในอนาคต)
+            const keysToClear = [
+                'matchData', 'workflowStep', 'score', 'setsWon', 'completedSets',
+                'timeouts', 'challenges', 'substitutions', 'matchEvents', 'servingTeam',
+                'isHomeLeft', 'homeRoster', 'awayRoster', 'homeLineup', 'awayLineup',
+                'homeLiberos', 'awayLiberos', 'history', 'setsToWin', 'matchDuration',
+                'isTimerRunning', 'lastLiberoSwap', 'teamColors', 'homeLiberoSwaps',
+                'awayLiberoSwaps', 'liberoTracker', 'disqualified'
+            ];
+
+            keysToClear.forEach(key => {
+                localStorage.removeItem(`match_${matchId}_${key}`);
+            });
+
+            // 3. เปลี่ยนหน้ากลับไปที่ Admin
+            navigate('/admin');
+        }
+    });
+};
 
     // --- CONFIRM HANDLERS ---
     const handleSetupConfirm = (data) => {
