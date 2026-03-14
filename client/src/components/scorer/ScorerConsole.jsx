@@ -381,6 +381,8 @@ export default function ScorerConsole() {
             });
         } catch (error) {
             console.error(`Failed to save event ${eventType}:`, error);
+            const serverError = error.response?.data?.error || error.message;
+            Swal.fire('Error', `Failed to save event: ${serverError}`, 'error');
         }
 
         let description = eventType;
@@ -574,7 +576,8 @@ export default function ScorerConsole() {
             }
         } catch (error) {
             console.error("Error ending set:", error);
-            Swal.fire('Error', 'ไม่สามารถบันทึกผลเซตลงฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
+            const serverError = error.response?.data?.error || 'กรุณาลองใหม่อีกครั้ง';
+            Swal.fire('Error', `ไม่สามารถบันทึกผลเซตลงฐานข้อมูลได้: ${serverError}`, 'error');
         }
     };
 
