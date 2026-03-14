@@ -16,7 +16,7 @@ export default function LandingPage() {
         try {
             // เรียก API Public ที่เราเพิ่งเปิด
             const res = await client.get('/public/competitions');
-            setCompetitions(res.data);
+            setCompetitions(res.data.filter(c => c.status?.toLowerCase() === 'open'));
         } catch (err) {
             console.error("Error fetching public data:", err);
         } finally {

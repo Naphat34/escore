@@ -10,9 +10,10 @@ const TimeoutTimerModal = ({ isOpen, onClose, duration = 30, title = 'Timeout' }
         if (isOpen) {
             setVisible(true);
             setTimeLeft(duration);
-            setIsRunning(true);
+            setIsRunning(true);  // Always auto-start when opened
         } else {
             setVisible(false);
+            setIsRunning(false); // Pause when closed so next open starts fresh
         }
     }, [isOpen, duration]);
 

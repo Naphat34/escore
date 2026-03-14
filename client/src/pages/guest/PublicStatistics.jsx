@@ -13,10 +13,11 @@ export default function PublicStatistics() {
         const fetchComps = async () => {
             try {
                 const res = await client.get('/public/competitions'); // หรือ endpoint ที่ดึงรายการแข่ง
-                setCompetitions(res.data);
+                const openComps = res.data.filter(c => c.status?.toLowerCase() === 'open');
+                setCompetitions(openComps);
                 // ถ้ามีรายการแข่ง ให้เลือกรายการล่าสุดเป็นค่าเริ่มต้น
-                if (res.data.length > 0) {
-                    setSelectedCompId(res.data[0].id);
+                if (openComps.length > 0) {
+                    setSelectedCompId(openComps[0].id);
                 }
             } catch (err) {
                 console.error("Error fetching competitions:", err);

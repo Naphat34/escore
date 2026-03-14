@@ -43,7 +43,7 @@ export default function EScoreTab({ darkMode }) {
     const fetchCompetitions = async () => {
         try {
             const res = await api.get('/admin/competitions');
-            setCompetitions(res.data);
+            setCompetitions(res.data.filter(c => c.status?.toLowerCase() === 'open'));
             
             const bases = new Set();
             res.data.forEach(c => {

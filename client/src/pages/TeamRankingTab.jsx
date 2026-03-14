@@ -60,7 +60,7 @@ export default function TeamRankingTab({ darkMode }) {
     const fetchCompetitions = async () => {
         try {
             const res = await api.getAllCompetitions();
-            setCompetitions(res.data);
+            setCompetitions(res.data.filter(c => c.status?.toLowerCase() === 'open'));
             
             // จัดกลุ่มชื่อรายการ (ตัดวงเล็บเพศออก)
             const bases = new Set();
