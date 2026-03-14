@@ -368,9 +368,8 @@ export default function ScorerConsole() {
         setIsLoading(false);
     }
 };
-// เรียกใช้งาน
 fetchMatchData();
-}, [matchData]);
+}, [matchId]);
 
 
     // --- API HELPER: SAVE EVENT ---
