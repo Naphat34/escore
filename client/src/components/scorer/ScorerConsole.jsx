@@ -327,43 +327,51 @@ export default function ScorerConsole() {
     // --- LOAD DATA ---
     useEffect(() => {
         const fetchMatchData = async () => {
-            try {
-                setIsLoading(true);
-                let currentMatch = matchData;
+    try {
+        setIsLoading(true);
+        let currentMatch = matchData;
 
-                if (!currentMatch.teamHomeId || !currentMatch.teamAwayId) {
-                    const resMatch = await api.getMatchById(matchId);
-                    const m = resMatch.data;
-                    const calculatedSetsToWin = Math.ceil((m.max_sets || 5) / 2);
-                    currentMatch = {
-                        ...matchData,
-                        teamHome: m.home_team_name,
-                        teamAway: m.away_team_name,
-                        teamHomeId: m.home_team_id,
-                        teamAwayId: m.away_team_id,
-                        currentSet: m.current_set || 1,
-                        maxSets: m.max_sets || 5
-                    };
-                    setMatchData(currentMatch);
-                    setSetsToWin(calculatedSetsToWin);
-                }
-
-                if (currentMatch.teamHomeId) {
-                    const resHome = await api.getPlayersByTeam(currentMatch.teamHomeId);
-                    setMasterHomeRoster(resHome.data || []);
-                }
-                if (currentMatch.teamAwayId) {
-                    const resAway = await api.getPlayersByTeam(currentMatch.teamAwayId);
-                    setMasterAwayRoster(resAway.data || []);
-                }
-            } catch (error) {
-                console.error("Error fetching match data:", error);
-            } finally {
-                setIsLoading(false);
-            }
+        // ✅ 1. ยิง API ดึงข้อมูลแมตช์เสมอ เพื่อเอา max_sets ที่ถูกต้องชัวร์ๆ
+        const resMatch = await api.getMatchById(matchId);
+        const m = resMatch.data;
+        
+        // คำนวณระบบการแข่งขัน (เช่น 3/2 = 2, 5/2 = 3)
+        const maxSets = m.max_sets || 5;
+        const calculatedSetsToWin = Math.ceil(maxSets / 2);
+        
+        currentMatch = {
+            ...matchData,
+            teamHome: m.home_team_name || matchData.teamHome,
+            teamAway: m.away_team_name || matchData.teamAway,
+            teamHomeId: m.home_team_id || matchData.teamHomeId,
+            teamAwayId: m.away_team_id || matchData.teamAwayId,
+            currentSet: m.current_set || matchData.currentSet || 1,
+            maxSets: maxSets
         };
-        fetchMatchData();
-    }, [matchId]);
+        
+        setMatchData(currentMatch);
+        setSetsToWin(calculatedSetsToWin); // ✅ อัปเดต setsToWin เสมอ
+
+        // ✅ 2. ดึงรายชื่อผู้เล่นเมื่อได้ ID ทีมมาแล้ว
+        if (currentMatch.teamHomeId) {
+            const resHome = await api.getPlayersByTeam(currentMatch.teamHomeId);
+            setMasterHomeRoster(resHome.data || []);
+        }
+        if (currentMatch.teamAwayId) {
+            const resAway = await api.getPlayersByTeam(currentMatch.teamAwayId);
+            setMasterAwayRoster(resAway.data || []);
+        }
+
+    } catch (error) {
+        console.error("Error fetching match data:", error);
+    } finally {
+        setIsLoading(false);
+    }
+};
+// เรียกใช้งาน
+fetchMatchData();
+}, [matchData]);
+
 
     // --- API HELPER: SAVE EVENT ---
     const saveEventToBackend = async (eventType, teamCode, details = {}) => {
