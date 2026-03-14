@@ -1485,8 +1485,8 @@ export default function ScorerConsole() {
                                                                             <span className="text-red-600 dark:text-red-400 font-bold">OUT {ev.metadata.out}</span>
                                                                             {ev.metadata.type === 'LIBERO' && <span className="text-[9px] bg-blue-100 text-blue-800 px-1 rounded">Libero</span>}
                                                                             <span 
-                                                                                className="px-1.5 py-0.5 rounded text-white font-bold text-[10px] ml-auto shadow-sm"
-                                                                                style={{ backgroundColor: isHome ? teamColors.home : teamColors.away }}
+                                                                                className="font-bold text-[11px] ml-auto"
+                                                                                style={{ color: isHome ? teamColors.home : teamColors.away }}
                                                                             >
                                                                                 {ev.metadata.team}
                                                                             </span>
@@ -1498,10 +1498,10 @@ export default function ScorerConsole() {
                                                                             const teamColor = isHome ? teamColors.home : teamColors.away;
                                                                             return (
                                                                                 <span>
-                                                                                    {parts[0]}
+                                                                                    {parts[0]} 
                                                                                     <span 
-                                                                                        className="px-2 py-0.5 rounded text-white font-bold mx-1 whitespace-nowrap shadow-sm" 
-                                                                                        style={{ backgroundColor: teamColor }}
+                                                                                        className="font-bold mx-1 whitespace-nowrap" 
+                                                                                        style={{ color: teamColor }}
                                                                                     >
                                                                                         {teamName}
                                                                                     </span>
