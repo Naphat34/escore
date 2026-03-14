@@ -256,6 +256,23 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     useEffect(() => {
         if (homeLineupConfirmed && awayLineupConfirmed) {
             setLineupSubmitted(true);
+            
+            // Add Lineup to Action Log
+            const homeNumbers = homeRotation.map(p => p.number).join(', ');
+            const awayNumbers = awayRotation.map(p => p.number).join(', ');
+            
+            setActionLog(prev => [{
+                id: Date.now(),
+                set_number: currentSet,
+                team_id: null,
+                player_id: null,
+                skill: 'LINEUP_CONFIRM',
+                grade: '!',
+                score_home: pointScore.home,
+                score_away: pointScore.away,
+                description: `Lineup Confirmed - ${matchData.home_team}: [${homeNumbers}] | ${matchData.away_team}: [${awayNumbers}]`,
+                time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+            }, ...prev]);
         }
     }, [homeLineupConfirmed, awayLineupConfirmed]);
 

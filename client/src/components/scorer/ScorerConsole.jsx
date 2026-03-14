@@ -716,6 +716,19 @@ export default function ScorerConsole() {
         setLastSetHomeLiberos({...homeLiberos});
         setLastSetAwayLiberos({...awayLiberos});
 
+        // Add Lineup to Match Events history
+        const homeNumbers = homeLineup.map(p => p.number).join(', ');
+        const awayNumbers = awayLineup.map(p => p.number).join(', ');
+        
+        setMatchEvents(prev => [{
+            id: Date.now(),
+            set: matchData.currentSet,
+            score: `${score.home}-${score.away}`,
+            description: `Lineup Confirmed - ${matchData.teamHome}: [${homeNumbers}] | ${matchData.teamAway}: [${awayNumbers}]`,
+            metadata: { type: 'LINEUP_CONFIRM' },
+            time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        }, ...prev]);
+
         setShowLineupModal(false);
         setWorkflowStep('READY');
     };
