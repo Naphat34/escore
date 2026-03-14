@@ -551,39 +551,48 @@ fetchMatchData();
     };
 
     const finishSet = async (winnerCode, finalScore) => {
-        // 1. Call API to save set result
-        try {
-            const response = await api.endSet(matchId, {
-                setNumber: matchData.currentSet,
-                homeScore: finalScore.home,
-                awayScore: finalScore.away,
-                duration: Math.ceil(matchDuration / 60) // Send duration in minutes
-            });
+    try {
+        const response = await api.endSet(matchId, {
+            setNumber: matchData.currentSet,
+            homeScore: finalScore.home,
+            awayScore: finalScore.away,
+            duration: Math.ceil(matchDuration / 60)
+        });
 
-            if (response.data.success) {
-                const { isMatchFinished, winnerId, currentSets, nextSet } = response.data;
+        if (response.data.success) {
+            // 1. ดึงข้อมูลจาก backend (แก้ชื่อให้ตรงเผื่อไว้ด้วย)
+            const { matchFinished, currentSets } = response.data;
 
-                // 2. Update Local State based on backend response
-                setSetsWon(currentSets);
-                setCompletedSets(prev => [...prev, {
-                    set: matchData.currentSet,
-                    home: finalScore.home,
-                    away: finalScore.away,
-                    winner: winnerCode
-                }]);
+            // 2. คำนวณจำนวนเซตล่าสุดจากฝั่ง Frontend เอง (ปลอดภัยที่สุด)
+            const newSetsWon = {
+                home: winnerCode === 'home' ? setsWon.home + 1 : setsWon.home,
+                away: winnerCode === 'away' ? setsWon.away + 1 : setsWon.away
+            };
 
-                if (isMatchFinished) {
-                    setWorkflowStep('MATCH_FINISHED');
-                    setIsTimerRunning(false);
-                } else {
-                    setWorkflowStep('SET_FINISHED');
-                }
+            setSetsWon(newSetsWon);
+            setCompletedSets(prev => [...prev, {
+                set: matchData.currentSet,
+                home: finalScore.home,
+                away: finalScore.away,
+                winner: winnerCode
+            }]);
+
+            // 🚨 3. เช็คการจบแมตช์จาก setsToWin ของ Frontend เลย (ชัวร์ 100%)
+            // ถ้าฝ่ายใดฝ่ายหนึ่งได้เซต >= ที่กำหนดไว้ (เช่น ได้ 2 เซต) ให้จบแมตช์ทันที
+            if (newSetsWon.home >= setsToWin || newSetsWon.away >= setsToWin) {
+                setWorkflowStep('MATCH_FINISHED');
+                setIsTimerRunning(false);
+                // ถ้าคุณมีฟังก์ชันเรียกหน้าต่างสรุปผล ก็สามารถใส่ไว้ตรงนี้ได้ครับ
+            } else {
+                // ถ้าเซตยังไม่ครบ ถึงให้เริ่มตั้งค่าเซตถัดไป
+                setWorkflowStep('SET_FINISHED');
             }
-        } catch (error) {
-            console.error("Error ending set:", error);
-            Swal.fire('Error', 'ไม่สามารถบันทึกผลเซตลงฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
         }
-    };
+    } catch (error) {
+        console.error("Error ending set:", error);
+        Swal.fire('Error', 'ไม่สามารถบันทึกผลเซตลงฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
+    }
+};
 
     const startNextSet = () => {
         // Reset scores and quotas for the new set
