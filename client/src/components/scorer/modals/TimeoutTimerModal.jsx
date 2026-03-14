@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Clock, Play, Pause, RotateCcw } from 'lucide-react';
 
-const TimeoutTimerModal = ({ isOpen, onClose, duration = 30, title = 'Timeout' }) => {
+const TimeoutTimerModal = ({ isOpen, onClose, duration = 30, title = 'Timeout', startTime = null }) => {
     const [timeLeft, setTimeLeft] = useState(duration);
     const [isRunning, setIsRunning] = useState(true);
     const [visible, setVisible] = useState(false);
@@ -9,25 +9,41 @@ const TimeoutTimerModal = ({ isOpen, onClose, duration = 30, title = 'Timeout' }
     useEffect(() => {
         if (isOpen) {
             setVisible(true);
-            setTimeLeft(duration);
-            setIsRunning(true);  // Always auto-start when opened
+            setIsRunning(true);
+            
+            // If startTime is provided by the server, calculate remaining time
+            if (startTime) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = Math.max(0, duration - elapsed);
+                setTimeLeft(remaining);
+            } else {
+                setTimeLeft(duration);
+            }
         } else {
             setVisible(false);
-            setIsRunning(false); // Pause when closed so next open starts fresh
+            setIsRunning(false);
         }
-    }, [isOpen, duration]);
+    }, [isOpen, duration, startTime]);
 
     useEffect(() => {
         let interval = null;
         if (isOpen && isRunning && timeLeft > 0) {
             interval = setInterval(() => {
-                setTimeLeft((prev) => prev - 1);
+                // If we have a startTime, recalculate strictly to avoid drift
+                if (startTime) {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const remaining = Math.max(0, duration - elapsed);
+                    setTimeLeft(remaining);
+                    if (remaining <= 0) setIsRunning(false);
+                } else {
+                    setTimeLeft((prev) => prev - 1);
+                }
             }, 1000);
-        } else if (timeLeft === 0) {
+        } else if (timeLeft <= 0) {
             setIsRunning(false);
         }
         return () => clearInterval(interval);
-    }, [isOpen, isRunning, timeLeft]);
+    }, [isOpen, isRunning, timeLeft, startTime, duration]);
 
     // Keep component mounted during exit animation
     if (!isOpen && !visible) return null;
