@@ -93,6 +93,7 @@ function App() {
         />
         <Route path="/match/:matchId/referee" element={<ScoreViewReferee />} />
         <Route path="/match/:matchId/viewer" element={<ScoreViewSpectator />} />
+        <Route path="/scorer/:matchId/viewer" element={<ScoreViewSpectator />} />
 
         {/* ✅ ย้ายมาไว้ตรงนี้ครับ (ต้องอยู่ก่อนตัว * เสมอ) */}
         <Route path="/stats" element={<PublicStatistics />} />
