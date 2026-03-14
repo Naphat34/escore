@@ -252,30 +252,38 @@ module.exports = {
 
             const { id } = req.params; // matchId
             const { 
-                team_a_score, // สกอร์รวม (เช่น 3)
-                team_b_score, // สกอร์รวม (เช่น 1)
-                status,       // 'Finished'
-                sets          // Array ของคะแนนเซต: [{set_number:1, a:25, b:20}, ...]
+                home_set_score, 
+                away_set_score, 
+                status,       
+                set_scores          // JSON string ของคะแนนเซต: '["25-20", "25-22"]'
             } = req.body;
 
             // 1. อัปเดตข้อมูลหลักในตาราง matches
             await client.query(`
                 UPDATE matches 
-                SET team_a_score = $1, team_b_score = $2, status = $3
-                WHERE id = $4
-            `, [team_a_score, team_b_score, status, id]);
+                SET home_set_score = $1, away_set_score = $2, set_scores = $3, status = $4
+                WHERE id = $5
+            `, [home_set_score, away_set_score, set_scores, status, id]);
 
             // 2. จัดการคะแนนรายเซต (match_sets)
-            if (sets && sets.length > 0) {
-                // ลบข้อมูลเซตเก่าของแมตช์นี้ออกก่อน (กันซ้ำ)
-                await client.query('DELETE FROM match_sets WHERE match_id = $1', [id]);
+            if (set_scores && typeof set_scores === 'string') {
+                const parsedSets = JSON.parse(set_scores);
+                if (parsedSets.length > 0) {
+                    // ลบข้อมูลเซตเก่าของแมตช์นี้ออกก่อน (กันซ้ำ)
+                    await client.query('DELETE FROM match_sets WHERE match_id = $1', [id]);
 
-                // วนลูป Insert เซตใหม่
-                for (const set of sets) {
-                    await client.query(`
-                        INSERT INTO match_sets (match_id, set_number, team_a_score, team_b_score)
-                        VALUES ($1, $2, $3, $4)
-                    `, [id, set.set_number, set.team_a_score, set.team_b_score]);
+                    // วนลูป Insert เซตใหม่
+                    for (let i = 0; i < parsedSets.length; i++) {
+                        const setScore = parsedSets[i];
+                        const [homePoints, awayPoints] = setScore.split('-').map(Number);
+                        
+                        if (!isNaN(homePoints) && !isNaN(awayPoints)) {
+                            await client.query(`
+                                INSERT INTO match_sets (match_id, set_number, home_score, away_score)
+                                VALUES ($1, $2, $3, $4)
+                            `, [id, i + 1, homePoints, awayPoints]);
+                        }
+                    }
                 }
             }
 
