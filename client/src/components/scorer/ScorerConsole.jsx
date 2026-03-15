@@ -1194,18 +1194,53 @@ fetchMatchData();
 
         // CASE 3: Normal Substitution logic
         const tracker = subTracker[actualTeamCode];
-        if (tracker.count >= 6) {
-            Swal.fire("หมดโควต้าเปลี่ยนตัว", "ทีมนี้ใช้สิทธิ์เปลี่ยนตัวครบ 6 ครั้งในเซตนี้แล้ว", "warning");
+        const posData = tracker.positions[posIndex]; // ดูประวัติการเปลี่ยนตัวในตำแหน่งนี้
+
+        // เช็ค 1: ตำแหน่งนี้เปลี่ยนตัวคู่ครบแล้วหรือยัง? (ตัวจริงกลับเข้าสนามแล้ว = ห้ามเปลี่ยนอีก)
+        if (posData && posData.returned) {
+            Swal.fire("ผิดกติกา FIVB", "ตำแหน่งนี้มีการเปลี่ยนตัวกลับครบโควต้าแล้ว (ผู้เล่นตัวจริงกลับเข้าสนามแล้ว) ไม่สามารถเปลี่ยนตัวได้อีกในเซตนี้", "error");
             return;
         }
 
+        // เช็ค 2: โควต้ารวมทีมครบ 6 ครั้งหรือยัง?
+        if (tracker.count >= 6) {
+            Swal.fire("หมดโควต้า", "ทีมนี้ใช้สิทธิ์เปลี่ยนตัวครบ 6 ครั้งในเซตนี้แล้ว", "warning");
+            return;
+        }
+
+        // 🌟 NEW LOGIC: หากลุ่มนักกีฬาที่ "สามารถเปลี่ยนตัวลงมาได้" ตามกฎการจับคู่
+        const roster = actualTeamCode === 'home' ? homeRoster : awayRoster;
+        const currentLineupIds = lineup.map(p => p?.id || p?.player_id);
+        let validSubs = [];
+
+        if (!posData) {
+            // กรณียังไม่เคยเปลี่ยนตัวในตำแหน่งนี้: เลือกใครก็ได้ในคอกสำรอง ที่ "ยังไม่เคยลงสนามในตำแหน่งอื่น" ในเซตนี้
+            validSubs = roster.filter(p => 
+                !currentLineupIds.includes(p.id || p.player_id) && 
+                !tracker.usedPlayers.includes(p.id || p.player_id) && 
+                !p.isLibero
+            );
+        } else {
+            // กรณีเคยเปลี่ยนตัวไปแล้ว (สำรองอยู่ในสนาม): บังคับเลือกได้แค่ "ผู้เล่นตัวจริง (Starter)" คนเดิมคนเดียวเท่านั้น
+            validSubs = roster.filter(p => (p.id === posData.starterId) || (p.player_id === posData.starterId));
+        }
+
+        if (validSubs.length === 0) {
+            Swal.fire("ไม่มีผู้เล่น", "ไม่มีผู้เล่นสำรองที่สามารถเปลี่ยนตัวลงมาได้ตามกติกา", "warning");
+            return;
+        }
+
+        // อัปเดต State พร้อมส่ง validSubs ไปให้ Modal ใช้งาน
         setSubData({
             isOpen: true,
             team: actualTeamCode,
             posIndex: posIndex,
-            playerOut
+            playerOut,
+            validSubs // 👈 เพิ่มตัวแปรนี้เข้าไป เพื่อให้ Modal เอาไปแสดงผล
         });
     };
+
+    
 
     // 2. ฟังก์ชันนี้จะถูกเรียกเมื่อกด Confirm ใน SubstitutionModal
     const handleSubstitutionConfirm = async (playerIn, isExceptional) => {
