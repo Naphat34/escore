@@ -110,7 +110,7 @@ const CourtView = ({
                         <div className="flex items-center justify-center relative">
                             <PlayerToken player={awayPositions[0]} colorClass={rightColor} onClick={() => onPlayerClick && onPlayerClick('away', 0)} /> {/* P1 */}
                             {servingSide === 'right' && !hideTokens && (
-                                <div className="absolute -right-1 lg:-right-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20"><img src="../assets/img/ball.png"></img></div>
+                                <div className="absolute -right-1 lg:-right-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20"><img src="./assets/img/ball.png"></img></div>
                             )}
                         </div>
                         {/* Row 2 */}
