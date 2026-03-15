@@ -626,10 +626,10 @@ fetchMatchData();
 
         // Auto-fill from last set if available, otherwise clear
         setHomeLineup(lastSetHomeLineup ? [...lastSetHomeLineup] : Array(6).fill(null));
-        setHomeLiberos(lastSetHomeLiberos ? { ...lastSetHomeLiberos } : { l1: null, l2: null });
+        
 
         setAwayLineup(lastSetAwayLineup ? [...lastSetAwayLineup] : Array(6).fill(null));
-        setAwayLiberos(lastSetAwayLiberos ? { ...lastSetAwayLiberos } : { l1: null, l2: null });
+        
 
         if (isTieBreak) {
             setServingTeam(null);
@@ -1598,6 +1598,7 @@ fetchMatchData();
                 awayLiberos={awayLiberos}
                 onSlotClick={openPickerForLineup}
                 onConfirm={handleLineupConfirm}
+                currentLiberos={teamForLineup === 'home' ? homeLiberos : awayLiberos}
             />
 
             <MatchLogModal

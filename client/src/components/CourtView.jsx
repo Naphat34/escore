@@ -127,41 +127,53 @@ const CourtView = ({
         </div>
 
             {/* ปุ่ม Libero ด้านล่างสนาม */}
-            {onLiberoClick && !hideTokens && leftTeam && rightTeam && (
-                <div className="flex justify-between items-start mt-4 px-2">
-                    <div className="flex flex-col items-center gap-2 text-center">
-                        <span className={`font-bold text-sm ${leftTeam.color}`}></span>
-                        <button 
-                            onClick={() => !disableLibero && onLiberoClick(leftTeam.code)}
-                            disabled={disableLibero}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-lg font-bold text-sm ${disableLibero ? 'bg-slate-800 text-slate-600 border border-slate-700 cursor-not-allowed' : 'bg-slate-900 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30'}`}
-                        >
-                            <Repeat size={16} />
-                            <span>
-                                {leftTeam.liberos?.l1 || leftTeam.liberos?.l2 
-                                    ? `L: ${[leftTeam.liberos.l1?.number, leftTeam.liberos.l2?.number].filter(Boolean).join(',')}` 
-                                    : 'Libero'}
-                            </span>
-                        </button>
-                    </div>
+                {onLiberoClick && !hideTokens && leftTeam && rightTeam && (
+                    <div className="flex justify-between items-start mt-4 px-2">
+                        
+                        {/* ทีมฝั่งซ้าย */}
+                        <div className="flex flex-col items-center gap-2 text-center min-w-[120px]">
+                            {/* ซ่อนปุ่มถ้าไม่มี Libero */}
+                            {(leftTeam.liberos?.l1 || leftTeam.liberos?.l2) && (
+                                <>
+                                    <span className={`font-bold text-sm ${leftTeam.color}`}></span>
+                                    <button 
+                                        onClick={() => !disableLibero && onLiberoClick(leftTeam.code)}
+                                        disabled={disableLibero}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-lg font-bold text-sm ${disableLibero ? 'bg-slate-800 text-slate-600 border border-slate-700 cursor-not-allowed' : 'bg-slate-900 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30'}`}
+                                    >
+                                        <Repeat size={16} />
+                                        <span>
+                                            {/* แสดงแค่ L: และหมายเลข */}
+                                            L: {[leftTeam.liberos.l1?.number, leftTeam.liberos.l2?.number].filter(Boolean).join(', ')}
+                                        </span>
+                                    </button>
+                                </>
+                            )}
+                        </div>
 
-                    <div className="flex flex-col items-center gap-2 text-center">
-                        <span className={`font-bold text-sm ${rightTeam.color}`}></span>
-                        <button 
-                            onClick={() => !disableLibero && onLiberoClick(rightTeam.code)}
-                            disabled={disableLibero}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-lg font-bold text-sm ${disableLibero ? 'bg-slate-800 text-slate-600 border border-slate-700 cursor-not-allowed' : 'bg-slate-900 hover:bg-pink-600 text-pink-400 hover:text-white border border-pink-500/30'}`}
-                        >
-                            <Repeat size={16} />
-                            <span>
-                                {rightTeam.liberos?.l1 || rightTeam.liberos?.l2 
-                                    ? `L: ${[rightTeam.liberos.l1?.number, rightTeam.liberos.l2?.number].filter(Boolean).join(',')}` 
-                                    : 'Libero'}
-                            </span>
-                        </button>
+                        {/* ทีมฝั่งขวา */}
+                        <div className="flex flex-col items-center gap-2 text-center min-w-[120px]">
+                            {/* ซ่อนปุ่มถ้าไม่มี Libero */}
+                            {(rightTeam.liberos?.l1 || rightTeam.liberos?.l2) && (
+                                <>
+                                    <span className={`font-bold text-sm ${rightTeam.color}`}></span>
+                                    <button 
+                                        onClick={() => !disableLibero && onLiberoClick(rightTeam.code)}
+                                        disabled={disableLibero}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all shadow-lg font-bold text-sm ${disableLibero ? 'bg-slate-800 text-slate-600 border border-slate-700 cursor-not-allowed' : 'bg-slate-900 hover:bg-pink-600 text-pink-400 hover:text-white border border-pink-500/30'}`}
+                                    >
+                                        <Repeat size={16} />
+                                        <span>
+                                            {/* แสดงแค่ L: และหมายเลข */}
+                                            L: {[rightTeam.liberos.l1?.number, rightTeam.liberos.l2?.number].filter(Boolean).join(', ')}
+                                        </span>
+                                    </button>
+                                </>
+                            )}
+                        </div>
+
                     </div>
-                </div>
-            )}
+                )}
         </div>
     );
 };
