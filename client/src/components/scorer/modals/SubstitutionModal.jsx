@@ -43,13 +43,16 @@ export default function SubstitutionModal({
             if (subTracker.count >= 6) {
                 isError = true;
                 ruleMessage = "หมดโควต้าเปลี่ยนตัวปกติ 6 ครั้งแล้วในเซตนี้ ";
-            } else if (posData?.isClosed) {
-                isError = true;
-                ruleMessage = "ไม่สามารถเปลี่ยนตัวได้อีกในเซตนี้";
             } else if (posData) {
-                // เปลี่ยนตัวกลับ: ต้องเป็นผู้เล่นตัวจริงคนเดิมเท่านั้น
-                eligibleBenchPlayers = availableBench.filter(p => p.id === posData.starterId);
-                ruleMessage = `เปลี่ยนตัวกลับ: ต้องเปลี่ยนตัวจริงเบอร์ ${eligibleBenchPlayers[0]?.number || '?'} กลับเข้าสนามเท่านั้น`;
+                if (posData.returned) {
+                    isError = true;
+                    ruleMessage = "ตำแหน่งนี้ปิดแล้ว ไม่สามารถเปลี่ยนตัวได้อีกในเซตนี้";
+                    eligibleBenchPlayers = [];
+                } else {
+                    // เปลี่ยนตัวกลับ: ต้องเป็นผู้เล่นตัวจริงคนเดิมเท่านั้น
+                    eligibleBenchPlayers = availableBench.filter(p => p.id === posData.starterId);
+                    ruleMessage = `เปลี่ยนตัวกลับ: ต้องเปลี่ยนตัวจริงเบอร์ ${eligibleBenchPlayers[0]?.number || '?'} กลับเข้าสนามเท่านั้น`;
+                }
             } else {
                 // เปลี่ยนตัวครั้งแรกของตำแหน่งนี้: ห้ามซ้ำกับคนที่เคยเปลี่ยนลงไปแล้ว
                 const usedIds = subTracker.usedPlayers || [];
