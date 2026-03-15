@@ -870,31 +870,67 @@ fetchMatchData();
     };
 
     const handleSubConfirm = (playerOut, playerIn) => {
-        if (!playerOut || !playerIn || !subTeam) return;
-        saveStateToHistory();
+    if (!playerOut || !playerIn || !subTeam) return;
+    saveStateToHistory();
 
-        const teamCode = subTeam;
-        const currentLineup = teamCode === 'home' ? homeLineup : awayLineup;
-        const setLineup = teamCode === 'home' ? setHomeLineup : setAwayLineup;
+    const teamCode = subTeam;
+    const currentLineup = teamCode === 'home' ? homeLineup : awayLineup;
+    const setLineup = teamCode === 'home' ? setHomeLineup : setAwayLineup;
+    
+    // ดึง Roster ตัวเต็มเพื่อมาเช็คสถานะกัปตันดั้งเดิม
+    const roster = teamCode === 'home' ? homeRoster : awayRoster;
 
-        // ค้นหา index ของผู้เล่นที่จะเปลี่ยนออก เพื่อให้แน่ใจว่าเปลี่ยนถูกตำแหน่ง
-        const posIndex = currentLineup.findIndex(p => p && (p.id || p.player_id) === (playerOut.id || playerOut.player_id));
+    // ค้นหา index ของผู้เล่นที่จะเปลี่ยนออก เพื่อให้แน่ใจว่าเปลี่ยนถูกตำแหน่ง
+    const posIndex = currentLineup.findIndex(p => p && (p.id || p.player_id) === (playerOut.id || playerOut.player_id));
 
-        if (posIndex === -1) {
-            console.error("Substitution Error: Player to sub out not found in lineup.", playerOut);
-            return;
-        }
+    if (posIndex === -1) {
+        console.error("Substitution Error: Player to sub out not found in lineup.", playerOut);
+        return;
+    }
 
-        // สร้าง lineup ใหม่โดยการเปลี่ยนผู้เล่นที่ index ที่ถูกต้อง
-        const newLineup = [...currentLineup];
-        newLineup[posIndex] = playerIn;
-        setLineup(newLineup);
+    // สร้าง lineup ใหม่โดยการเปลี่ยนผู้เล่นที่ index ที่ถูกต้อง
+    let newLineup = [...currentLineup];
+    
+    // ==========================================
+    // 🌟 LOGIC คืนสิทธิ์กัปตันให้ตัวจริง & ริบสิทธิ์ Court Captain
+    // ==========================================
+    
+    // ตรวจสอบว่าคนที่กำลังจะลงมา (playerIn) ใช่กัปตันทีมตัวจริงไหม?
+    const isRealCaptainEntering = roster.some(p => 
+        p.isCaptain && (p.id === playerIn.id || p.player_id === playerIn.player_id)
+    );
 
+    if (isRealCaptainEntering) {
+        // 1. ถ้ายืนยันว่าเป็นกัปตันตัวจริง ให้เซ็ตสถานะเป็นกัปตัน
+        newLineup[posIndex] = { ...playerIn, isCaptain: true };
+        
+        // 2. วนลูปผู้เล่นในสนามคนอื่นๆ เพื่อริบสิทธิ์กัปตันชั่วคราวออก (ลบเครื่องหมาย)
+        newLineup = newLineup.map((p, idx) => {
+            if (p && idx !== posIndex && p.isCaptain) {
+                return { ...p, isCaptain: false }; 
+            }
+            return p;
+        });
+    } else {
+        // ถ้าไม่ใช่กัปตันตัวจริง ต้องแน่ใจว่าไม่ได้พกสถานะกัปตันติดตัวลงไป
+        newLineup[posIndex] = { ...playerIn, isCaptain: false };
+    }
+    // ==========================================
+
+    setLineup(newLineup);
+
+    // เช็คว่า State subCounts หรือ substitutions ที่คุณใช้อยู่ชื่ออะไร 
+    // ในโค้ดก่อนหน้าคุณใช้ substitutions แต่อันนี้เป็น subCounts (อัปเดตตามที่คุณใช้อยู่ได้เลยครับ)
+    if (typeof setSubCounts === 'function') {
         setSubCounts(prev => ({ ...prev, [teamCode]: prev[teamCode] + 1 }));
-        saveEventToBackend('SUBSTITUTION', teamCode, { player_id: playerIn.id, details: { out: playerOut.id } });
-        setShowSubModal(false);
-        setSubTeam(null);
-    };
+    } else if (typeof setSubstitutions === 'function') {
+        setSubstitutions(prev => ({ ...prev, [teamCode]: prev[teamCode] + 1 }));
+    }
+
+    saveEventToBackend('SUBSTITUTION', teamCode, { player_id: playerIn.id || playerIn.player_id, details: { out: playerOut.id || playerOut.player_id } });
+    setShowSubModal(false);
+    setSubTeam(null);
+};
 
     const handleSanctionConfirm = (player, cardType) => {
         if (!player || !cardType || !sanctionTeam) return;
@@ -1159,7 +1195,7 @@ fetchMatchData();
             playerOut
         });
     };
-    
+
     // 2. ฟังก์ชันนี้จะถูกเรียกเมื่อกด Confirm ใน SubstitutionModal
     const handleSubstitutionConfirm = async (playerIn, isExceptional) => {
         const { team, posIndex, playerOut } = subData;
