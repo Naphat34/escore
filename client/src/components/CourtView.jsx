@@ -90,7 +90,7 @@ const CourtView = ({
                         <div className="flex items-center justify-center relative">
                             <PlayerToken player={homePositions[0]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 0)} /> {/* P1 */}
                             {servingSide === 'left' && !hideTokens && (
-                                <div className="absolute -left-1 lg:-left-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20"><img src={ballIcon}></img></div>
+                                <div className="absolute -left-1 lg:-left-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20"><img src={ballIcon} width="40px" height="40px"></img></div>
                             )}
                         </div>
                         <div className="flex items-center justify-center"><PlayerToken player={homePositions[1]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 1)} /></div> {/* P2 */}
@@ -112,7 +112,7 @@ const CourtView = ({
                         <div className="flex items-center justify-center relative">
                             <PlayerToken player={awayPositions[0]} colorClass={rightColor} onClick={() => onPlayerClick && onPlayerClick('away', 0)} /> {/* P1 */}
                             {servingSide === 'right' && !hideTokens && (
-                                <div className="absolute -right-1 lg:-right-4 -top-1 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20"><img src={ballIcon} style="width:30px; height:30px;"></img></div>
+                                <div className="absolute -right-1 lg:-right-4 top-1/2 -translate-y-1/2 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20"><img src={ballIcon} width="40px" height="40px"></img></div>
                             )}
                         </div>
                         {/* Row 2 */}
