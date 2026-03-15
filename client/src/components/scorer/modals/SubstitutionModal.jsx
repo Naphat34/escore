@@ -46,7 +46,7 @@ export default function SubstitutionModal({
             } else if (posData) {
                 if (posData.returned) {
                     isError = true;
-                    ruleMessage = "ตำแหน่งนี้ปิดแล้ว ไม่สามารถเปลี่ยนตัวได้อีกในเซตนี้";
+                    ruleMessage = "ตำแหน่งนี้ไม่สามารถเปลี่ยนตัวได้อีกในเซตนี้";
                     eligibleBenchPlayers = [];
                 } else {
                     // เปลี่ยนตัวกลับ: ต้องเป็นผู้เล่นตัวจริงคนเดิมเท่านั้น
