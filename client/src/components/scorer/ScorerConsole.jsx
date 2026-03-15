@@ -877,10 +877,10 @@ fetchMatchData();
     const currentLineup = teamCode === 'home' ? homeLineup : awayLineup;
     const setLineup = teamCode === 'home' ? setHomeLineup : setAwayLineup;
     
-    // ดึง Roster ตัวเต็มเพื่อมาเช็คสถานะกัปตันดั้งเดิม
+    // 1. ดึง Roster ตัวเต็มเพื่อหากัปตันทีมตัวจริง
     const roster = teamCode === 'home' ? homeRoster : awayRoster;
+    const realCaptain = roster.find(p => p.isCaptain);
 
-    // ค้นหา index ของผู้เล่นที่จะเปลี่ยนออก เพื่อให้แน่ใจว่าเปลี่ยนถูกตำแหน่ง
     const posIndex = currentLineup.findIndex(p => p && (p.id || p.player_id) === (playerOut.id || playerOut.player_id));
 
     if (posIndex === -1) {
@@ -888,39 +888,50 @@ fetchMatchData();
         return;
     }
 
-    // สร้าง lineup ใหม่โดยการเปลี่ยนผู้เล่นที่ index ที่ถูกต้อง
     let newLineup = [...currentLineup];
     
+    // 2. ใส่ผู้เล่นใหม่ลงไปในสนามก่อน (บังคับลบสถานะกัปตันเผื่อเขาพก C ติดมาด้วย)
+    newLineup[posIndex] = { ...playerIn, isCaptain: false };
+
     // ==========================================
-    // 🌟 LOGIC คืนสิทธิ์กัปตันให้ตัวจริง & ริบสิทธิ์ Court Captain
+    // 🌟 LOGIC จัดการตัว C (ห้ามมี C เกิน 1 คนเด็ดขาด)
     // ==========================================
     
-    // ตรวจสอบว่าคนที่กำลังจะลงมา (playerIn) ใช่กัปตันทีมตัวจริงไหม?
-    const isRealCaptainEntering = roster.some(p => 
-        p.isCaptain && (p.id === playerIn.id || p.player_id === playerIn.player_id)
+    // เช็คว่า "กัปตันทีมตัวจริง" อยู่ในสนามหรือไม่?
+    const isRealCaptainOnCourt = newLineup.some(p => 
+        p && realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)
     );
 
-    if (isRealCaptainEntering) {
-        // 1. ถ้ายืนยันว่าเป็นกัปตันตัวจริง ให้เซ็ตสถานะเป็นกัปตัน
-        newLineup[posIndex] = { ...playerIn, isCaptain: true };
-        
-        // 2. วนลูปผู้เล่นในสนามคนอื่นๆ เพื่อริบสิทธิ์กัปตันชั่วคราวออก (ลบเครื่องหมาย)
-        newLineup = newLineup.map((p, idx) => {
-            if (p && idx !== posIndex && p.isCaptain) {
-                return { ...p, isCaptain: false }; 
+    if (isRealCaptainOnCourt) {
+        // กรณีที่ 1: กัปตันตัวจริงอยู่ในสนาม -> กวาดล้าง C ของคนอื่นให้หมด
+        newLineup = newLineup.map(p => {
+            if (!p) return p;
+            
+            // ถ้าเป็นกัปตันตัวจริง ให้สิทธิ์ C
+            if (realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)) {
+                return { ...p, isCaptain: true };
             }
-            return p;
+            
+            // ถ้าเป็นผู้เล่นคนอื่น "ริบ C ออกทั้งหมด" (เอาเครื่องหมายของ Court Captain ออก)
+            return { ...p, isCaptain: false }; 
         });
     } else {
-        // ถ้าไม่ใช่กัปตันตัวจริง ต้องแน่ใจว่าไม่ได้พกสถานะกัปตันติดตัวลงไป
-        newLineup[posIndex] = { ...playerIn, isCaptain: false };
+        // กรณีที่ 2: กัปตันตัวจริงไม่อยู่ในสนาม 
+        // ตรวจสอบความปลอดภัย เผื่อมี Court Captain ค้างเกิน 1 คน
+        const courtCaptainsCount = newLineup.filter(p => p && p.isCaptain).length;
+        if (courtCaptainsCount > 1) {
+            // ถ้าระบบรวนมี C สองคน ให้ริบของคนที่เพิ่งเปลี่ยนตัวลงมา
+            newLineup[posIndex].isCaptain = false;
+        }
+        
+        // หมายเหตุ: กรณีที่คุณเปลี่ยนเอา Court Captain คนปัจจุบันออก 
+        // สนามจะไม่มี C เหลือเลย ซึ่งถูกต้องแล้ว! ระบบจะเด้งถามให้ตั้งกัปตันใหม่เองเมื่อคุณคลิกผู้เล่นในครั้งถัดไป
     }
     // ==========================================
 
     setLineup(newLineup);
 
-    // เช็คว่า State subCounts หรือ substitutions ที่คุณใช้อยู่ชื่ออะไร 
-    // ในโค้ดก่อนหน้าคุณใช้ substitutions แต่อันนี้เป็น subCounts (อัปเดตตามที่คุณใช้อยู่ได้เลยครับ)
+    // อัปเดตโควต้าเปลี่ยนตัว
     if (typeof setSubCounts === 'function') {
         setSubCounts(prev => ({ ...prev, [teamCode]: prev[teamCode] + 1 }));
     } else if (typeof setSubstitutions === 'function') {
