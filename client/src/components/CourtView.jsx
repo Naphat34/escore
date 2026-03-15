@@ -138,7 +138,7 @@ const CourtView = ({
                             <span>
                                 {leftTeam.liberos?.l1 || leftTeam.liberos?.l2 
                                     ? `L: ${[leftTeam.liberos.l1?.number, leftTeam.liberos.l2?.number].filter(Boolean).join(',')}` 
-                                    : 'เปลี่ยน Libero'}
+                                    : 'Libero'}
                             </span>
                         </button>
                     </div>
@@ -154,7 +154,7 @@ const CourtView = ({
                             <span>
                                 {rightTeam.liberos?.l1 || rightTeam.liberos?.l2 
                                     ? `L: ${[rightTeam.liberos.l1?.number, rightTeam.liberos.l2?.number].filter(Boolean).join(',')}` 
-                                    : 'เปลี่ยน Libero'}
+                                    : 'Libero'}
                             </span>
                         </button>
                     </div>
