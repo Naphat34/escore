@@ -1598,7 +1598,7 @@ fetchMatchData();
                 awayLiberos={awayLiberos}
                 onSlotClick={openPickerForLineup}
                 onConfirm={handleLineupConfirm}
-                currentLiberos={teamForLineup === 'home' ? homeLiberos : awayLiberos}
+                
             />
 
             <MatchLogModal
