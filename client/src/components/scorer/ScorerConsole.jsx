@@ -1008,6 +1008,47 @@ fetchMatchData();
 
         if (!playerOut) return;
 
+        // ==========================================
+        // 🌟 NEW LOGIC: เช็คกัปตันทีมในสนาม
+        // ==========================================
+        const hasCaptainOnCourt = lineup.some(p => p && p.isCaptain);
+
+        if (!hasCaptainOnCourt) {
+            const result = await Swal.fire({
+                title: 'ตั้งกัปตันทีมในสนาม?',
+                text: `ไม่มีกัปตันทีมอยู่ในสนาม คุณต้องการแต่งตั้งให้ผู้เล่นหมายเลข ${playerOut.number} เป็นกัปตันทีม (Court Captain) ใช่หรือไม่?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'ใช่, แต่งตั้ง',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if (result.isConfirmed) {
+                // อัปเดตสถานะ isCaptain ให้กับผู้เล่นที่ถูกคลิก
+                const setLineup = actualTeamCode === 'home' ? setHomeLineup : setAwayLineup;
+                const newLineup = [...lineup];
+                newLineup[posIndex] = { ...playerOut, isCaptain: true };
+                setLineup(newLineup);
+
+                // บันทึก Log เหตุการณ์ (ถ้าต้องการ)
+                setMatchEvents(prev => [{
+                    id: Date.now(),
+                    set: matchData.currentSet,
+                    score: `${score.home}-${score.away}`,
+                    description: `Court Captain Assigned: #${playerOut.number} (${actualTeamCode === 'home' ? matchData.teamHome : matchData.teamAway})`,
+                    metadata: { type: 'CAPTAIN', player: playerOut.number, team: actualTeamCode },
+                    time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                }, ...prev]);
+            }
+            // return ออกทันที เพื่อบังคับให้ต้องตั้งกัปตันก่อน ถึงจะเปลี่ยนตัวหรือทำอย่างอื่นได้
+            return; 
+        }
+        // ==========================================
+        // สิ้นสุดส่วนที่เพิ่มใหม่
+        // ==========================================
+
         if (playerOut.isLibero) {
             Swal.fire({
                 icon: 'error',
@@ -1118,7 +1159,7 @@ fetchMatchData();
             playerOut
         });
     };
-
+    
     // 2. ฟังก์ชันนี้จะถูกเรียกเมื่อกด Confirm ใน SubstitutionModal
     const handleSubstitutionConfirm = async (playerIn, isExceptional) => {
         const { team, posIndex, playerOut } = subData;
