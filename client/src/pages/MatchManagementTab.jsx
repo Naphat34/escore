@@ -365,22 +365,30 @@ export default function MatchManagementTab({ darkMode }) {
 
     // --- Render ---
     return (
-        <div className={`p-6 min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-800'}`}>
+        <div className={`p-6 min-h-screen ${darkMode ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white' : 'bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800'}`}>
             
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                    <Swords className="text-indigo-500" /> Match Management
-                </h2>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg">
+                        <Swords className="text-white" size={28} />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            Match Management
+                        </h2>
+                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Organize and manage volleyball matches</p>
+                    </div>
+                </div>
                 
                 {/* Competition Selector Group */}
-                <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto flex-1 justify-end">
+                <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto flex-1 justify-end">
                     <div className="w-full md:w-64">
-                        <label className={`block text-xs font-bold uppercase mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Competition</label>
+                        <label className={`block text-xs font-bold uppercase mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>🏆 Competition</label>
                         <select
                             value={selectedBaseName}
                             onChange={(e) => setSelectedBaseName(e.target.value)}
-                            className={`w-full p-2.5 rounded-lg border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'}`}
+                            className={`w-full p-3 rounded-xl border-2 transition-all hover:shadow-md ${darkMode ? 'bg-gray-800 border-gray-600 text-white hover:border-gray-500' : 'bg-white border-gray-300 hover:border-indigo-400'}`}
                         >
                             {uniqueBaseNames.map(name => (
                                 <option key={name} value={name}>{name}</option>
@@ -389,11 +397,11 @@ export default function MatchManagementTab({ darkMode }) {
                     </div>
                     
                     <div>
-                        <label className={`block text-xs font-bold uppercase mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Gender</label>
-                        <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                        <label className={`block text-xs font-bold uppercase mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>👥 Gender</label>
+                        <div className={`flex rounded-xl p-1 border-2 ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>
                             <button 
                                 onClick={() => setFilterGender('All')} 
-                                className={`px-3 py-1.5 text-xs font-bold rounded-md transition ${filterGender === 'All' ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
+                                className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${filterGender === 'All' ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 hover:bg-white/50'}`}
                             >
                                 All
                             </button>
@@ -401,7 +409,7 @@ export default function MatchManagementTab({ darkMode }) {
                                 <button 
                                     key={g} 
                                     onClick={() => setFilterGender(g)} 
-                                    className={`px-3 py-1.5 text-xs font-bold rounded-md transition ${filterGender === g ? 'bg-white dark:bg-gray-600 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
+                                    className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${filterGender === g ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 hover:bg-white/50'}`}
                                 >
                                     {g}
                                 </button>
@@ -415,127 +423,146 @@ export default function MatchManagementTab({ darkMode }) {
                     <button
                         onClick={handleOpenCreate}
                         disabled={!selectedBaseName}
-                        className={`px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all h-[42px] ${
+                        className={`px-6 py-3 rounded-xl flex items-center gap-3 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
                             selectedBaseName 
-                            ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg' 
+                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white' 
                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                     >
-                        <PlusCircle size={18} /> Add Match
+                        <PlusCircle size={20} /> Add Match
                     </button>
                 </div>
             </div>
 
             {/* Match List */}
             {loading ? (
-                <div className="text-center py-10">Loading matches...</div>
+                <div className="flex items-center justify-center py-16">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+                    <span className="ml-3 text-lg">Loading matches...</span>
+                </div>
             ) : matches.length === 0 ? (
-                <div className={`text-center py-12 rounded-xl border-2 border-dashed ${darkMode ? 'border-gray-700 text-gray-500' : 'border-gray-300 text-gray-400'}`}>
-                    {selectedBaseName ? "No matches found. Create one!" : "Please select a competition to view matches."}
+                <div className={`text-center py-16 rounded-2xl border-2 border-dashed ${darkMode ? 'border-gray-600 bg-gray-800/50' : 'border-gray-300 bg-gray-50'} relative overflow-hidden`}>
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-4 left-4 w-16 h-16 bg-indigo-500 rounded-full"></div>
+                        <div className="absolute bottom-4 right-4 w-12 h-12 bg-purple-500 rounded-full"></div>
+                        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-pink-500 rounded-full"></div>
+                    </div>
+                    <div className="relative z-10">
+                        <Trophy className={`mx-auto mb-4 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} size={64} />
+                        <h3 className="text-xl font-bold mb-2">No matches found</h3>
+                        <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {selectedBaseName ? "Create your first match to get started!" : "Please select a competition to view matches."}
+                        </p>
+                    </div>
                 </div>
             ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                     {matches.map((match) => (
-                        <div key={match.id} className={`group relative p-5 rounded-xl border transition-all hover:shadow-md ${darkMode ? 'bg-gray-800 border-gray-700 hover:bg-gray-750' : 'bg-white border-gray-200 shadow-sm hover:bg-gray-50'}`}>
+                        <div key={match.id} className={`group relative p-6 rounded-2xl border transition-all hover:shadow-xl hover:scale-[1.02] ${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-750 border-gray-600 hover:from-gray-750 hover:to-gray-700' : 'bg-gradient-to-r from-white to-gray-50 border-gray-200 shadow-md hover:from-gray-50 hover:to-white'}`}>
                             
                             <div className="flex flex-col md:flex-row items-center gap-6">
                                 
                                 {/* 1. Left: Match Details (Number, Round, Gender) */}
-                                <div className="flex flex-row md:flex-col items-center md:items-start gap-3 md:gap-1 min-w-[120px] border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-700 pb-3 md:pb-0 md:pr-6 w-full md:w-auto justify-between md:justify-start">
-                                    <div>
-                                        <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider">Match #{match.match_number}</span>
-                                        <div className="text-sm font-bold text-gray-700 dark:text-gray-200">{match.round_name}</div>
+                                <div className="flex flex-row md:flex-col items-center md:items-start gap-3 md:gap-2 min-w-[140px] border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-600 pb-4 md:pb-0 md:pr-6 w-full md:w-auto justify-between md:justify-start">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                                            <ListFilter className="text-indigo-600 dark:text-indigo-400" size={16} />
+                                        </div>
+                                        <div>
+                                            <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Match #{match.match_number}</span>
+                                            <div className="text-base font-bold text-gray-800 dark:text-gray-200">{match.round_name}</div>
+                                        </div>
                                     </div>
-                                    <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide border ${
+                                    <div className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border-2 ${
                                         match.gender === 'Female' 
-                                            ? 'bg-pink-50 text-pink-600 border-pink-200 dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-800' 
+                                            ? 'bg-gradient-to-r from-pink-100 to-rose-100 text-pink-700 border-pink-300 dark:from-pink-900/50 dark:to-rose-900/50 dark:text-pink-300 dark:border-pink-700' 
                                             : match.gender === 'Mix'
-                                                ? 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800'
-                                                : 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'
+                                                ? 'bg-gradient-to-r from-purple-100 to-violet-100 text-purple-700 border-purple-300 dark:from-purple-900/50 dark:to-violet-900/50 dark:text-purple-300 dark:border-purple-700'
+                                                : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-blue-300 dark:from-blue-900/50 dark:to-indigo-900/50 dark:text-blue-300 dark:border-blue-700'
                                     }`}>
                                         {match.gender || 'Male'}
                                     </div>
                                 </div>
 
                                 {/* 2. Center: Teams (Full Names) */}
-                                <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-4 w-full">
-                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-center md:justify-end gap-3 w-full">
-                                        <div className="font-bold text-lg md:text-xl text-gray-900 dark:text-white leading-tight break-words text-center md:text-right order-2 md:order-1">
+                                <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-6 w-full">
+                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-center md:justify-end gap-4 w-full">
+                                        <div className="font-bold text-xl md:text-2xl text-gray-900 dark:text-white leading-tight break-words text-center md:text-right order-2 md:order-1">
                                         {registeredTeams.find(t => t.id == match.home_team_id)?.name || match.home_team || 'TBD'}
                                         </div>
-                                        <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-600 shadow-sm order-1 md:order-2 shrink-0">
+                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700 flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg order-1 md:order-2 shrink-0">
                                             {registeredTeams.find(t => t.id == match.home_team_id)?.logo_url ? (
-                                                <img src={registeredTeams.find(t => t.id == match.home_team_id).logo_url} alt="Home" className="w-full h-full object-contain p-1" />
+                                                <img src={registeredTeams.find(t => t.id == match.home_team_id).logo_url} alt="Home" className="w-full h-full object-contain p-2" />
                                             ) : (
-                                                <Shield size={20} className="text-gray-300 dark:text-gray-500" />
+                                                <Shield size={24} className="text-white" />
                                             )}
                                         </div>
                                     </div>
                                     
-                                    <div className="flex flex-col items-center shrink-0">
+                                    <div className="flex flex-col items-center shrink-0 px-6">
                                         {(match.status === 'completed' || match.home_set_score > 0 || match.away_set_score > 0) ? (
                                             <div className="flex flex-col items-center">
-                                                <div className="px-4 py-1 rounded-lg bg-gray-800 text-white font-mono text-xl font-bold tracking-widest mb-1">
+                                                <div className="px-6 py-3 rounded-2xl bg-gradient-to-r from-gray-800 to-gray-900 text-white font-mono text-2xl font-bold tracking-widest mb-2 shadow-lg">
                                                     {match.home_set_score} - {match.away_set_score}
                                                 </div>
                                                 {match.set_scores && (
-                                                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1 max-w-[150px] text-center break-words">
+                                                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 max-w-[200px] text-center break-words bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-lg">
                                                         {typeof match.set_scores === 'string' ? JSON.parse(match.set_scores).join(', ') : Array.isArray(match.set_scores) ? match.set_scores.join(', ') : ''}
                                                     </div>
                                                 )}
                                                 {match.status === 'completed' && (
-                                                    <span className="px-2 py-0.5 rounded bg-green-100 text-green-700 text-[10px] font-bold border border-green-200 whitespace-nowrap">
-                                                        จบการแข่งขันเป็นทางการ
+                                                    <span className="px-3 py-1 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold border border-green-400 shadow-md">
+                                                        ✅ จบการแข่งขันเป็นทางการ
                                                     </span>
                                                 )}
                                             </div>
                                         ) : (
-                                            <div className="px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-700 font-mono text-sm font-bold text-gray-500 dark:text-gray-400">
+                                            <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-mono text-lg font-bold shadow-lg">
                                                 VS
                                             </div>
                                         )}
                                     </div>
                                     
-                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-center md:justify-start gap-3 w-full">
-                                        <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-600 shadow-sm shrink-0">
+                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 w-full">
+                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg shrink-0">
                                             {registeredTeams.find(t => t.id == match.away_team_id)?.logo_url ? (
-                                                <img src={registeredTeams.find(t => t.id == match.away_team_id).logo_url} alt="Away" className="w-full h-full object-contain p-1" />
+                                                <img src={registeredTeams.find(t => t.id == match.away_team_id).logo_url} alt="Away" className="w-full h-full object-contain p-2" />
                                             ) : (
-                                                <Shield size={20} className="text-gray-300 dark:text-gray-500" />
+                                                <Shield size={24} className="text-white" />
                                             )}
                                         </div>
-                                        <div className="font-bold text-lg md:text-xl text-gray-900 dark:text-white leading-tight break-words text-center md:text-left">
+                                        <div className="font-bold text-xl md:text-2xl text-gray-900 dark:text-white leading-tight break-words text-center md:text-left">
                                             {registeredTeams.find(t => t.id == match.away_team_id)?.name || match.away_team || 'TBD'}
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* 3. Right: Meta Info (Time, Location) */}
-                                <div className="flex flex-row md:flex-col gap-4 md:gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-[160px] justify-center md:justify-end text-center md:text-right border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700 pt-3 md:pt-0 md:pl-6 w-full md:w-auto">
-                                    <div className="flex items-center justify-center md:justify-end gap-2">
-                                        <Calendar size={14} className="text-indigo-400"/> 
-                                        {match.start_time ? new Date(match.start_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date TBD'}
+                                <div className="flex flex-row md:flex-col gap-4 md:gap-2 text-sm text-gray-600 dark:text-gray-300 min-w-[180px] justify-center md:justify-end text-center md:text-right border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-600 pt-4 md:pt-0 md:pl-6 w-full md:w-auto">
+                                    <div className="flex items-center justify-center md:justify-end gap-2 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                                        <Calendar size={16} className="text-indigo-500"/> 
+                                        <span className="font-medium">{match.start_time ? new Date(match.start_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date TBD'}</span>
                                     </div>
-                                    <div className="flex items-center justify-center md:justify-end gap-2">
-                                        <Clock size={14} className="text-indigo-400"/> 
-                                        {match.start_time ? new Date(match.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Time TBD'}
+                                    <div className="flex items-center justify-center md:justify-end gap-2 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                                        <Clock size={16} className="text-indigo-500"/> 
+                                        <span className="font-medium">{match.start_time ? new Date(match.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Time TBD'}</span>
                                     </div>
-                                    <div className="flex items-center justify-center md:justify-end gap-2">
-                                        <MapPin size={14} className="text-indigo-400"/> 
-                                        {match.location || 'Location TBD'}
+                                    <div className="flex items-center justify-center md:justify-end gap-2 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
+                                        <MapPin size={16} className="text-indigo-500"/> 
+                                        <span className="font-medium">{match.location || 'Location TBD'}</span>
                                     </div>
                                 </div>
 
                                 {/* 4. Actions */}
-                                <div className="flex gap-2 md:flex-col justify-center border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700 pt-3 md:pt-0 md:pl-4 w-full md:w-auto">
-                                    <button onClick={() => handleEditMatch(match)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg dark:hover:bg-gray-700 transition-colors" title="Edit">
-                                        <Edit2 size={18} />
+                                <div className="flex gap-3 md:flex-col justify-center border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-600 pt-4 md:pt-0 md:pl-4 w-full md:w-auto">
+                                    <button onClick={() => handleEditMatch(match)} className="p-3 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all hover:scale-110 shadow-md" title="Edit Match">
+                                        <Edit2 size={20} />
                                     </button>
-                                    <button onClick={() => openScoreModal(match)} className="p-2 text-green-500 hover:bg-green-50 rounded-lg dark:hover:bg-gray-700 transition-colors" title="Update Score">
-                                        <Trophy size={18} />
+                                    <button onClick={() => openScoreModal(match)} className="p-3 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-xl transition-all hover:scale-110 shadow-md" title="Update Score">
+                                        <Trophy size={20} />
                                     </button>
-                                    <button onClick={() => handleDeleteMatch(match.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg dark:hover:bg-gray-700 transition-colors" title="Delete">
-                                        <Trash2 size={18} />
+                                    <button onClick={() => handleDeleteMatch(match.id)} className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all hover:scale-110 shadow-md" title="Delete Match">
+                                        <Trash2 size={20} />
                                     </button>
                                 </div>
                             </div>
@@ -546,31 +573,48 @@ export default function MatchManagementTab({ darkMode }) {
 
             {/* --- Create/Edit Modal --- */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className={`w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                        <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                            <h3 className="text-xl font-bold">{isEditing ? 'Edit Match' : 'New Match'}</h3>
-                            <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
-                                <X size={24} />
-                            </button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+                    <div className={`w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden border ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'}`}>
+                        <div className={`p-6 border-b ${darkMode ? 'border-gray-600 bg-gradient-to-r from-gray-800 to-gray-700' : 'border-gray-200 bg-gradient-to-r from-indigo-50 to-purple-50'}`}>
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600">
+                                        {isEditing ? <Edit2 className="text-white" size={24} /> : <PlusCircle className="text-white" size={24} />}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{isEditing ? 'Edit Match' : 'Create New Match'}</h3>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{isEditing ? 'Update match details' : 'Set up a new volleyball match'}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 hover:text-gray-700 transition-colors">
+                                    <X size={24} />
+                                </button>
+                            </div>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                        <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             {/* Row 1: Match Info */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input 
-                                    label="Match Number" 
-                                    type="number" 
-                                    value={matchForm.match_number}
-                                    onChange={e => setMatchForm({...matchForm, match_number: e.target.value})}
-                                    darkMode={darkMode}
-                                />
-                                <div className="flex flex-col gap-1">
-                                    <label className={`text-xs font-bold uppercase mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Gender</label>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className={`flex items-center gap-2 text-sm font-bold uppercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        <ListFilter size={16} className="text-indigo-500" /> Match Number
+                                    </label>
+                                    <Input 
+                                        type="number" 
+                                        value={matchForm.match_number}
+                                        onChange={e => setMatchForm({...matchForm, match_number: e.target.value})}
+                                        darkMode={darkMode}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className={`flex items-center gap-2 text-sm font-bold uppercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        <Shield size={16} className="text-indigo-500" /> Gender
+                                    </label>
                                     <select 
                                         value={matchForm.gender}
                                         onChange={e => setMatchForm({...matchForm, gender: e.target.value})}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                                        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
                                     >
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
@@ -579,13 +623,15 @@ export default function MatchManagementTab({ darkMode }) {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-1">
-                                    <label className={`text-xs font-bold uppercase mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Round</label>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className={`flex items-center gap-2 text-sm font-bold uppercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        <Trophy size={16} className="text-indigo-500" /> Round
+                                    </label>
                                     <select 
                                         value={matchForm.round_name}
                                         onChange={e => setMatchForm({...matchForm, round_name: e.target.value})}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                                        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
                                     >
                                         <option>Round 1</option>
                                         <option>Round 2</option>
@@ -594,75 +640,96 @@ export default function MatchManagementTab({ darkMode }) {
                                         <option>Final</option>
                                     </select>
                                 </div>
-                                <Input 
-                                    label="Pool (Optional)" 
-                                    value={matchForm.pool_name}
-                                    onChange={e => setMatchForm({...matchForm, pool_name: e.target.value})}
-                                    darkMode={darkMode}
-                                    placeholder="e.g. Pool A"
-                                />
+                                <div className="space-y-2">
+                                    <label className={`flex items-center gap-2 text-sm font-bold uppercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        <Printer size={16} className="text-indigo-500" /> Pool (Optional)
+                                    </label>
+                                    <Input 
+                                        value={matchForm.pool_name}
+                                        onChange={e => setMatchForm({...matchForm, pool_name: e.target.value})}
+                                        darkMode={darkMode}
+                                        placeholder="e.g. Pool A"
+                                        className="w-full"
+                                    />
+                                </div>
                             </div>
 
                             {/* Row 2: Teams */}
-                            <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-100 dark:border-gray-600">
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-xs font-bold uppercase text-indigo-500 mb-1">Home Team</label>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0">
-                                            {registeredTeams.find(t => t.id == matchForm.home_team_id)?.logo_url ? (
-                                                <img src={registeredTeams.find(t => t.id == matchForm.home_team_id).logo_url} alt="" className="w-full h-full object-contain p-1"/>
-                                            ) : <Shield size={16} className="text-gray-300 dark:text-gray-600"/>}
+                            <div className={`p-6 rounded-2xl border-2 ${darkMode ? 'bg-gradient-to-r from-gray-700 to-gray-600 border-gray-500' : 'bg-gradient-to-r from-indigo-50 to-purple-50 border-indigo-200'}`}>
+                                <h4 className="text-lg font-bold mb-4 flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                                    <Shield size={20} /> Teams
+                                </h4>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-2 text-sm font-bold uppercase text-indigo-600 dark:text-indigo-400">
+                                            🏠 Home Team
+                                        </label>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg shrink-0">
+                                                {registeredTeams.find(t => t.id == matchForm.home_team_id)?.logo_url ? (
+                                                    <img src={registeredTeams.find(t => t.id == matchForm.home_team_id).logo_url} alt="" className="w-full h-full object-contain p-1"/>
+                                                ) : <Shield size={20} className="text-white"/>}
+                                            </div>
+                                            <select 
+                                                value={matchForm.home_team_id}
+                                                onChange={e => setMatchForm({...matchForm, home_team_id: e.target.value})}
+                                                className={`flex-1 px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                                            >
+                                                <option value="">-- Select Home Team --</option>
+                                                {registeredTeams.map(t => (
+                                                    <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
+                                                ))}
+                                            </select>
                                         </div>
-                                        <select 
-                                            value={matchForm.home_team_id}
-                                            onChange={e => setMatchForm({...matchForm, home_team_id: e.target.value})}
-                                            className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
-                                        >
-                                            <option value="">-- Select Home Team --</option>
-                                            {registeredTeams.map(t => (
-                                                <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
-                                            ))}
-                                        </select>
                                     </div>
-                                </div>
 
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-xs font-bold uppercase text-rose-500 mb-1">Away Team</label>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0">
-                                            {registeredTeams.find(t => t.id == matchForm.away_team_id)?.logo_url ? (
-                                                <img src={registeredTeams.find(t => t.id == matchForm.away_team_id).logo_url} alt="" className="w-full h-full object-contain p-1"/>
-                                            ) : <Shield size={16} className="text-gray-300 dark:text-gray-600"/>}
+                                    <div className="space-y-3">
+                                        <label className="flex items-center gap-2 text-sm font-bold uppercase text-rose-600 dark:text-rose-400">
+                                            ✈️ Away Team
+                                        </label>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg shrink-0">
+                                                {registeredTeams.find(t => t.id == matchForm.away_team_id)?.logo_url ? (
+                                                    <img src={registeredTeams.find(t => t.id == matchForm.away_team_id).logo_url} alt="" className="w-full h-full object-contain p-1"/>
+                                                ) : <Shield size={20} className="text-white"/>}
+                                            </div>
+                                            <select 
+                                                value={matchForm.away_team_id}
+                                                onChange={e => setMatchForm({...matchForm, away_team_id: e.target.value})}
+                                                className={`flex-1 px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                                            >
+                                                <option value="">-- Select Away Team --</option>
+                                                {registeredTeams.map(t => (
+                                                    <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
+                                                ))}
+                                            </select>
                                         </div>
-                                        <select 
-                                            value={matchForm.away_team_id}
-                                            onChange={e => setMatchForm({...matchForm, away_team_id: e.target.value})}
-                                            className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
-                                        >
-                                            <option value="">-- Select Away Team --</option>
-                                            {registeredTeams.map(t => (
-                                                <option key={t.id} value={t.id}>{t.name} ({t.code})</option>
-                                            ))}
-                                        </select>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Row 3: Time & Location */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <Input 
-                                    label="Start Time" 
-                                    type="datetime-local" 
-                                    value={matchForm.start_time}
-                                    onChange={e => setMatchForm({...matchForm, start_time: e.target.value})}
-                                    darkMode={darkMode}
-                                />
-                                <div className="flex flex-col gap-1">
-                                    <label className={`text-xs font-bold uppercase mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Location (Stadium)</label>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className={`flex items-center gap-2 text-sm font-bold uppercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        <Clock size={16} className="text-indigo-500" /> Start Time
+                                    </label>
+                                    <Input 
+                                        type="datetime-local" 
+                                        value={matchForm.start_time}
+                                        onChange={e => setMatchForm({...matchForm, start_time: e.target.value})}
+                                        darkMode={darkMode}
+                                        className="w-full"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className={`flex items-center gap-2 text-sm font-bold uppercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        <MapPin size={16} className="text-indigo-500" /> Location (Stadium)
+                                    </label>
                                     <select 
                                         value={matchForm.location}
                                         onChange={e => setMatchForm({...matchForm, location: e.target.value})}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                                        className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
                                     >
                                         <option value="">-- Select Stadium --</option>
                                         {stadiums.map(s => (
@@ -673,19 +740,19 @@ export default function MatchManagementTab({ darkMode }) {
                             </div>
 
                             {/* Footer Buttons */}
-                            <div className="flex justify-end gap-3 mt-4 pt-4 border-t dark:border-gray-700">
+                            <div className="flex justify-end gap-4 mt-8 pt-6 border-t dark:border-gray-600">
                                 <button
                                     type="button"
                                     onClick={() => setShowModal(false)}
-                                    className="px-4 py-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    className="px-6 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-6 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 shadow-lg"
+                                    className="px-8 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center gap-2"
                                 >
-                                    <Save size={18} className="inline mr-2" />
+                                    <Save size={20} />
                                     {isEditing ? 'Update Match' : 'Create Match'}
                                 </button>
                             </div>
@@ -696,41 +763,72 @@ export default function MatchManagementTab({ darkMode }) {
 
             {/* --- Score Modal --- */}
             {scoringMatch && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className={`w-full max-w-md rounded-xl shadow-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                        <div className="p-6 border-b dark:border-gray-700 flex justify-between items-center">
-                            <h3 className="text-xl font-bold">Update Score</h3>
-                            <button onClick={() => setScoringMatch(null)}><X size={24} /></button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+                    <div className={`w-full max-w-lg rounded-3xl shadow-2xl border ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'}`}>
+                        <div className={`p-6 border-b ${darkMode ? 'border-gray-600 bg-gradient-to-r from-gray-800 to-gray-700' : 'border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50'}`}>
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600">
+                                        <Trophy className="text-white" size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Update Match Score</h3>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Record the final scores</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setScoringMatch(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl text-gray-500 hover:text-gray-700 transition-colors">
+                                    <X size={24} />
+                                </button>
+                            </div>
                         </div>
                         <div className="p-6 space-y-6">
-                            <div className="text-center">
-                                <p className="text-sm text-gray-500">Match #{scoringMatch.match_number}</p>
-                                <h4 className="font-bold">{registeredTeams.find(t => t.id == scoringMatch.home_team_id)?.name} vs {registeredTeams.find(t => t.id == scoringMatch.away_team_id)?.name}</h4>
+                            <div className="text-center bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-gray-700 dark:to-gray-600 p-4 rounded-2xl">
+                                <p className="text-sm text-indigo-600 dark:text-indigo-400 font-bold mb-2">Match #{scoringMatch.match_number}</p>
+                                <h4 className="font-bold text-lg text-gray-900 dark:text-white flex items-center justify-center gap-2">
+                                    <span className="text-blue-600">{registeredTeams.find(t => t.id == scoringMatch.home_team_id)?.name}</span>
+                                    <span className="text-gray-400">vs</span>
+                                    <span className="text-red-600">{registeredTeams.find(t => t.id == scoringMatch.away_team_id)?.name}</span>
+                                </h4>
                             </div>
                             
                             <div>
-                                <label className="block text-xs font-bold uppercase mb-2">Set Scores (Points)</label>
-                                <div className={`grid grid-cols-5 gap-2`}>
+                                <label className={`flex items-center gap-2 text-sm font-bold uppercase mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                    <Trophy size={16} className="text-green-500" /> Set Scores (Points)
+                                </label>
+                                <div className={`grid grid-cols-5 gap-3`}>
                                     {scoreForm.set_scores.map((val, idx) => (
-                                        <input
-                                            key={idx}
-                                            type="text"
-                                            placeholder={`Set ${idx + 1}`}
-                                            value={val}
-                                            onChange={(e) => {
-                                                const newScores = [...scoreForm.set_scores];
-                                                newScores[idx] = e.target.value;
-                                                setScoreForm({ ...scoreForm, set_scores: newScores });
-                                            }}
-                                            className={`w-full p-2 text-center border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-300'}`}
-                                        />
+                                        <div key={idx} className="text-center">
+                                            <input
+                                                type="text"
+                                                placeholder={`Set ${idx + 1}`}
+                                                value={val}
+                                                onChange={(e) => {
+                                                    const newScores = [...scoreForm.set_scores];
+                                                    newScores[idx] = e.target.value;
+                                                    setScoreForm({ ...scoreForm, set_scores: newScores });
+                                                }}
+                                                className={`w-full p-3 text-center border-2 rounded-xl focus:ring-2 focus:ring-green-500 outline-none transition-all font-mono text-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                                            />
+                                            <p className="text-xs text-gray-500 mt-1">Set {idx + 1}</p>
+                                        </div>
                                     ))}
                                 </div>
-                                <p className="text-xs text-center mt-2 text-gray-400">Format: "25-20"</p>
+                                <p className="text-xs text-center mt-4 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 p-2 rounded-lg">Format: "25-20" (home-away)</p>
                             </div>
 
-                            <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
-                                <button type="button" onClick={() => setScoringMatch(null)} className="px-4 py-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700">Cancel</button>
+                            <div className="flex justify-end gap-4 pt-6 border-t dark:border-gray-600">
+                                <button type="button" onClick={() => setScoringMatch(null)} className="px-6 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium">
+                                    Cancel
+                                </button>
+                                <button onClick={handleScoreSubmit} className="px-8 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                                    <Save size={20} />
+                                    Update Score
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
                                 <button onClick={handleSaveScore} className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 shadow-lg">
                                     <Save size={18} className="inline mr-2" /> Save Score
                                 </button>
