@@ -384,7 +384,7 @@ export default function MatchManagementTab({ darkMode }) {
                 {/* Competition Selector Group */}
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto flex-1 justify-end">
                     <div className="w-full md:w-64">
-                        <label className={`block text-xs font-bold uppercase mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>🏆 Competition</label>
+                        <label className={`block text-xs font-bold uppercase mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Competition</label>
                         <select
                             value={selectedBaseName}
                             onChange={(e) => setSelectedBaseName(e.target.value)}
@@ -397,7 +397,7 @@ export default function MatchManagementTab({ darkMode }) {
                     </div>
                     
                     <div>
-                        <label className={`block text-xs font-bold uppercase mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>👥 Gender</label>
+                        <label className={`block text-xs font-bold uppercase mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Gender</label>
                         <div className={`flex rounded-xl p-1 border-2 ${darkMode ? 'bg-gray-800 border-gray-600' : 'bg-gray-100 border-gray-300'}`}>
                             <button 
                                 onClick={() => setFilterGender('All')} 
@@ -510,11 +510,9 @@ export default function MatchManagementTab({ darkMode }) {
                                                         {typeof match.set_scores === 'string' ? JSON.parse(match.set_scores).join(', ') : Array.isArray(match.set_scores) ? match.set_scores.join(', ') : ''}
                                                     </div>
                                                 )}
-                                                {match.status === 'completed' && (
                                                     <span className="px-3 py-1 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold border border-green-400 shadow-md">
-                                                        ✅ จบการแข่งขันเป็นทางการ
+                                                        Completed
                                                     </span>
-                                                )}
                                             </div>
                                         ) : (
                                             <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-mono text-lg font-bold shadow-lg">
@@ -662,7 +660,7 @@ export default function MatchManagementTab({ darkMode }) {
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-3">
                                         <label className="flex items-center gap-2 text-sm font-bold uppercase text-indigo-600 dark:text-indigo-400">
-                                            🏠 Home Team
+                                            Home Team
                                         </label>
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg shrink-0">
@@ -685,7 +683,7 @@ export default function MatchManagementTab({ darkMode }) {
 
                                     <div className="space-y-3">
                                         <label className="flex items-center gap-2 text-sm font-bold uppercase text-rose-600 dark:text-rose-400">
-                                            ✈️ Away Team
+                                            Away Team
                                         </label>
                                         <div className="flex items-center gap-3">
                                             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center overflow-hidden border-2 border-white shadow-lg shrink-0">
@@ -823,14 +821,6 @@ export default function MatchManagementTab({ darkMode }) {
                                 <button onClick={handleScoreSubmit} className="px-8 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center gap-2">
                                     <Save size={20} />
                                     Update Score
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-                                <button onClick={handleSaveScore} className="px-6 py-2 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 shadow-lg">
-                                    <Save size={18} className="inline mr-2" /> Save Score
                                 </button>
                             </div>
                         </div>
