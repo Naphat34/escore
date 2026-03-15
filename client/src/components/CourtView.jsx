@@ -1,5 +1,6 @@
 import React from 'react';
 import { Repeat } from 'lucide-react';
+import Ball from '../assets/img/ball.png'
 
 // ✅ 1. รับ prop onPlayerClick เพิ่มเข้ามา
 const CourtView = ({ 
@@ -88,7 +89,7 @@ const CourtView = ({
                         <div className="flex items-center justify-center relative">
                             <PlayerToken player={homePositions[0]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 0)} /> {/* P1 */}
                             {servingSide === 'left' && !hideTokens && (
-                                <div className="absolute -left-1 lg:-left-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20"><img src="./assets/img/ball.png"></img></div>
+                                <div className="absolute -left-1 lg:-left-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20">{Ball}</div>
                             )}
                         </div>
                         <div className="flex items-center justify-center"><PlayerToken player={homePositions[1]} colorClass={leftColor} onClick={() => onPlayerClick && onPlayerClick('home', 1)} /></div> {/* P2 */}
@@ -110,7 +111,7 @@ const CourtView = ({
                         <div className="flex items-center justify-center relative">
                             <PlayerToken player={awayPositions[0]} colorClass={rightColor} onClick={() => onPlayerClick && onPlayerClick('away', 0)} /> {/* P1 */}
                             {servingSide === 'right' && !hideTokens && (
-                                <div className="absolute -right-1 lg:-right-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20"><img src="./assets/img/ball.png"></img></div>
+                                <div className="absolute -right-1 lg:-right-4 text-xl lg:text-3xl animate-bounce drop-shadow-md z-20">{Ball}</div>
                             )}
                         </div>
                         {/* Row 2 */}
