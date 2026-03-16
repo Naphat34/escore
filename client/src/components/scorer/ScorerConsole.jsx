@@ -499,6 +499,9 @@ fetchMatchData();
         const p1 = newLineup.shift();
         newLineup.push(p1);
 
+        const currentSwaps = teamCode === 'home' ? homeLiberoSwaps : awayLiberoSwaps;
+        const setSwaps = teamCode === 'home' ? setHomeLiberoSwaps : setAwayLiberoSwaps;
+
         if (Object.keys(currentSwaps).length > 0) {
             const newSwaps = {};
             Object.keys(currentSwaps).forEach(idx => {
