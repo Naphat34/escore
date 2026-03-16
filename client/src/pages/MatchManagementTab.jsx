@@ -458,109 +458,111 @@ export default function MatchManagementTab({ darkMode }) {
             ) : (
                 <div className="space-y-6">
                     {matches.map((match) => (
-                        <div key={match.id} className={`group relative p-6 rounded-2xl border transition-all hover:shadow-xl hover:scale-[1.02] ${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-750 border-gray-600 hover:from-gray-750 hover:to-gray-700' : 'bg-gradient-to-r from-white to-gray-50 border-gray-200 shadow-md hover:from-gray-50 hover:to-white'}`}>
+                        <div key={match.id} className={`group relative p-4 rounded-2xl border transition-all hover:shadow-xl hover:scale-[1.01] ${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-750 border-gray-600' : 'bg-white border-gray-200 shadow-md'}`}>
                             
-                            <div className="flex flex-col md:flex-row items-center gap-6">
-                                
-                                {/* 1. Left: Match Details (Number, Round, Gender) */}
-                                <div className="flex flex-row md:flex-col items-center md:items-start gap-3 md:gap-2 min-w-[140px] border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-600 pb-4 md:pb-0 md:pr-6 w-full md:w-auto justify-between md:justify-start">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
-                                            <ListFilter className="text-indigo-600 dark:text-indigo-400" size={16} />
-                                        </div>
-                                        <div>
-                                            <span className="text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Match #{match.match_number}</span>
-                                            <div className="text-base font-bold text-gray-800 dark:text-gray-200">{match.round_name}</div>
-                                        </div>
+                            {/* 1. Top Header: Match #, Round, Gender */}
+                            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
+                                <div className="flex items-center gap-3">
+                                    <div className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/40 rounded-lg border border-indigo-100 dark:border-indigo-800">
+                                        <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-tighter">Match #{match.match_number}</span>
                                     </div>
-                                    <div className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border-2 ${
-                                        match.gender === 'Female' 
-                                            ? 'bg-gradient-to-r from-pink-100 to-rose-100 text-pink-700 border-pink-300 dark:from-pink-900/50 dark:to-rose-900/50 dark:text-pink-300 dark:border-pink-700' 
-                                            : match.gender === 'Mix'
-                                                ? 'bg-gradient-to-r from-purple-100 to-violet-100 text-purple-700 border-purple-300 dark:from-purple-900/50 dark:to-violet-900/50 dark:text-purple-300 dark:border-purple-700'
-                                                : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 border-blue-300 dark:from-blue-900/50 dark:to-indigo-900/50 dark:text-blue-300 dark:border-blue-700'
-                                    }`}>
-                                        {match.gender || 'Male'}
-                                    </div>
+                                    <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{match.round_name}</div>
                                 </div>
+                                <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${
+                                    match.gender === 'Female' 
+                                        ? 'bg-pink-50 text-pink-600 border-pink-200 dark:bg-pink-900/30 dark:text-pink-400 dark:border-pink-800' 
+                                        : match.gender === 'Mix'
+                                            ? 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800'
+                                            : 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
+                                }`}>
+                                    {match.gender || 'Male'}
+                                </div>
+                            </div>
 
-                                {/* 2. Center: Teams (Full Names) */}
-                                <div className="flex-1 flex flex-col md:flex-row items-center justify-center gap-6 w-full">
-                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-center md:justify-end gap-4 w-full">
-                                        <div className="font-bold text-xl md:text-2xl text-gray-900 dark:text-white leading-tight break-words text-center md:text-right order-2 md:order-1">
-                                        {registeredTeams.find(t => t.id == match.home_team_id)?.name || match.home_team || 'TBD'}
+                            <div className="flex flex-col md:flex-row items-center gap-4">
+                                {/* 2. Teams Selection */}
+                                <div className="flex-1 flex flex-row items-center justify-center gap-2 md:gap-6 w-full">
+                                    {/* Home Team */}
+                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-end gap-3 w-full">
+                                        <div className="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight break-words text-center md:text-right order-2 md:order-1">
+                                            {registeredTeams.find(t => t.id == match.home_team_id)?.name || match.home_team || 'TBD'}
                                         </div>
-                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700 flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg order-1 md:order-2 shrink-0">
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-white dark:border-gray-800 shadow-sm order-1 md:order-2 shrink-0">
                                             {registeredTeams.find(t => t.id == match.home_team_id)?.logo_url ? (
-                                                <img src={registeredTeams.find(t => t.id == match.home_team_id).logo_url} alt="Home" className="w-full h-full object-contain p-2" />
+                                                <img src={registeredTeams.find(t => t.id == match.home_team_id).logo_url} alt="Home" className="w-full h-full object-contain p-1.5" />
                                             ) : (
-                                                <Shield size={24} className="text-white" />
+                                                <Shield size={20} className="text-gray-400" />
                                             )}
                                         </div>
                                     </div>
                                     
-                                    <div className="flex flex-col items-center shrink-0 px-6">
+                                    {/* Score / VS Center */}
+                                    <div className="flex flex-col items-center shrink-0 px-2">
                                         {(match.status === 'completed' || match.home_set_score > 0 || match.away_set_score > 0) ? (
                                             <div className="flex flex-col items-center">
-                                                <div className="px-6 py-3 rounded-2xl bg-gradient-to-r from-gray-800 to-gray-900 text-white font-mono text-2xl font-bold tracking-widest mb-2 shadow-lg">
+                                                <div className="px-4 py-1.5 rounded-xl bg-gray-900 dark:bg-gray-700 text-white font-mono text-xl font-bold tracking-widest shadow-md">
                                                     {match.home_set_score} - {match.away_set_score}
                                                 </div>
                                                 {match.set_scores && (
-                                                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-2 max-w-[200px] text-center break-words bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-lg">
+                                                    <div className="text-[10px] text-gray-500 mt-1 font-medium">
                                                         {typeof match.set_scores === 'string' ? JSON.parse(match.set_scores).join(', ') : Array.isArray(match.set_scores) ? match.set_scores.join(', ') : ''}
                                                     </div>
                                                 )}
-                                                    <span className="px-3 py-1 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold border border-green-400 shadow-md">
-                                                        Completed
-                                                    </span>
                                             </div>
                                         ) : (
-                                            <div className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-mono text-lg font-bold shadow-lg">
+                                            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 text-[10px] font-black text-gray-400 dark:text-gray-500">
                                                 VS
                                             </div>
                                         )}
                                     </div>
                                     
-                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-center md:justify-start gap-4 w-full">
-                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 flex items-center justify-center overflow-hidden border-4 border-white dark:border-gray-800 shadow-lg shrink-0">
+                                    {/* Away Team */}
+                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-start gap-3 w-full">
+                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-white dark:border-gray-800 shadow-sm shrink-0">
                                             {registeredTeams.find(t => t.id == match.away_team_id)?.logo_url ? (
-                                                <img src={registeredTeams.find(t => t.id == match.away_team_id).logo_url} alt="Away" className="w-full h-full object-contain p-2" />
+                                                <img src={registeredTeams.find(t => t.id == match.away_team_id).logo_url} alt="Away" className="w-full h-full object-contain p-1.5" />
                                             ) : (
-                                                <Shield size={24} className="text-white" />
+                                                <Shield size={20} className="text-gray-400" />
                                             )}
                                         </div>
-                                        <div className="font-bold text-xl md:text-2xl text-gray-900 dark:text-white leading-tight break-words text-center md:text-left">
+                                        <div className="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight break-words text-center md:text-left">
                                             {registeredTeams.find(t => t.id == match.away_team_id)?.name || match.away_team || 'TBD'}
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* 3. Right: Meta Info (Time, Location) */}
-                                <div className="flex flex-row md:flex-col gap-4 md:gap-2 text-sm text-gray-600 dark:text-gray-300 min-w-[180px] justify-center md:justify-end text-center md:text-right border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-600 pt-4 md:pt-0 md:pl-6 w-full md:w-auto">
-                                    <div className="flex items-center justify-center md:justify-end gap-2 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
-                                        <Calendar size={16} className="text-indigo-500"/> 
-                                        <span className="font-medium">{match.start_time ? new Date(match.start_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date TBD'}</span>
+                            {/* 3. Footer: Meta Info & Actions */}
+                            <div className="flex flex-col md:flex-row items-center justify-between mt-4 pt-3 border-t border-gray-50 dark:border-gray-700 gap-4">
+                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
+                                        <Calendar size={12} className="text-indigo-400"/> 
+                                        {match.start_time ? new Date(match.start_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'TBD'}
                                     </div>
-                                    <div className="flex items-center justify-center md:justify-end gap-2 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
-                                        <Clock size={16} className="text-indigo-500"/> 
-                                        <span className="font-medium">{match.start_time ? new Date(match.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Time TBD'}</span>
+                                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
+                                        <Clock size={12} className="text-indigo-400"/> 
+                                        {match.start_time ? new Date(match.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBD'}
                                     </div>
-                                    <div className="flex items-center justify-center md:justify-end gap-2 bg-gray-50 dark:bg-gray-700 px-3 py-2 rounded-lg">
-                                        <MapPin size={16} className="text-indigo-500"/> 
-                                        <span className="font-medium">{match.location || 'Location TBD'}</span>
+                                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
+                                        <MapPin size={12} className="text-indigo-400"/> 
+                                        {match.location || 'TBD'}
                                     </div>
+                                    {match.status === 'completed' && (
+                                        <div className="px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold border border-green-100 dark:border-green-800">
+                                            Official Result
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* 4. Actions */}
-                                <div className="flex gap-3 md:flex-col justify-center border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-600 pt-4 md:pt-0 md:pl-4 w-full md:w-auto">
-                                    <button onClick={() => handleEditMatch(match)} className="p-3 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all hover:scale-110 shadow-md" title="Edit Match">
-                                        <Edit2 size={20} />
+                                <div className="flex items-center gap-1">
+                                    <button onClick={() => handleEditMatch(match)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all" title="Edit">
+                                        <Edit2 size={16} />
                                     </button>
-                                    <button onClick={() => openScoreModal(match)} className="p-3 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-xl transition-all hover:scale-110 shadow-md" title="Update Score">
-                                        <Trophy size={20} />
+                                    <button onClick={() => openScoreModal(match)} className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-all" title="Score">
+                                        <Trophy size={16} />
                                     </button>
-                                    <button onClick={() => handleDeleteMatch(match.id)} className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-all hover:scale-110 shadow-md" title="Delete Match">
-                                        <Trash2 size={20} />
+                                    <button onClick={() => handleDeleteMatch(match.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all" title="Delete">
+                                        <Trash2 size={16} />
                                     </button>
                                 </div>
                             </div>
