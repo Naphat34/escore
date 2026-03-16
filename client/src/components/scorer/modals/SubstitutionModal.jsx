@@ -17,7 +17,6 @@ export default function SubstitutionModal({
     if (!isOpen) return null;
 
     const courtIds = currentLineup.filter(p => p).map(p => p?.id || p?.player_id);
-    const replacedPlayerId = liberoTracker?.replacedPlayer?.id || liberoTracker?.replacedPlayer?.player_id;
     
     // กรองคนที่โดนแบนตลอดแมตช์ออกไปจากม้านั่งสำรอง
     const availableBench = roster.filter(p => {
@@ -99,7 +98,7 @@ export default function SubstitutionModal({
                             {playerOut?.number || '?'}
                         </div>
                         <div className="text-center mb-6">
-                            <p className="text-white font-bold text-lg">{playerOut?.firstname || 'Unknown'}</p>
+                            <p className="text-white font-bold text-lg">{playerOut?.first_name || playerOut?.firstname || 'Unknown'}</p>
                             <p className="text-slate-400 text-sm">Position {posIndex + 1}</p>
                         </div>
 

@@ -1325,8 +1325,8 @@ fetchMatchData();
 
                 return { ...prev, [team]: newCount };
             });
-        } else {
-            // กรณีปกติ (Normal Substitution)
+
+            // กรณีปกติ (Normal Substitution) - อัปเดต Tracker
             setSubTracker(prev => {
                 const teamTracker = { ...prev[team] };
                 const posData = teamTracker.positions[posIndex];
