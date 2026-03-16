@@ -1353,8 +1353,8 @@ fetchMatchData();
                     </div>
 
                     {/* COURT VIEW */}
-                    <div className="flex-1 relative bg-white/40 backdrop-blur-sm border border-slate-200 rounded-3xl shadow-inner overflow-hidden flex items-center justify-center p-2">
-                        <div className="w-full h-full max-w-4xl max-h-[400px]">
+                    <div className="flex-1 relative bg-white/40 backdrop-blur-sm border border-slate-200 rounded-[2rem] shadow-inner overflow-hidden flex items-center justify-center p-1">
+                        <div className="w-full h-full max-w-4xl max-h-[320px]">
                             <CourtView
                                 homePositions={!isSetupPhase ? (isHomeLeft ? homeLineup : awayLineup) : Array(6).fill(null)}
                                 awayPositions={!isSetupPhase ? (isHomeLeft ? awayLineup : homeLineup) : Array(6).fill(null)}
