@@ -499,9 +499,6 @@ fetchMatchData();
         const p1 = newLineup.shift();
         newLineup.push(p1);
 
-        const currentSwaps = teamCode === 'home' ? homeLiberoSwaps : awayLiberoSwaps;
-        const setSwaps = teamCode === 'home' ? setHomeLiberoSwaps : setAwayLiberoSwaps;
-
         if (Object.keys(currentSwaps).length > 0) {
             const newSwaps = {};
             Object.keys(currentSwaps).forEach(idx => {
@@ -511,6 +508,34 @@ fetchMatchData();
             });
             setSwaps(newSwaps);
         }
+
+        // ✅ 2. หมุนตำแหน่งใน Substitution Tracker (subTracker)
+        setSubTracker(prev => {
+            const teamTracker = prev[teamCode];
+            const newPositions = {};
+            Object.keys(teamTracker.positions).forEach(idx => {
+                const i = parseInt(idx);
+                const newIdx = i === 0 ? 5 : i - 1;
+                newPositions[newIdx] = teamTracker.positions[i];
+            });
+            return {
+                ...prev,
+                [teamCode]: { ...teamTracker, positions: newPositions }
+            };
+        });
+
+        // ✅ 3. หมุนตำแหน่งใน Libero Tracker (กรณี Libero อยู่ในสนาม)
+        setLiberoTracker(prev => {
+            const teamLib = prev[teamCode];
+            if (teamLib.onCourt && teamLib.posIndex !== null) {
+                const newIdx = teamLib.posIndex === 0 ? 5 : teamLib.posIndex - 1;
+                return {
+                    ...prev,
+                    [teamCode]: { ...teamLib, posIndex: newIdx }
+                };
+            }
+            return prev;
+        });
 
         return newLineup;
     };
