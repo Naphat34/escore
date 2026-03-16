@@ -1001,42 +1001,7 @@ fetchMatchData();
         // ==========================================
         // 🌟 NEW LOGIC: เช็คกัปตันทีมในสนาม
         // ==========================================
-        const hasCaptainOnCourt = lineup.some(p => p && p.isCaptain);
-
-        if (!hasCaptainOnCourt) {
-            const result = await Swal.fire({
-                title: 'ตั้งกัปตันทีมในสนาม?',
-                text: `ไม่มีกัปตันทีมอยู่ในสนาม คุณต้องการแต่งตั้งให้ผู้เล่นหมายเลข ${playerOut.number} เป็นกัปตันทีม (Court Captain) ใช่หรือไม่?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'ใช่, แต่งตั้ง',
-                cancelButtonText: 'ยกเลิก'
-            });
-
-            if (result.isConfirmed) {
-                // อัปเดตสถานะ isCaptain ให้กับผู้เล่นที่ถูกคลิก
-                const setLineup = actualTeamCode === 'home' ? setHomeLineup : setAwayLineup;
-                // ✅ เคลียร์กัปตันเดิมทุกคนในสนามก่อน เพื่อป้องกันมี C ซ้ำซ้อน
-                const newLineup = lineup.map(p => p ? { ...p, isCaptain: false } : p);
-                // ตั้งคนใหม่เป็นกัปตัน
-                newLineup[posIndex] = { ...playerOut, isCaptain: true };
-                setLineup(newLineup);
-
-                // บันทึก Log เหตุการณ์ (ถ้าต้องการ)
-                setMatchEvents(prev => [{
-                    id: Date.now(),
-                    set: matchData.currentSet,
-                    score: `${score.home}-${score.away}`,
-                    description: `Court Captain Assigned: #${playerOut.number} (${actualTeamCode === 'home' ? matchData.teamHome : matchData.teamAway})`,
-                    metadata: { type: 'CAPTAIN', player: playerOut.number, team: actualTeamCode },
-                    time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                }, ...prev]);
-            }
-            // return ออกทันที เพื่อบังคับให้ต้องตั้งกัปตันก่อน ถึงจะเปลี่ยนตัวหรือทำอย่างอื่นได้
-            return; 
-        }
+        // Removed Court Captain logic and prompts
         // ==========================================
         // สิ้นสุดส่วนที่เพิ่มใหม่
         // ==========================================
@@ -1259,74 +1224,14 @@ fetchMatchData();
         // จับผู้เล่นใหม่ใส่ลงสนามไปก่อน (และริบ C ออกไว้ก่อนเผื่อพกติดมา)
         newLineup[posIndex] = { ...playerIn, isCaptain: false };
 
-        // --- กฎเหล็ก: ในสนามต้องมีกัปตัน (C) แค่คนเดียวเท่านั้น ---
-        // 1. หาว่ากัปตันตัวจริง (Real Captain) อยู่ในสนามตำแหน่งไหน?
-        const realCaptainIdx = newLineup.findIndex(p => 
-            p && realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)
-        );
-
+        const realCaptainIdx = newLineup.findIndex(p => p && realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id));
         if (realCaptainIdx !== -1) {
-            // ✅ กรณีที่ 1: กัปตันตัวจริงอยู่บนสนาม! 
-            // -> ให้คนนั้นเป็น C คนเดียว คนอื่น (รวมถึง Court Captain เดิม) ต้องโดนริบ C
             newLineup = newLineup.map((p, idx) => {
                 if (!p) return p;
                 return { ...p, isCaptain: (idx === realCaptainIdx) };
             });
-            setLineup(newLineup);
-        } else {
-            // ✅ กรณีที่ 2: กัปตันตัวจริง "ไม่" อยู่บนสนาม
-            // -> ตรวจสอบว่าในคนที่เหลือบนสนาม มีใครเป็น Court Captain (isCaptain: true) อยู่ไหม?
-            const existingCourtCaptains = newLineup.filter(p => p && p.isCaptain);
-            
-            if (existingCourtCaptains.length === 0) {
-                // ⚠️ ไม่มีกัปตัน! (อาจเพราะกัปตันจริงพึ่งถูกเปลี่ยนออก หรือ Court Cap เดิมออก)
-                // ต้องบังคับให้ตั้ง Court Captain ทันที
-                setTimeout(async () => {
-                    const { value: selectedIdx } = await Swal.fire({
-                        title: 'Appoint Court Captain',
-                        text: 'The captain has left the court. Please designate a new Court Captain:',
-                        input: 'select',
-                        inputOptions: newLineup.reduce((acc, p, idx) => {
-                            if (p) acc[idx] = `#${p.number} ${p.firstname || p.name}`;
-                            return acc;
-                        }, {}),
-                        inputPlaceholder: 'Select a player',
-                        showCancelButton: false,
-                        allowOutsideClick: false,
-                        confirmButtonText: 'Confirm Captain',
-                        inputValidator: (value) => {
-                            if (!value) return 'You must choose a captain!';
-                        }
-                    });
-
-                    if (selectedIdx !== undefined) {
-                        const finalLineup = newLineup.map((p, idx) => {
-                            if (!p) return p;
-                            // ตั้งเป็น C แค่ตำแหน่งที่เลือก ตำแหน่งอื่นริบหมด
-                            return { ...p, isCaptain: (idx.toString() === selectedIdx.toString()) };
-                        });
-                        setLineup(finalLineup);
-                    }
-                }, 500); 
-            } else if (existingCourtCaptains.length > 1) {
-                // ถ้าดันมี C มากกว่าหนึ่ง (ซึ่งไม่ควรเกิด) ให้เหลือแค่คนแรกที่เจอ
-                let foundFirst = false;
-                const cleanedLineup = newLineup.map(p => {
-                    if (p && p.isCaptain) {
-                        if (!foundFirst) {
-                            foundFirst = true;
-                            return p;
-                        }
-                        return { ...p, isCaptain: false };
-                    }
-                    return p;
-                });
-                setLineup(cleanedLineup);
-            } else {
-                // มี C คนเดียวพอดีอยู่แล้ว
-                setLineup(newLineup);
-            }
         }
+        setLineup(newLineup);
 
         // --- 3. จัดการการตัดสิทธิ์ (Disqualify) หากเป็นกรณีพิเศษ ---
         if (isExceptional) {
