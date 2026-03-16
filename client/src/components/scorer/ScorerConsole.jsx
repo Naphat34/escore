@@ -1428,10 +1428,58 @@ fetchMatchData();
                 </aside>
 
                 {/* CENTER: COURT & SCORE */}
-                <section className="flex-1 flex flex-col gap-4 overflow-hidden min-w-[600px]">
+                <section className="flex-1 flex flex-col gap-3 overflow-hidden min-w-[600px]">
+                    {/* NEW: TOP INFO STRIP */}
+                    <div className="bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl p-3 flex items-center justify-between shadow-sm shrink-0">
+                        {/* Left Team Info */}
+                        <div className="flex-1 flex items-center gap-4">
+                            <div className="flex flex-col items-start">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">SET WON</span>
+                                <div className="flex gap-1">
+                                    {Array.from({ length: setsToWin }).map((_, i) => (
+                                        <div key={i} className={`w-3 h-3 rounded-sm border ${i < leftTeam.sets ? 'bg-indigo-600 border-indigo-400 shadow-sm' : 'bg-slate-100 border-slate-200'}`}></div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-sm font-black text-slate-800 uppercase truncate max-w-[120px]">{leftTeam.name}</span>
+                                {servingTeam === leftTeam.code && <div className="flex items-center gap-1 text-[10px] text-indigo-600 font-bold"><ArrowUpDown size={10} className="rotate-90"/> SERVING</div>}
+                            </div>
+                        </div>
+
+                        {/* Central BIG Score */}
+                        <div className="flex items-center gap-8 px-6 py-1 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
+                            <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: leftTeam.color }}>{leftTeam.score}</span>
+                            <div className="flex flex-col items-center gap-0.5">
+                                <div className="bg-indigo-600 px-3 py-0.5 rounded-full text-white text-[10px] font-black shadow-sm">SET {matchData.currentSet}</div>
+                                <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-slate-400 uppercase">
+                                    <Clock size={10} />
+                                    {Math.floor(matchDuration / 60)}:{(matchDuration % 60).toString().padStart(2, '0')}
+                                </div>
+                            </div>
+                            <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: rightTeam.color }}>{rightTeam.score}</span>
+                        </div>
+
+                        {/* Right Team Info */}
+                        <div className="flex-1 flex items-center justify-end gap-4">
+                            <div className="flex flex-col items-end">
+                                <span className="text-sm font-black text-slate-800 uppercase truncate max-w-[120px]">{rightTeam.name}</span>
+                                {servingTeam === rightTeam.code && <div className="flex items-center gap-1 text-[10px] text-indigo-600 font-bold">SERVING <ArrowUpDown size={10} className="-rotate-90"/></div>}
+                            </div>
+                            <div className="flex flex-col items-end">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">SET WON</span>
+                                <div className="flex gap-1">
+                                    {Array.from({ length: setsToWin }).map((_, i) => (
+                                        <div key={i} className={`w-3 h-3 rounded-sm border ${i < rightTeam.sets ? 'bg-rose-600 border-rose-400 shadow-sm' : 'bg-slate-100 border-slate-200'}`}></div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* COURT VIEW */}
-                    <div className="flex-1 relative bg-white/40 backdrop-blur-sm border border-slate-200 rounded-3xl shadow-inner overflow-hidden flex items-center justify-center p-4">
-                        <div className="w-full h-full max-w-4xl max-h-[500px]">
+                    <div className="flex-1 relative bg-white/40 backdrop-blur-sm border border-slate-200 rounded-3xl shadow-inner overflow-hidden flex items-center justify-center p-2">
+                        <div className="w-full h-full max-w-4xl max-h-[400px]">
                             <CourtView
                                 homePositions={!isSetupPhase ? (isHomeLeft ? homeLineup : awayLineup) : Array(6).fill(null)}
                                 awayPositions={!isSetupPhase ? (isHomeLeft ? awayLineup : homeLineup) : Array(6).fill(null)}
@@ -1549,25 +1597,25 @@ fetchMatchData();
                                     </div>
                                 </div>
 
-                                {/* Center Score & Meta */}
-                                <div className="flex flex-col items-center gap-4 w-52 shrink-0">
-                                    <div className="bg-slate-100 px-4 py-2 rounded-full flex items-center gap-3 shadow-inner">
-                                        <Timer size={14} className="text-slate-400" />
-                                        <span className="font-mono text-base font-black text-slate-700 tabular-nums">{Math.floor(matchDuration / 60)}:{(matchDuration % 60).toString().padStart(2, '0')}</span>
+                                {/* Center Controls (Timer & Undo) */}
+                                <div className="flex flex-col items-center gap-4 w-40 shrink-0">
+                                    <div className="bg-slate-100 px-4 py-2 rounded-full flex items-center justify-between w-full shadow-inner">
+                                        <div className="flex items-center gap-2">
+                                            <Timer size={14} className="text-slate-400" />
+                                            <span className="font-mono text-xs font-black text-slate-700">TIMER</span>
+                                        </div>
                                         <button onClick={() => setIsTimerRunning(!isTimerRunning)} className={`p-1.5 rounded-full transition-colors ${isTimerRunning ? 'text-rose-500 bg-rose-100 hover:bg-rose-200' : 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200'}`}>
                                             {isTimerRunning ? <Pause size={14} /> : <PlayCircle size={14} />}
                                         </button>
                                     </div>
 
-                                    <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[1.5rem] border border-slate-200 shadow-lg">
-                                        <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: leftTeam.color }}>{leftTeam.score}</span>
-                                        <div className="w-px h-10 bg-slate-100"></div>
-                                        <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: rightTeam.color }}>{rightTeam.score}</span>
-                                    </div>
-
-                                    <div className="flex gap-2 w-full">
-                                        <button onClick={handleUndo} disabled={workflowStep !== 'RALLY' && history.length === 0} className={`flex-1 rounded-xl py-2.5 border border-slate-100 bg-white shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all disabled:opacity-30`} title="Undo Action"><RotateCcw size={18} className="mx-auto" /></button>
-                                        <button onClick={() => setIsHomeLeft(!isHomeLeft)} className={`flex-1 rounded-xl py-2.5 border border-slate-100 bg-white shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all`} title="Switch Sides"><ArrowRightLeft size={18} className="mx-auto" /></button>
+                                    <div className="flex gap-2 w-full flex-1">
+                                        <button onClick={handleUndo} disabled={workflowStep !== 'RALLY' && history.length === 0} className={`flex-1 rounded-xl border border-slate-100 bg-white shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all disabled:opacity-30 flex items-center justify-center`} title="Undo Action">
+                                            <RotateCcw size={20} />
+                                        </button>
+                                        <button onClick={() => setIsHomeLeft(!isHomeLeft)} className={`flex-1 rounded-xl border border-slate-100 bg-white shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all flex items-center justify-center`} title="Switch Sides">
+                                            <ArrowRightLeft size={20} />
+                                        </button>
                                     </div>
                                 </div>
 
