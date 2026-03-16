@@ -867,24 +867,11 @@ fetchMatchData();
         if (isPlayerRealCaptain) {
             // If the selected player is the real captain, assign captaincy to them
             newPlayer.isCaptain = true;
-            // And remove captaincy from any other player currently on court
+            // ✅ กวาดล้างกัปตันคนอื่นออกให้หมด เพื่อความชัวร์ (Strict Single Captain Rule)
             newLineup = newLineup.map(p => p ? { ...p, isCaptain: false } : p);
         } else {
-            // If the selected player is NOT the real captain
-            // Check if the real captain is already on court at a different position
-            const realCaptainAlreadyOnCourt = newLineup.some((p, idx) =>
-                idx !== posIndex && p && realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)
-            );
-
-            if (!realCaptainAlreadyOnCourt) {
-                // If the real captain is NOT on court, and the selected player is not the real captain
-                // Then, if the player being replaced (at posIndex) was a captain,
-                // we need to ensure no one else inherits captaincy automatically.
-                // The system will later prompt to assign a court captain if needed.
-                newPlayer.isCaptain = false; // Ensure the new player doesn't become captain by accident
-            }
-            // If real captain IS on court, then newPlayer should definitely not be captain.
-            // (This is already handled by newPlayer.isCaptain = false;)
+            // If the selected player is NOT the real captain, they definitely shouldn't be captain
+            newPlayer.isCaptain = false;
         }
 
         newLineup[posIndex] = newPlayer;
@@ -1024,7 +1011,9 @@ fetchMatchData();
             if (result.isConfirmed) {
                 // อัปเดตสถานะ isCaptain ให้กับผู้เล่นที่ถูกคลิก
                 const setLineup = actualTeamCode === 'home' ? setHomeLineup : setAwayLineup;
-                const newLineup = [...lineup];
+                // ✅ เคลียร์กัปตันเดิมทุกคนในสนามก่อน เพื่อป้องกันมี C ซ้ำซ้อน
+                const newLineup = lineup.map(p => p ? { ...p, isCaptain: false } : p);
+                // ตั้งคนใหม่เป็นกัปตัน
                 newLineup[posIndex] = { ...playerOut, isCaptain: true };
                 setLineup(newLineup);
 
