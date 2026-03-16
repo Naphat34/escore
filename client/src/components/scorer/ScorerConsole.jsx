@@ -1354,7 +1354,7 @@ fetchMatchData();
 
                     {/* COURT VIEW */}
                     <div className="flex-1 relative bg-white/40 backdrop-blur-sm border border-slate-200 rounded-[2rem] shadow-inner overflow-hidden flex items-center justify-center p-1">
-                        <div className="w-full h-full max-w-4xl max-h-[320px]">
+                        <div className="w-full h-full max-w-4xl max-h-[220px]">
                             <CourtView
                                 homePositions={!isSetupPhase ? (isHomeLeft ? homeLineup : awayLineup) : Array(6).fill(null)}
                                 awayPositions={!isSetupPhase ? (isHomeLeft ? awayLineup : homeLineup) : Array(6).fill(null)}
@@ -1409,14 +1409,14 @@ fetchMatchData();
                             )}
 
                             {workflowStep === 'LINEUP_SELECT' && (
-                                <button onClick={() => setShowLineupModal(true)} className="pointer-events-auto animate-pulse bg-emerald-500 hover:bg-emerald-600 px-10 py-5 rounded-full text-2xl font-black text-white shadow-2xl border-4 border-white flex items-center gap-3 transition-transform hover:scale-105">
-                                    <Users size={32} /> SET LINEUPS
+                                <button onClick={() => setShowLineupModal(true)} className="pointer-events-auto animate-pulse bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 rounded-full text-[10px] font-black text-white shadow-2xl border border-white flex items-center gap-1.5 transition-transform hover:scale-105">
+                                    <Users size={14} /> SET LINEUPS
                                 </button>
                             )}
 
                             {workflowStep === 'READY' && (
-                                <button onClick={handleStartMatch} className="pointer-events-auto animate-pulse bg-indigo-600 hover:bg-indigo-700 px-10 py-5 rounded-full text-2xl font-black text-white shadow-2xl border-4 border-white flex items-center gap-3 transition-transform hover:scale-105">
-                                    <PlayCircle size={32} /> START MATCH
+                                <button onClick={handleStartMatch} className="pointer-events-auto animate-pulse bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-full text-[10px] font-black text-white shadow-2xl border border-white flex items-center gap-1.5 transition-transform hover:scale-105">
+                                    <PlayCircle size={14} /> START MATCH
                                 </button>
                             )}
 

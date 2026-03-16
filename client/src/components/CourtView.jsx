@@ -39,8 +39,8 @@ const CourtView = ({
             <div 
                 className={`
                     relative
-                    w-10 h-10 lg:w-14 lg:h-14 
-                    rounded-full border-2 border-white shadow-md shadow-black/30
+                    w-8 h-8 lg:w-11 lg:h-11 
+                    rounded-full border border-white shadow-md shadow-black/30
                     flex flex-col items-center justify-center 
                     transition-transform transform group-hover:scale-110 hover:border-yellow-400
                     ${finalColorClass}
@@ -52,7 +52,7 @@ const CourtView = ({
                         C
                     </div>
                 )}
-                <span className={`text-lg lg:text-2xl font-black drop-shadow-md ${finalTextColorClass}`}>
+                <span className={`text-sm lg:text-xl font-black drop-shadow-md ${finalTextColorClass}`}>
                     {player ? player.number : ''}
                 </span>
             </div>
