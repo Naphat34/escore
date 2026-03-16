@@ -1313,6 +1313,8 @@ fetchMatchData();
     );
 
     const isSetupPhase = ['ROSTER_CHECK', 'SERVER_SELECT', 'LINEUP_SELECT'].includes(workflowStep);
+    const leftTeam = getLeftTeam();
+    const rightTeam = getRightTeam();
 
     return (
         <div className="h-screen flex flex-col bg-slate-50 text-slate-900 font-sans overflow-hidden">
@@ -1346,7 +1348,7 @@ fetchMatchData();
             <main className="flex-1 flex overflow-hidden p-4 gap-4">
                 {/* Left Sidebar */}
                 <aside className="w-80 bg-white/80 backdrop-blur-xl border border-slate-200 rounded-2xl hidden lg:flex flex-col z-10 shadow-sm overflow-hidden">
-                    <TeamInfoPanel team={getLeftTeam()} align="left" onPlayerClick={handleCourtPlayerClick} />
+                    <TeamInfoPanel team={leftTeam} align="left" onPlayerClick={handleCourtPlayerClick} />
                 </aside>
 
                 {/* CENTER: COURT & SCORE */}
@@ -1450,14 +1452,24 @@ fetchMatchData();
                             <div className="flex-1 flex gap-6 items-center">
                                 {/* Left Controls */}
                                 <div className="flex-1 flex items-stretch gap-3">
-                                    <button onClick={() => handlePoint(getLeftTeam().code)} disabled={workflowStep !== 'RALLY'} className="flex-1 rounded-[1.5rem] flex items-center justify-center px-6 border-b-8 shadow-lg active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-30 disabled:grayscale group" style={{ backgroundColor: teamColors.home, borderBottomColor: 'rgba(0,0,0,0.2)' }}>
-                                        <span className="font-black text-4xl group-active:scale-95 transition-transform italic">POINT</span>
+                                    <button 
+                                        onClick={() => {
+                                            if (workflowStep === 'SERVING' && servingTeam === leftTeam.code) setWorkflowStep('RALLY');
+                                            else handlePoint(leftTeam.code);
+                                        }} 
+                                        disabled={workflowStep !== 'RALLY' && !(workflowStep === 'SERVING' && servingTeam === leftTeam.code)} 
+                                        className="flex-1 rounded-[1.5rem] flex items-center justify-center px-6 border-b-8 shadow-lg active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-30 disabled:grayscale group" 
+                                        style={{ backgroundColor: leftTeam.color, borderBottomColor: 'rgba(0,0,0,0.2)' }}
+                                    >
+                                        <span className="font-black text-4xl group-active:scale-95 transition-transform italic">
+                                            {(workflowStep === 'SERVING' && servingTeam === leftTeam.code) ? 'SERVE' : 'POINT'}
+                                        </span>
                                     </button>
                                     <div className="flex flex-col gap-1.5 w-24 shrink-0">
-                                        <button onClick={() => handleActionSelect(getLeftTeam().code, 'TIMEOUT')} disabled={timeouts[getLeftTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-slate-600 hover:text-indigo-600 disabled:opacity-30`}>TIMEOUT ({2 - timeouts[getLeftTeam().code]})</button>
-                                        <button onClick={() => setSubData({ isOpen: true, team: getLeftTeam().code, posIndex: null, playerOut: null })} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-30`}>SUBS ({substitutions[getLeftTeam().code]}/6)</button>
-                                        <button onClick={() => { setChallengeData({ team: getLeftTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getLeftTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-amber-600 hover:bg-amber-50 disabled:opacity-30`}>CHALLENGE</button>
-                                        <button onClick={() => { setSanctionTeam(getLeftTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-rose-600 hover:bg-rose-50 disabled:opacity-30`}>SANCTION</button>
+                                        <button onClick={() => handleActionSelect(leftTeam.code, 'TIMEOUT')} disabled={timeouts[leftTeam.code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-slate-600 hover:text-indigo-600 disabled:opacity-30`}>TIMEOUT ({2 - timeouts[leftTeam.code]})</button>
+                                        <button onClick={() => setSubData({ isOpen: true, team: leftTeam.code, posIndex: null, playerOut: null })} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-30`}>SUBS ({substitutions[leftTeam.code]}/6)</button>
+                                        <button onClick={() => { setChallengeData({ team: leftTeam.code }); setShowChallengeModal(true); }} disabled={challenges[leftTeam.code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-amber-600 hover:bg-amber-50 disabled:opacity-30`}>CHALLENGE</button>
+                                        <button onClick={() => { setSanctionTeam(leftTeam.code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-rose-600 hover:bg-rose-50 disabled:opacity-30`}>SANCTION</button>
                                     </div>
                                 </div>
 
@@ -1472,9 +1484,9 @@ fetchMatchData();
                                     </div>
 
                                     <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[1.5rem] border border-slate-200 shadow-lg">
-                                        <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: teamColors.home }}>{score.home}</span>
+                                        <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: leftTeam.color }}>{leftTeam.score}</span>
                                         <div className="w-px h-10 bg-slate-100"></div>
-                                        <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: teamColors.away }}>{score.away}</span>
+                                        <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: rightTeam.color }}>{rightTeam.score}</span>
                                     </div>
 
                                     <div className="flex gap-2 w-full">
@@ -1486,13 +1498,23 @@ fetchMatchData();
                                 {/* Right Controls */}
                                 <div className="flex-1 flex items-stretch gap-3">
                                     <div className="flex flex-col gap-1.5 w-24 shrink-0">
-                                        <button onClick={() => handleActionSelect(getRightTeam().code, 'TIMEOUT')} disabled={timeouts[getRightTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-slate-600 hover:text-indigo-600 disabled:opacity-30`}>TIMEOUT ({2 - timeouts[getRightTeam().code]})</button>
-                                        <button onClick={() => setSubData({ isOpen: true, team: getRightTeam().code, posIndex: null, playerOut: null })} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-30`}>SUBS ({substitutions[getRightTeam().code]}/6)</button>
-                                        <button onClick={() => { setChallengeData({ team: getRightTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getRightTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-amber-600 hover:bg-amber-50 disabled:opacity-30`}>CHALLENGE</button>
-                                        <button onClick={() => { setSanctionTeam(getRightTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-rose-600 hover:bg-rose-50 disabled:opacity-30`}>SANCTION</button>
+                                        <button onClick={() => handleActionSelect(rightTeam.code, 'TIMEOUT')} disabled={timeouts[rightTeam.code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-slate-600 hover:text-indigo-600 disabled:opacity-30`}>TIMEOUT ({2 - timeouts[rightTeam.code]})</button>
+                                        <button onClick={() => setSubData({ isOpen: true, team: rightTeam.code, posIndex: null, playerOut: null })} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-30`}>SUBS ({substitutions[rightTeam.code]}/6)</button>
+                                        <button onClick={() => { setChallengeData({ team: rightTeam.code }); setShowChallengeModal(true); }} disabled={challenges[rightTeam.code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-amber-600 hover:bg-amber-50 disabled:opacity-30`}>CHALLENGE</button>
+                                        <button onClick={() => { setSanctionTeam(rightTeam.code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-rose-600 hover:bg-rose-50 disabled:opacity-30`}>SANCTION</button>
                                     </div>
-                                    <button onClick={() => handlePoint(getRightTeam().code)} disabled={workflowStep !== 'RALLY'} className="flex-1 rounded-[1.5rem] flex items-center justify-center px-6 border-b-8 shadow-lg active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-30 disabled:grayscale group" style={{ backgroundColor: teamColors.away, borderBottomColor: 'rgba(0,0,0,0.2)' }}>
-                                        <span className="font-black text-4xl group-active:scale-95 transition-transform italic">POINT</span>
+                                    <button 
+                                        onClick={() => {
+                                            if (workflowStep === 'SERVING' && servingTeam === rightTeam.code) setWorkflowStep('RALLY');
+                                            else handlePoint(rightTeam.code);
+                                        }} 
+                                        disabled={workflowStep !== 'RALLY' && !(workflowStep === 'SERVING' && servingTeam === rightTeam.code)} 
+                                        className="flex-1 rounded-[1.5rem] flex items-center justify-center px-6 border-b-8 shadow-lg active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-30 disabled:grayscale group" 
+                                        style={{ backgroundColor: rightTeam.color, borderBottomColor: 'rgba(0,0,0,0.2)' }}
+                                    >
+                                        <span className="font-black text-4xl group-active:scale-95 transition-transform italic">
+                                            {(workflowStep === 'SERVING' && servingTeam === rightTeam.code) ? 'SERVE' : 'POINT'}
+                                        </span>
                                     </button>
                                 </div>
                             </div>
@@ -1507,7 +1529,7 @@ fetchMatchData();
 
                 {/* Right Sidebar (Team Info) */}
                 <aside className="w-80 bg-white/80 backdrop-blur-xl border border-slate-200 rounded-2xl hidden lg:flex flex-col z-10 shadow-sm overflow-hidden">
-                    <TeamInfoPanel team={getRightTeam()} align="right" onPlayerClick={handleCourtPlayerClick} />
+                    <TeamInfoPanel team={rightTeam} align="right" onPlayerClick={handleCourtPlayerClick} />
                 </aside>
 
                 {/* NEW: Match History Sidebar */}
