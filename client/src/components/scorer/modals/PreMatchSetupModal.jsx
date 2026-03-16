@@ -1,28 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { ListChecks, Loader, CheckCircle } from 'lucide-react';
 
-const PreMatchSetupModal = ({ isOpen, teamHome, teamAway, homeRoster, awayRoster, onConfirm, isDarkMode }) => {
+const PreMatchSetupModal = ({ isOpen, teamHome, teamAway, homeRoster, awayRoster, onConfirm }) => {
     const [activeTab, setActiveTab] = useState('settings'); 
     const [setsOption, setSetsOption] = useState(3);
     const [selHome, setSelHome] = useState([]);
     const [selAway, setSelAway] = useState([]);
 
+    const [initialized, setInitialized] = useState(false);
+
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !initialized) {
             if (homeRoster && homeRoster.length > 0) {
-                setSelHome(prev => {
-                    if (prev.length > 0 && prev[0].id === homeRoster[0].id) return prev; 
-                    return homeRoster.map(p => ({ ...p, selected: true, isCaptain: p.is_captain || false, isLibero: p.position === 'LIBERO' }));
-                });
+                setSelHome(homeRoster.map(p => ({ ...p, selected: true, isCaptain: p.is_captain || false, isLibero: p.position === 'LIBERO' })));
             }
             if (awayRoster && awayRoster.length > 0) {
-                setSelAway(prev => {
-                    if (prev.length > 0 && prev[0].id === awayRoster[0].id) return prev;
-                    return awayRoster.map(p => ({ ...p, selected: true, isCaptain: p.is_captain || false, isLibero: p.position === 'LIBERO' }));
-                });
+                setSelAway(awayRoster.map(p => ({ ...p, selected: true, isCaptain: p.is_captain || false, isLibero: p.position === 'LIBERO' })));
             }
+            setInitialized(true);
         }
-    }, [isOpen, homeRoster, awayRoster]);
+    }, [isOpen, homeRoster, awayRoster, initialized]);
 
     if (!isOpen) return null;
 
@@ -57,50 +54,77 @@ const PreMatchSetupModal = ({ isOpen, teamHome, teamAway, homeRoster, awayRoster
     };
 
     return (
-        <div className="fixed inset-0 z-[80] bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className={`w-full max-w-5xl h-[85vh] rounded-3xl flex flex-col shadow-2xl overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 border border-slate-700' : 'bg-white border border-gray-200'}`}>
-                <div className={`p-6 border-b flex justify-between items-center ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
+        <div className="fixed inset-0 z-[80] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
+            <div className="w-full max-w-5xl h-[85vh] rounded-[2.5rem] bg-white border border-slate-200 flex flex-col shadow-2xl overflow-hidden transition-all duration-500 animate-in fade-in zoom-in slide-in-from-bottom-10">
+                {/* Header */}
+                <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div>
-                        <h2 className={`text-3xl font-bold flex items-center gap-3 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                            <ListChecks className="text-blue-400" size={32} /> Match Setup & Roster
+                        <h2 className="text-4xl font-black flex items-center gap-4 text-slate-800 tracking-tight">
+                            <div className="bg-indigo-600 p-2.5 rounded-2xl text-white shadow-indigo-200 shadow-xl">
+                                <ListChecks size={32} />
+                            </div>
+                            MATCH PREPARATION
                         </h2>
-                        <p className={`text-sm mt-1 ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>ตั้งค่ากติกาและตรวจสอบรายชื่อผู้เล่น</p>
+                        <p className="text-sm mt-2 text-slate-400 font-bold uppercase tracking-widest px-1">Phase 1: Rules & Official Rosters</p>
                     </div>
                 </div>
 
-                <div className={`flex border-b ${isDarkMode ? 'border-slate-700 bg-slate-900' : 'border-gray-200 bg-white'}`}>
-                    <button onClick={() => setActiveTab('settings')} className={`flex-1 py-4 font-bold text-lg uppercase transition-all ${activeTab === 'settings' ? `border-b-4 border-blue-500 ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-gray-50 text-blue-600'}` : `${isDarkMode ? 'text-slate-500 hover:bg-slate-800/50' : 'text-gray-500 hover:bg-gray-100'}`}`}>1. Match Rules</button>
-                    <button onClick={() => setActiveTab('home')} className={`flex-1 py-4 font-bold text-lg uppercase transition-all ${activeTab === 'home' ? `border-b-4 border-indigo-500 ${isDarkMode ? 'bg-slate-800 text-indigo-400' : 'bg-gray-50 text-indigo-600'}` : `${isDarkMode ? 'text-slate-500 hover:bg-slate-800/50' : 'text-gray-500 hover:bg-gray-100'}`}`}>2. {teamHome}</button>
-                    <button onClick={() => setActiveTab('away')} className={`flex-1 py-4 font-bold text-lg uppercase transition-all ${activeTab === 'away' ? `border-b-4 border-rose-500 ${isDarkMode ? 'bg-slate-800 text-rose-400' : 'bg-gray-50 text-rose-600'}` : `${isDarkMode ? 'text-slate-500 hover:bg-slate-800/50' : 'text-gray-500 hover:bg-gray-100'}`}`}>3. {teamAway}</button>
+                {/* Tabs */}
+                <div className="flex bg-slate-50 p-2 gap-2 mx-8 mt-6 rounded-[2rem] border border-slate-200/60">
+                    <button onClick={() => setActiveTab('settings')} className={`flex-1 py-4 font-black text-xs uppercase tracking-[0.2em] rounded-[1.5rem] transition-all ${activeTab === 'settings' ? 'bg-white text-indigo-600 shadow-sm border border-slate-100 scale-[1.02]' : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'}`}>1. Ruleset</button>
+                    <button onClick={() => setActiveTab('home')} className={`flex-1 py-4 font-black text-xs uppercase tracking-[0.2em] rounded-[1.5rem] transition-all ${activeTab === 'home' ? 'bg-white text-indigo-600 shadow-sm border border-slate-100 scale-[1.02]' : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'}`}>2. {teamHome}</button>
+                    <button onClick={() => setActiveTab('away')} className={`flex-1 py-4 font-black text-xs uppercase tracking-[0.2em] rounded-[1.5rem] transition-all ${activeTab === 'away' ? 'bg-white text-indigo-600 shadow-sm border border-slate-100 scale-[1.02]' : 'text-slate-400 hover:text-slate-600 hover:bg-white/50'}`}>3. {teamAway}</button>
                 </div>
 
-                <div className={`flex-1 p-6 overflow-hidden ${isDarkMode ? 'bg-slate-900' : 'bg-white'}`}>
+                {/* Content */}
+                <div className="flex-1 p-8 overflow-hidden bg-white">
                     {activeTab === 'settings' && (
-                        <div className="flex flex-col items-center justify-center h-full gap-8 animate-in fade-in zoom-in duration-300">
-                            <h3 className={`text-xl uppercase tracking-widest font-bold ${isDarkMode ? 'text-slate-400' : 'text-gray-600'}`}>เลือกจำนวนเซตตัดสิน</h3>
-                            <div className="flex gap-8">
-                                <button onClick={() => setSetsOption(2)} className={`w-72 p-10 rounded-3xl border-2 flex flex-col items-center gap-4 transition-all ${setsOption === 2 ? `border-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.3)] scale-105 ${isDarkMode ? 'bg-blue-600/20' : 'bg-blue-50'}` : `opacity-60 hover:opacity-100 ${isDarkMode ? 'bg-slate-800 border-slate-700 hover:border-slate-500' : 'bg-gray-100 border-gray-200 hover:border-gray-400'}`}`}>
-                                    <span className={`text-6xl font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>2 : 3</span>
-                                    <span className={`text-lg font-bold uppercase ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>Best of 3 Sets</span>
+                        <div className="flex flex-col items-center justify-center h-full gap-10 animate-in fade-in zoom-in duration-500">
+                            <div className="space-y-2 text-center">
+                                <h3 className="text-sm font-black text-slate-400 uppercase tracking-[0.3em]">Scoring Format</h3>
+                                <p className="text-slate-300 font-medium">Select match duration rules for this competition</p>
+                            </div>
+                            <div className="flex gap-10">
+                                <button onClick={() => setSetsOption(2)} className={`w-80 p-12 rounded-[3rem] border-2 flex flex-col items-center gap-6 transition-all group active:scale-95 ${setsOption === 2 ? 'border-indigo-500 bg-indigo-50/50 shadow-2xl shadow-indigo-100 ring-4 ring-indigo-50' : 'border-slate-100 bg-slate-50/50 opacity-40 hover:opacity-100 hover:border-slate-200'}`}>
+                                    <span className={`text-7xl font-black italic tracking-tighter transition-colors ${setsOption === 2 ? 'text-indigo-600' : 'text-slate-300'}`}>2 : 3</span>
+                                    <div className="flex flex-col gap-1 items-center">
+                                        <span className={`text-xs font-black uppercase tracking-[0.2em] ${setsOption === 2 ? 'text-indigo-600' : 'text-slate-400'}`}>Standard Match</span>
+                                        <span className={`text-[10px] font-bold ${setsOption === 2 ? 'text-indigo-400' : 'text-slate-300'}`}>BEST OF 3 SETS</span>
+                                    </div>
                                 </button>
-                                <button onClick={() => setSetsOption(3)} className={`w-72 p-10 rounded-3xl border-2 flex flex-col items-center gap-4 transition-all ${setsOption === 3 ? `border-blue-500 shadow-[0_0_40px_rgba(59,130,246,0.3)] scale-105 ${isDarkMode ? 'bg-blue-600/20' : 'bg-blue-50'}` : `opacity-60 hover:opacity-100 ${isDarkMode ? 'bg-slate-800 border-slate-700 hover:border-slate-500' : 'bg-gray-100 border-gray-200 hover:border-gray-400'}`}`}>
-                                    <span className={`text-6xl font-black ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>3 : 5</span>
-                                    <span className={`text-lg font-bold uppercase ${isDarkMode ? 'text-slate-300' : 'text-gray-700'}`}>Best of 5 Sets</span>
+                                <button onClick={() => setSetsOption(3)} className={`w-80 p-12 rounded-[3rem] border-2 flex flex-col items-center gap-6 transition-all group active:scale-95 ${setsOption === 3 ? 'border-indigo-500 bg-indigo-50/50 shadow-2xl shadow-indigo-100 ring-4 ring-indigo-50' : 'border-slate-100 bg-slate-50/50 opacity-40 hover:opacity-100 hover:border-slate-200'}`}>
+                                    <span className={`text-7xl font-black italic tracking-tighter transition-colors ${setsOption === 3 ? 'text-indigo-600' : 'text-slate-300'}`}>3 : 5</span>
+                                    <div className="flex flex-col gap-1 items-center">
+                                        <span className={`text-xs font-black uppercase tracking-[0.2em] ${setsOption === 3 ? 'text-indigo-600' : 'text-slate-400'}`}>Official FIVB</span>
+                                        <span className={`text-[10px] font-bold ${setsOption === 3 ? 'text-indigo-400' : 'text-slate-300'}`}>BEST OF 5 SETS</span>
+                                    </div>
                                 </button>
                             </div>
                         </div>
                     )}
 
-                    {activeTab === 'home' && <RosterList list={selHome} team="home" toggleSelect={toggleSelect} setRole={setRole} isDarkMode={isDarkMode} />}
-                    {activeTab === 'away' && <RosterList list={selAway} team="away" toggleSelect={toggleSelect} setRole={setRole} isDarkMode={isDarkMode} />}
+                    {activeTab === 'home' && <RosterList list={selHome} team="home" toggleSelect={toggleSelect} setRole={setRole} accentColor="indigo" />}
+                    {activeTab === 'away' && <RosterList list={selAway} team="away" toggleSelect={toggleSelect} setRole={setRole} accentColor="rose" />}
                 </div>
 
-                <div className={`p-6 border-t flex justify-between items-center ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-50 border-gray-200'}`}>
-                    <div className={`${isDarkMode ? 'text-slate-400' : 'text-gray-500'} text-sm`}>
-                        Selected: <strong className={isDarkMode ? 'text-white' : 'text-gray-800'}>{selHome.filter(p=>p.selected).length}</strong> (Home) / <strong className={isDarkMode ? 'text-white' : 'text-gray-800'}>{selAway.filter(p=>p.selected).length}</strong> (Away)
+                {/* Footer */}
+                <div className="p-8 border-t border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div className="flex gap-4">
+                        <div className="bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Home</span>
+                            <span className={`font-mono font-black text-lg ${selHome.filter(p=>p.selected).length <6 ? 'text-rose-500' : 'text-indigo-600'}`}>{selHome.filter(p=>p.selected).length}</span>
+                        </div>
+                        <div className="bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Away</span>
+                            <span className={`font-mono font-black text-lg ${selAway.filter(p=>p.selected).length <6 ? 'text-rose-500' : 'text-indigo-600'}`}>{selAway.filter(p=>p.selected).length}</span>
+                        </div>
                     </div>
-                    <button onClick={handleSave} className="bg-green-600 hover:bg-green-500 text-white px-10 py-3 rounded-xl font-bold text-lg shadow-lg flex items-center gap-2 active:scale-95 transition-transform">
-                        Confirm & Start Match <CheckCircle />
+                    
+                    <button onClick={handleSave} className="relative group overflow-hidden bg-slate-900 hover:bg-black text-white px-12 py-4 rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-sm shadow-xl transition-all active:scale-95 flex items-center gap-3">
+                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <span className="relative z-10 flex items-center gap-3">
+                            Initialize Console <CheckCircle size={20} />
+                        </span>
                     </button>
                 </div>
             </div>
@@ -108,25 +132,27 @@ const PreMatchSetupModal = ({ isOpen, teamHome, teamAway, homeRoster, awayRoster
     );
 };
 
-const RosterList = ({ list, team, toggleSelect, setRole, isDarkMode }) => {
+const RosterList = ({ list, team, toggleSelect, setRole, accentColor }) => {
+    const accentClass = accentColor === 'indigo' ? 'bg-indigo-600 border-indigo-600' : 'bg-rose-600 border-rose-600';
+    const accentText = accentColor === 'indigo' ? 'text-indigo-600' : 'text-rose-600';
+
     if (!list || list.length === 0) {
         return (
-            <div className={`flex flex-col items-center justify-center h-full min-h-[300px] ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>
-                <Loader className="animate-spin mb-3 text-blue-500" size={32} />
-                <p className="font-bold">กำลังโหลดรายชื่อนักกีฬา...</p>
-                <p className="text-xs opacity-60 mt-1">(หากรอนาน โปรดตรวจสอบว่าทีมนี้มีนักกีฬาในระบบหรือไม่)</p>
+            <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-slate-300">
+                <div className={`w-12 h-12 border-4 border-slate-100 ${accentColor === 'indigo' ? 'border-t-indigo-600' : 'border-t-rose-600'} rounded-full animate-spin mb-6`}></div>
+                <p className="font-black uppercase tracking-[0.2em] text-xs">Syncing Team Data...</p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col h-full">
-            <div className={`grid grid-cols-12 gap-2 text-xs font-bold uppercase mb-2 px-4 select-none ${isDarkMode ? 'text-slate-500' : 'text-gray-500'}`}>
-                <div className="col-span-1 text-center">ลงแข่ง</div>
-                <div className="col-span-1 text-center">เบอร์</div>
-                <div className="col-span-6">ชื่อ-นามสกุล</div>
-                <div className="col-span-2 text-center">กัปตัน</div>
-                <div className="col-span-2 text-center">ลิเบอโร่</div>
+        <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-10 duration-500">
+            <div className="grid grid-cols-12 gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 px-6">
+                <div className="col-span-1 text-center">Active</div>
+                <div className="col-span-1 text-center">#</div>
+                <div className="col-span-6 px-4">Full Roster Name</div>
+                <div className="col-span-2 text-center">Captain</div>
+                <div className="col-span-2 text-center">Libero</div>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar px-2 space-y-2 pb-4">
                 {list.map(p => {
@@ -136,17 +162,22 @@ const RosterList = ({ list, team, toggleSelect, setRole, isDarkMode }) => {
                     const displayName = (fName || lName) ? `${fName} ${lName} ${nickname}`.trim() : (p.name || 'Unknown Player');
 
                     return (
-                        <div key={p.id} className={`grid grid-cols-12 gap-2 items-center p-3 rounded-lg border transition-all duration-200 ${p.selected ? `shadow-md ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-gray-100 border-gray-300'}` : `opacity-60 hover:opacity-80 ${isDarkMode ? 'bg-slate-800/30 border-slate-800' : 'bg-gray-50/30 border-gray-200'}` }`}>
+                        <div key={p.id} className={`grid grid-cols-12 gap-4 items-center p-4 rounded-2xl border transition-all duration-300 ${p.selected ? `bg-white shadow-xl shadow-slate-200/50 border-slate-100 scale-[1.01]` : `opacity-30 grayscale border-transparent hover:opacity-50` }`}>
                             <div className="col-span-1 flex justify-center">
-                                <input type="checkbox" checked={p.selected} onChange={() => toggleSelect(team, p.id)} className="w-5 h-5 accent-green-500 rounded cursor-pointer transition-transform active:scale-90" />
+                                <div onClick={() => toggleSelect(team, p.id)} className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all ${p.selected ? `${accentClass} text-white` : `bg-white border-slate-200`}`}>
+                                    {p.selected && <CheckCircle size={14} />}
+                                </div>
                             </div>
-                            <div className={`col-span-1 font-black text-center text-lg ${p.selected ? (isDarkMode ? 'text-white' : 'text-gray-900') : 'text-slate-500'}`}>{p.number}</div>
-                            <div className={`col-span-6 text-sm truncate font-medium ${p.selected ? (isDarkMode ? 'text-slate-200' : 'text-gray-700') : 'text-slate-500'}`} title={displayName}>{displayName}</div>
-                            <div className="col-span-2 flex justify-center">
-                                <button onClick={() => p.selected && setRole(team, p.id, 'isCaptain')} disabled={!p.selected} className={`w-8 h-8 rounded-full text-xs font-bold transition-all border-2 flex items-center justify-center ${!p.selected ? `opacity-20 cursor-not-allowed ${isDarkMode ? 'border-slate-700 text-slate-700' : 'border-gray-200 text-gray-300'}` : p.isCaptain ? 'bg-yellow-500 text-black border-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.4)] scale-110' : `bg-transparent ${isDarkMode ? 'text-slate-500 border-slate-600 hover:border-slate-400 hover:text-white' : 'text-gray-500 border-gray-300 hover:border-gray-500 hover:text-gray-800'}` }`}>C</button>
+                            <div className="col-span-1 font-mono font-black text-center text-xl text-slate-700">{p.number}</div>
+                            <div className="col-span-6 px-4">
+                                <div className="text-sm font-black text-slate-800 uppercase tracking-tight truncate" title={displayName}>{displayName}</div>
+                                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{p.position || 'PLAYER'}</div>
                             </div>
                             <div className="col-span-2 flex justify-center">
-                                <button onClick={() => p.selected && setRole(team, p.id, 'isLibero')} disabled={!p.selected} className={`w-8 h-8 rounded-full text-xs font-bold transition-all border-2 flex items-center justify-center ${!p.selected ? `opacity-20 cursor-not-allowed ${isDarkMode ? 'border-slate-700 text-slate-700' : 'border-gray-200 text-gray-300'}` : p.isLibero ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.4)] scale-110' : `bg-transparent ${isDarkMode ? 'text-slate-500 border-slate-600 hover:border-slate-400 hover:text-white' : 'text-gray-500 border-gray-300 hover:border-gray-500 hover:text-gray-800'}` }`}>L</button>
+                                <button onClick={() => p.selected && setRole(team, p.id, 'isCaptain')} disabled={!p.selected} className={`w-10 h-10 rounded-xl text-xs font-black transition-all border flex items-center justify-center ${p.isCaptain ? 'bg-amber-400 text-amber-900 border-amber-300 shadow-lg shadow-amber-100 scale-110' : 'bg-slate-50 text-slate-300 border-slate-100 hover:bg-white hover:border-slate-300 hover:text-slate-600' }`}>C</button>
+                            </div>
+                            <div className="col-span-2 flex justify-center">
+                                <button onClick={() => p.selected && setRole(team, p.id, 'isLibero')} disabled={!p.selected} className={`w-10 h-10 rounded-xl text-xs font-black transition-all border flex items-center justify-center ${p.isLibero ? `${accentClass} text-white shadow-lg shadow-slate-100 scale-110` : 'bg-slate-50 text-slate-300 border-slate-100 hover:bg-white hover:border-slate-300 hover:text-slate-600' }`}>L</button>
                             </div>
                         </div>
                     );

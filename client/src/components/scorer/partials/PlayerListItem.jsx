@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PlayerListItem = ({ player, label, align, isActive, isLibero, teamColor, isDarkMode, isSwappedLibero, isLastSwap }) => {
+const PlayerListItem = ({ player, label, align, isActive, isLibero, isSwappedLibero, isLastSwap }) => {
     const isRight = align === 'right';
     
     const getPlayerName = (p) => {
@@ -11,34 +11,34 @@ const PlayerListItem = ({ player, label, align, isActive, isLibero, teamColor, i
         return 'Unknown';
     };
 
-    // Conditional styles
-    const activeClass = isDarkMode ? 'bg-slate-800/80 border-slate-700/50 shadow-sm' : 'bg-gray-100 border-gray-200 shadow-sm';
-    const inactiveClass = isDarkMode ? 'hover:bg-slate-800/30 text-slate-400' : 'hover:bg-gray-50 text-gray-500';
-    const numberInactiveClass = isDarkMode ? 'bg-slate-700 text-slate-500' : 'bg-gray-200 text-gray-500';
-    const liberoClass = isDarkMode ? 'bg-yellow-600 text-white' : 'bg-yellow-500 text-black';
-    const swappedLiberoClass = isDarkMode ? 'bg-white text-black border-2 border-slate-400' : 'bg-white text-black border-2 border-gray-300';
-    const lastSwapClass = isDarkMode ? 'ring-2 ring-offset-2 ring-offset-slate-800 ring-yellow-400' : 'ring-2 ring-offset-2 ring-offset-white ring-yellow-400';
-    const nameActiveClass = isDarkMode ? 'text-slate-200' : 'text-gray-800';
-    const nameInactiveClass = isDarkMode ? 'text-slate-500' : 'text-gray-500';
-    const numberActiveClass = isDarkMode ? 'bg-slate-700 text-white' : 'bg-gray-800 text-white';
-    const captainClass = isDarkMode ? 'bg-yellow-500 text-black' : 'bg-yellow-400 text-yellow-900';
-    const labelClass = isDarkMode ? 'text-slate-500 bg-slate-900' : 'text-gray-500 bg-gray-100';
+    // New light theme tokens
+    const activeClass = 'bg-white border-slate-100 shadow-sm';
+    const inactiveClass = 'hover:bg-slate-50/50 text-slate-400';
+    const numberInactiveClass = 'bg-slate-50 text-slate-300';
+    const liberoClass = 'bg-amber-100 text-amber-700 border-amber-200';
+    const swappedLiberoClass = 'bg-indigo-600 text-white border-indigo-400 shadow-indigo-100 shadow-md scale-105';
+    const lastSwapClass = 'ring-2 ring-indigo-400 ring-offset-2 ring-offset-white';
+    const nameActiveClass = 'text-slate-800';
+    const nameInactiveClass = 'text-slate-400';
+    const numberActiveClass = 'bg-slate-800 text-white';
+    const captainClass = 'bg-amber-400 text-amber-900';
+    const labelClass = 'bg-slate-100 text-slate-500';
 
     return (
-        <div className={`flex items-center gap-3 p-2 rounded border border-transparent transition-all ${isActive ? activeClass : inactiveClass} ${isRight ? 'flex-row-reverse text-right' : 'flex-row text-left'} ${isLastSwap ? lastSwapClass : ''}`}>
-            <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm shrink-0 ${isSwappedLibero ? swappedLiberoClass : (isLibero ? liberoClass : (isActive && player ? numberActiveClass : numberInactiveClass))}`}>
+        <div className={`flex items-center gap-3 p-2 rounded-xl border border-transparent transition-all duration-300 ${isActive ? activeClass : inactiveClass} ${isRight ? 'flex-row-reverse text-right' : 'flex-row text-left'} ${isLastSwap ? lastSwapClass : ''}`}>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs shrink-0 border transition-all ${isSwappedLibero ? swappedLiberoClass : (isLibero ? liberoClass : (isActive && player ? `${numberActiveClass} border-slate-800` : `${numberInactiveClass} border-slate-100`))}`}>
                 {player ? player.number : '-'}
             </div>
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <div className={`text-sm truncate font-medium flex items-center gap-1.5 ${isActive ? nameActiveClass : nameInactiveClass} ${isRight ? 'flex-row-reverse' : ''}`}>
+                <div className={`text-xs truncate font-bold flex items-center gap-2 ${isActive ? nameActiveClass : nameInactiveClass} ${isRight ? 'flex-row-reverse' : ''}`}>
                     <span>{getPlayerName(player)}</span>
                     {player?.isCaptain && (
-                        <span className={`text-[9px] font-black px-1.5 rounded-full ${captainClass}`} title="Captain"> C </span>
+                        <span className={`text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full ${captainClass}`} title="Captain">C</span>
                     )}
                 </div>
             </div>
             {label && (
-                <div className={`text-[10px] font-bold px-2 py-1 rounded ${labelClass}`}>{label}</div>
+                <div className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider ${labelClass}`}>{label}</div>
             )}
         </div>
     );

@@ -3,7 +3,7 @@ import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowRightLeft, Users, ListChecks, CheckCircle, Shield, X, PlayCircle, Loader,
     Trophy, RotateCcw, Flag, Clock, RefreshCcw, History, FileText, AlertTriangle, Repeat,
-    Moon, Sun, Timer, Video, ArrowUpDown, ArrowDown, ArrowUp
+    Moon, Sun, Timer, Video, ArrowUpDown, ArrowDown, ArrowUp, Pause
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -36,7 +36,7 @@ export default function ScorerConsole() {
         try {
             const saved = localStorage.getItem(`match_${matchId}_${key}`);
             return saved !== null ? JSON.parse(saved) : defaultValue;
-        } catch (e) {
+        } catch {
             return defaultValue;
         }
     };
@@ -140,20 +140,16 @@ export default function ScorerConsole() {
 
     // History & Logs
     const [history, setHistory] = useState(() => loadState('history', []));
-    const [liberoLogs, setLiberoLogs] = useState(() => loadState('liberoLogs', []));
 
     // Limits & Quotas
 
     // Modals Control State
-    const [showRosterModal, setShowRosterModal] = useState(true);
     const [showLineupModal, setShowLineupModal] = useState(false);
     const [showMatchLogModal, setShowMatchLogModal] = useState(false);
 
     const [showPlayerPicker, setShowPlayerPicker] = useState(false);
     const [pickerContext, setPickerContext] = useState({ team: 'home', posIndex: null });
 
-    const [showSubModal, setShowSubModal] = useState(false);
-    const [subTeam, setSubTeam] = useState(null);
 
     const [showSanctionModal, setShowSanctionModal] = useState(false);
     const [sanctionTeam, setSanctionTeam] = useState(null);
@@ -198,19 +194,7 @@ export default function ScorerConsole() {
 
     const [activeHistoryTab, setActiveHistoryTab] = useState(1);
 
-    // --- THEME STATE (Dark/Light Mode) ---
-    const [isDarkMode, setIsDarkMode] = useState(() => {
-        try {
-            // This part seems to be for a different feature (theme), 
-            // but it's good practice to keep error handling.
-            const saved = localStorage.getItem('theme_mode');
-            return saved ? JSON.parse(saved) : false;
-        } catch (e) { return false; }
-    });
-
-    useEffect(() => {
-        localStorage.setItem('theme_mode', JSON.stringify(isDarkMode));
-    }, [isDarkMode]);
+    // --- BUTTON CLASS HELPER ---
 
     // --- EFFECT: TIMER ---
     useEffect(() => {
@@ -283,9 +267,9 @@ export default function ScorerConsole() {
     }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors, showTimeoutTimer, timeoutStartTime, subTracker]);
 
     // เก็บ ID ผู้เล่นที่ถูกเปลี่ยนตัวออกด้วยกรณีพิเศษ (บาดเจ็บ/ให้ออก) ห้ามลงเล่นทั้งนัด
-    const [disqualifiedPlayers, setDisqualifiedPlayers] = useState(() => {
+    const [disqualifiedPlayers] = useState(() => {
         const saved = localStorage.getItem(`match_${matchId}_disqualified`);
-        return saved ? JSON.parse(saved) : [];
+        return saved ? JSON.parse(saved) : { home: [], away: [] };
     });
 
     useEffect(() => {
@@ -569,7 +553,6 @@ fetchMatchData();
 
         if (response.data.success) {
             // 1. ดึงข้อมูลจาก backend (แก้ชื่อให้ตรงเผื่อไว้ด้วย)
-            const { matchFinished, currentSets } = response.data;
 
             // 2. คำนวณจำนวนเซตล่าสุดจากฝั่ง Frontend เอง (ปลอดภัยที่สุด)
             const newSetsWon = {
@@ -757,7 +740,6 @@ fetchMatchData();
 
         setHomeRoster(data.confirmedHome);
         setAwayRoster(data.confirmedAway);
-        setShowRosterModal(false);
         setWorkflowStep('SERVER_SELECT');
     };
 
@@ -910,7 +892,7 @@ fetchMatchData();
         setShowPlayerPicker(false);
     };
 
-    const handleSanctionConfirm = (player, cardType) => {
+    const handleSanction = (player, cardType) => {
         if (!player || !cardType || !sanctionTeam) return;
         saveStateToHistory();
         saveEventToBackend('SANCTION', sanctionTeam, { player_id: player.id, details: { card: cardType } });
@@ -923,7 +905,7 @@ fetchMatchData();
         setSanctionTeam(null);
     };
 
-    const handleChallengeSelect = (result, reason) => {
+    const handleChallengeSelect = (result) => {
         const team = challengeData.team;
         if (!team) return;
         if (result === 'UNSUCCESSFUL') {
@@ -1323,80 +1305,67 @@ fetchMatchData();
     };
 
 
-    if (isLoading) return <div className="h-screen bg-slate-950 text-white flex items-center justify-center"><Loader className="animate-spin" /></div>;
+    if (isLoading) return (
+        <div className="h-screen bg-slate-50 flex flex-col items-center justify-center gap-4">
+            <div className="w-16 h-16 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p className="text-slate-400 font-bold animate-pulse uppercase tracking-widest text-sm">Loading Console...</p>
+        </div>
+    );
+
     const isSetupPhase = ['ROSTER_CHECK', 'SERVER_SELECT', 'LINEUP_SELECT'].includes(workflowStep);
 
-    // Helper class for secondary buttons in controls
-    const secondaryBtnClass = isDarkMode
-        ? 'bg-slate-700 text-gray-200 border-slate-600 hover:bg-slate-600 disabled:opacity-40'
-        : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200 disabled:opacity-40';
-
     return (
-        <div className={`h-screen font-sans flex flex-col overflow-hidden relative transition-colors duration-300 ${isDarkMode ? 'bg-slate-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
-            <main className="flex-1 flex relative overflow-hidden">
-                <aside className={`w-80 border-r hidden lg:flex flex-col z-10 shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
-                    <TeamInfoPanel team={getLeftTeam()} align="left" isDarkMode={isDarkMode} onPlayerClick={handleCourtPlayerClick} />
-                </aside>
-
-                <section className={`flex-1 relative flex flex-col h-full transition-colors duration-300 ${isDarkMode ? 'bg-slate-900' : 'bg-gray-50'}`}>
-
-
-                    {/* SCOREBOARD */}
-                    <div className="absolute top-4 left-0 right-0 z-30 flex justify-center items-center gap-3 pointer-events-none px-4">
-                        <div className="flex items-center gap-2">
-                            <div className={`backdrop-blur-md border rounded-xl py-3 px-4 text-right max-w-[320px] flex items-center justify-end gap-3 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
-                                <div className={`text-3xl font-bold px-2 py-1 rounded border shrink-0 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getLeftTeam().sets}</div>
-                                <div className="font-bold text-2xl truncate min-w-0" style={{ color: getLeftTeam().color }}>{getLeftTeam().name}</div>
-                            </div>
-                            <div className={`border rounded-xl p-2 w-24 h-20 flex items-center justify-center shadow-sm shrink-0 transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-200'}`}>
-                                <div className="text-5xl font-black" style={{ color: getLeftTeam().color }}>{getLeftTeam().score}</div>
-                            </div>
-                        </div>
-
-                        <div className="relative shrink-0 flex flex-col items-center">
-                            <div className={`border rounded-xl px-6 py-2 flex flex-col items-center justify-center h-20 min-w-[80px] shadow-lg transition-colors ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-gray-800 border-gray-700'}`}>
-                                <span className="text-xs text-gray-400 font-bold uppercase">SET</span>
-                                <span className="text-4xl font-bold text-white">{matchData.currentSet}</span>
-                            </div>
-                            {isTimerRunning && (
-                                <div className={`absolute top-full mt-2 left-1/2 -translate-x-1/2 py-2 px-4 rounded-xl border flex items-center gap-2 z-40 shadow-md transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-300'}`}>
-                                    <Clock size={20} className="text-green-400 animate-pulse" />
-                                    <span className={`font-bold font-mono text-lg ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{Math.floor(matchDuration / 60)}:{String(matchDuration % 60).padStart(2, '0')}</span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <div className={`border rounded-xl p-2 w-24 h-20 flex items-center justify-center shadow-sm shrink-0 transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700' : 'bg-white/90 border-gray-200'}`}>
-                                <div className="text-5xl font-black" style={{ color: getRightTeam().color }}>{getRightTeam().score}</div>
-                            </div>
-                            <div className={`backdrop-blur-md border rounded-xl py-3 px-4 text-left max-w-[320px] flex items-center justify-start gap-3 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-800/90 border-slate-700 text-gray-100' : 'bg-white/90 border-gray-200'}`}>
-                                <div className="font-bold text-2xl truncate min-w-0" style={{ color: getRightTeam().color }}>{getRightTeam().name}</div>
-                                <div className={`text-3xl font-bold px-2 py-1 rounded border shrink-0 ${isDarkMode ? 'bg-slate-700 border-slate-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-500'}`}>{getRightTeam().sets}</div>
-                            </div>
+        <div className="h-screen flex flex-col bg-slate-50 text-slate-900 font-sans overflow-hidden">
+            {/* --- HEADER --- */}
+            <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-20 shadow-sm">
+                <div className="flex items-center gap-4">
+                    <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-indigo-200 shadow-lg">
+                        <Trophy size={20} />
+                    </div>
+                    <div>
+                        <h1 className="font-black text-xl tracking-tight text-slate-800 uppercase flex items-center gap-2">
+                            Scorer Console
+                            <span className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">LIVE</span>
+                        </h1>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                            <span>Volleyball MS</span>
+                            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                            <span>SET {matchData.currentSet}</span>
                         </div>
                     </div>
+                </div>
 
-                    {!isSetupPhase && (
-                        <button onClick={() => setShowMatchLogModal(true)} className={`absolute top-6 right-6 z-50 p-3 rounded-full border shadow-md transition-all pointer-events-auto lg:hidden ${isDarkMode ? 'bg-slate-800 border-slate-600 text-gray-300 hover:bg-slate-700' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100'}`}>
-                            <FileText size={24} />
-                        </button>
-                    )}
+                <div className="flex items-center gap-3">
+                    <div className="flex bg-slate-100 p-1 rounded-xl">
+                        <button onClick={() => setShowMatchLogModal(true)} className="p-2.5 rounded-lg text-slate-600 hover:bg-white hover:shadow-sm transition-all" title="Match Log"><ListChecks size={20} /></button>
+                        <button onClick={() => navigate('/admin')} className="p-2.5 rounded-lg text-slate-600 hover:bg-white hover:shadow-sm transition-all" title="Exit"><X size={20} /></button>
+                    </div>
+                </div>
+            </header>
 
+            <main className="flex-1 flex overflow-hidden p-4 gap-4">
+                {/* Left Sidebar */}
+                <aside className="w-80 bg-white/80 backdrop-blur-xl border border-slate-200 rounded-2xl hidden lg:flex flex-col z-10 shadow-sm overflow-hidden">
+                    <TeamInfoPanel team={getLeftTeam()} align="left" onPlayerClick={handleCourtPlayerClick} />
+                </aside>
+
+                {/* CENTER: COURT & SCORE */}
+                <section className="flex-1 flex flex-col gap-4 overflow-hidden min-w-[600px]">
                     {/* COURT VIEW */}
-                    <div className="flex-1 flex items-center justify-center pt-24 pb-4 px-4 relative">
-                        <CourtView
-                            homePositions={!isSetupPhase ? (isHomeLeft ? homeLineup : awayLineup) : Array(6).fill(null)}
-                            awayPositions={!isSetupPhase ? (isHomeLeft ? awayLineup : homeLineup) : Array(6).fill(null)}
-                            servingSide={!isSetupPhase && servingTeam ? ((servingTeam === 'home' && isHomeLeft) || (servingTeam === 'away' && !isHomeLeft) ? 'left' : 'right') : null}
-                            onPlayerClick={handleCourtPlayerClick}
-                            onLiberoClick={(team) => setLiberoActionData({ isOpen: true, team })}
-                            leftTeam={getLeftTeam()}
-                            rightTeam={getRightTeam()}
-                            disableLibero={workflowStep === 'RALLY'}
-                        />
-
-
+                    <div className="flex-1 relative bg-white/40 backdrop-blur-sm border border-slate-200 rounded-3xl shadow-inner overflow-hidden flex items-center justify-center p-4">
+                        <div className="w-full h-full max-w-4xl max-h-[500px]">
+                            <CourtView
+                                homePositions={!isSetupPhase ? (isHomeLeft ? homeLineup : awayLineup) : Array(6).fill(null)}
+                                awayPositions={!isSetupPhase ? (isHomeLeft ? awayLineup : homeLineup) : Array(6).fill(null)}
+                                servingSide={!isSetupPhase && servingTeam ? ((servingTeam === 'home' && isHomeLeft) || (servingTeam === 'away' && !isHomeLeft) ? 'left' : 'right') : null}
+                                onPlayerClick={handleCourtPlayerClick}
+                                onLiberoClick={(team) => setLiberoActionData({ isOpen: true, team })}
+                                leftTeam={getLeftTeam()}
+                                rightTeam={getRightTeam()}
+                                disableLibero={workflowStep === 'RALLY'}
+                            />
+                        </div>
+                    </div>
                         {/* OVERLAYS */}
                         <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none">
                             {workflowStep === 'ROSTER_CHECK' && (
@@ -1406,152 +1375,165 @@ fetchMatchData();
                                         teamHome={matchData.teamHome} teamAway={matchData.teamAway}
                                         homeRoster={masterHomeRoster} awayRoster={masterAwayRoster}
                                         onConfirm={handleSetupConfirm}
-                                        isDarkMode={isDarkMode}
                                     />
                                 </div>
                             )}
 
                             {workflowStep === 'SERVER_SELECT' && (
                                 <div className="fixed inset-0 z-[60] bg-gray-900/50 backdrop-blur-sm flex items-center justify-center pointer-events-auto">
-                                    <div className="bg-white p-8 rounded-3xl border border-gray-200 max-w-2xl w-full text-center space-y-8 shadow-2xl">
-                                        <h2 className="text-3xl font-bold flex items-center justify-center gap-3 text-gray-800"><ArrowRightLeft className="text-yellow-500" /> Coin Toss & Sides</h2>
+                                    <div className="bg-white p-8 rounded-3xl border border-slate-200 max-w-2xl w-full text-center space-y-8 shadow-2xl">
+                                        <h2 className="text-3xl font-bold flex items-center justify-center gap-3 text-slate-800"><ArrowRightLeft className="text-indigo-600" /> Coin Toss & Sides</h2>
                                         <div className="flex justify-around items-center px-4">
                                             <div className="flex flex-col items-center gap-2">
-                                                <span className="font-bold text-gray-700">{matchData.teamHome} Color</span>
-                                                <input type="color" value={teamColors.home} onChange={(e) => setTeamColors({ ...teamColors, home: e.target.value })} className="w-16 h-10 cursor-pointer rounded border" />
+                                                <span className="font-bold text-slate-700">{matchData.teamHome} Color</span>
+                                                <input type="color" value={teamColors.home} onChange={(e) => setTeamColors({ ...teamColors, home: e.target.value })} className="w-16 h-10 cursor-pointer rounded border border-slate-200 shadow-sm" />
                                             </div>
                                             <div className="flex flex-col items-center gap-2">
-                                                <span className="font-bold text-gray-700">{matchData.teamAway} Color</span>
-                                                <input type="color" value={teamColors.away} onChange={(e) => setTeamColors({ ...teamColors, away: e.target.value })} className="w-16 h-10 cursor-pointer rounded border" />
+                                                <span className="font-bold text-slate-700">{matchData.teamAway} Color</span>
+                                                <input type="color" value={teamColors.away} onChange={(e) => setTeamColors({ ...teamColors, away: e.target.value })} className="w-16 h-10 cursor-pointer rounded border border-slate-200 shadow-sm" />
                                             </div>
                                         </div>
                                         <div className="flex gap-4 h-32">
-                                            <button onClick={() => setIsHomeLeft(true)} className={`flex-1 border-2 rounded-xl flex items-center justify-center text-2xl font-bold transition-all ${isHomeLeft ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400'}`}>Left: {matchData.teamHome}</button>
-                                            <div className="flex items-center"><RefreshCcw className="cursor-pointer hover:rotate-180 transition-transform text-gray-500" onClick={() => setIsHomeLeft(!isHomeLeft)} /></div>
-                                            <button onClick={() => setIsHomeLeft(false)} className={`flex-1 border-2 rounded-xl flex items-center justify-center text-2xl font-bold transition-all ${!isHomeLeft ? 'border-indigo-500 bg-indigo-50 text-indigo-600' : 'border-gray-200 text-gray-400'}`}>Left: {matchData.teamAway}</button>
+                                            <button onClick={() => setIsHomeLeft(true)} className={`flex-1 border-2 rounded-2xl flex items-center justify-center text-2xl font-black transition-all ${isHomeLeft ? 'border-indigo-500 bg-indigo-50 text-indigo-600 shadow-inner' : 'border-slate-100 bg-slate-50 text-slate-300'}`}>Left: {matchData.teamHome}</button>
+                                            <div className="flex items-center"><RefreshCcw className="cursor-pointer hover:rotate-180 transition-transform text-slate-400" onClick={() => setIsHomeLeft(!isHomeLeft)} /></div>
+                                            <button onClick={() => setIsHomeLeft(false)} className={`flex-1 border-2 rounded-2xl flex items-center justify-center text-2xl font-black transition-all ${!isHomeLeft ? 'border-indigo-500 bg-indigo-50 text-indigo-600 shadow-inner' : 'border-slate-100 bg-slate-50 text-slate-300'}`}>Left: {matchData.teamAway}</button>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
-                                            <button onClick={() => setServingTeam('home')} className={`p-4 border-2 rounded-xl font-bold ${servingTeam === 'home' ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-gray-100 text-gray-600'}`}>{matchData.teamHome} Serves</button>
-                                            <button onClick={() => setServingTeam('away')} className={`p-4 border-2 rounded-xl font-bold ${servingTeam === 'away' ? 'bg-rose-600 border-rose-400 text-white' : 'bg-gray-100 text-gray-600'}`}>{matchData.teamAway} Serves</button>
+                                            <button onClick={() => setServingTeam('home')} className={`p-4 border-2 rounded-2xl font-black transition-all ${servingTeam === 'home' ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>{matchData.teamHome} Serves</button>
+                                            <button onClick={() => setServingTeam('away')} className={`p-4 border-2 rounded-2xl font-black transition-all ${servingTeam === 'away' ? 'bg-rose-600 border-rose-400 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>{matchData.teamAway} Serves</button>
                                         </div>
-                                        <button onClick={() => servingTeam && setWorkflowStep('LINEUP_SELECT')} disabled={!servingTeam} className="w-full py-4 bg-green-600 hover:bg-green-500 rounded-xl font-bold text-xl disabled:opacity-50">Confirm Setup</button>
+                                        <button onClick={() => servingTeam && setWorkflowStep('LINEUP_SELECT')} disabled={!servingTeam} className="w-full py-4 bg-indigo-600 hover:bg-black text-white rounded-2xl font-black text-xl disabled:opacity-30 shadow-lg transition-all">CONFIRM SETUP</button>
                                     </div>
                                 </div>
                             )}
 
                             {workflowStep === 'LINEUP_SELECT' && (
-                                <button onClick={() => setShowLineupModal(true)} className="pointer-events-auto animate-pulse bg-green-600 hover:bg-green-500 px-10 py-5 rounded-full text-2xl font-bold shadow-2xl border-4 border-green-400 flex items-center gap-3">
-                                    <Users size={32} /> Set Line-ups
+                                <button onClick={() => setShowLineupModal(true)} className="pointer-events-auto animate-pulse bg-emerald-500 hover:bg-emerald-600 px-10 py-5 rounded-full text-2xl font-black text-white shadow-2xl border-4 border-white flex items-center gap-3 transition-transform hover:scale-105">
+                                    <Users size={32} /> SET LINEUPS
                                 </button>
                             )}
 
                             {workflowStep === 'READY' && (
-                                <button onClick={handleStartMatch} className="pointer-events-auto animate-pulse bg-indigo-600 hover:bg-indigo-500 px-10 py-5 rounded-full text-2xl font-bold shadow-2xl border-4 border-indigo-400 flex items-center gap-3">
-                                    <PlayCircle size={32} /> Start Match
+                                <button onClick={handleStartMatch} className="pointer-events-auto animate-pulse bg-indigo-600 hover:bg-indigo-700 px-10 py-5 rounded-full text-2xl font-black text-white shadow-2xl border-4 border-white flex items-center gap-3 transition-transform hover:scale-105">
+                                    <PlayCircle size={32} /> START MATCH
                                 </button>
                             )}
 
                             {workflowStep === 'SET_FINISHED' && (
-                                <div className="pointer-events-auto bg-black/90 p-10 rounded-3xl backdrop-blur-md border border-yellow-500/50 text-center">
-                                    <h2 className="text-4xl font-black mb-4 text-yellow-500">SET {matchData.currentSet} FINISHED</h2>
-                                    <p className="text-2xl mb-8 text-yellow-500">Winner: {score.home > score.away ? matchData.teamHome : matchData.teamAway}</p>
-                                    <button onClick={startNextSet} className="bg-white text-black px-8 py-4 rounded-xl font-bold text-xl hover:bg-gray-200">Start Set {matchData.currentSet + 1}</button>
+                                <div className="pointer-events-auto bg-white/95 p-10 rounded-3xl backdrop-blur-md border border-slate-200 text-center shadow-2xl max-w-lg">
+                                    <h2 className="text-4xl font-black mb-4 text-indigo-600">SET {matchData.currentSet} FINISHED</h2>
+                                    <div className="h-1 w-20 bg-indigo-100 mx-auto mb-6 rounded-full"></div>
+                                    <p className="text-xl mb-8 text-slate-600 font-bold">Winner: <span className="text-indigo-600">{score.home > score.away ? matchData.teamHome : matchData.teamAway}</span></p>
+                                    <button onClick={startNextSet} className="bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-xl hover:bg-black transition-all shadow-lg active:scale-95">START SET {matchData.currentSet + 1}</button>
                                 </div>
                             )}
 
                             {workflowStep === 'MATCH_FINISHED' && (
-                                <div className="pointer-events-auto bg-black/95 p-12 rounded-3xl border border-yellow-500 text-center">
-                                    <Trophy className="text-yellow-400 mx-auto mb-6" size={80} />
-                                    <h2 className="text-5xl font-black text-white mb-4">MATCH FINISHED</h2>
-                                    <p className="text-3xl font-bold text-yellow-400 mb-8">Winner: {setsWon.home > setsWon.away ? matchData.teamHome : matchData.teamAway}</p>
-                                    <button onClick={handleFinishMatch} className="bg-yellow-500 text-black px-10 py-4 rounded-full font-bold text-xl">Return to Dashboard</button>
+                                <div className="pointer-events-auto bg-white/95 p-12 rounded-[2.5rem] border border-slate-200 text-center shadow-2xl max-w-xl">
+                                    <div className="bg-amber-100 w-24 h-24 flex items-center justify-center rounded-full mx-auto mb-6">
+                                        <Trophy className="text-amber-500" size={56} />
+                                    </div>
+                                    <h2 className="text-5xl font-black text-slate-800 mb-2 italic">VICTORY!</h2>
+                                    <p className="text-2xl font-bold text-slate-400 mb-8 uppercase tracking-widest">Match Completed</p>
+                                    <div className="bg-slate-50 p-6 rounded-3xl mb-8 border border-slate-100">
+                                        <p className="text-3xl font-black text-indigo-600">{setsWon.home > setsWon.away ? matchData.teamHome : matchData.teamAway}</p>
+                                        <p className="text-slate-400 font-bold text-sm mt-1 uppercase">Match Winner</p>
+                                    </div>
+                                    <button onClick={handleFinishMatch} className="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-black text-xl hover:bg-black transition-all shadow-lg active:scale-95">RETURN TO DASHBOARD</button>
                                 </div>
                             )}
                         </div>
-                    </div>
 
-                    {/* CONTROLS */}
-                    <div className={`h-40 border-t p-4 relative z-20 transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
-                        {(workflowStep === 'RALLY' || workflowStep === 'SERVING') ? (
-                            <div className="max-w-6xl mx-auto flex items-stretch gap-4 h-full">
+                    {/* CONTROLS & SCORE */}
+                    <div className="h-56 bg-white/80 backdrop-blur-xl border border-slate-200 rounded-[2rem] shadow-xl p-5 flex flex-col shrink-0">
+                        {workflowStep === 'RALLY' || workflowStep === 'SERVING' || workflowStep === 'SERVER_SELECT' ? (
+                            <div className="flex-1 flex gap-6 items-center">
                                 {/* Left Controls */}
-                                <div className="flex-1 flex items-stretch gap-2">
-                                    <button onClick={() => handlePoint(getLeftTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed`} style={{ backgroundColor: getLeftTeam().bg, borderColor: 'rgba(0,0,0,0.2)' }}><span className="font-black text-3xl">POINT</span></button>
-                                    <div className="flex flex-col gap-1 w-24">
-                                        <button onClick={() => handleActionSelect(getLeftTeam().code, 'TIMEOUT')} disabled={timeouts[getLeftTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold border ${secondaryBtnClass}`}>TIMEOUT ({2 - timeouts[getLeftTeam().code]})</button>
-                                        <button
-                                            onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')}
-                                            disabled={workflowStep === 'RALLY'}
-                                            className={`flex-1 rounded text-xs font-bold text-blue-600 border ${secondaryBtnClass}`}
-                                        >SUBS ({substitutions[getLeftTeam().code]}/6)</button>
-                                        <button onClick={() => { setChallengeData({ team: getLeftTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getLeftTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-yellow-600 border ${secondaryBtnClass}`}>CHALLENGE</button>
-                                        <button onClick={() => { setSanctionTeam(getLeftTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-red-600 border ${secondaryBtnClass}`}>SANCTION</button>
+                                <div className="flex-1 flex items-stretch gap-3">
+                                    <button onClick={() => handlePoint(getLeftTeam().code)} disabled={workflowStep !== 'RALLY'} className="flex-1 rounded-[1.5rem] flex items-center justify-center px-6 border-b-8 shadow-lg active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-30 disabled:grayscale group" style={{ backgroundColor: teamColors.home, borderBottomColor: 'rgba(0,0,0,0.2)' }}>
+                                        <span className="font-black text-4xl group-active:scale-95 transition-transform italic">POINT</span>
+                                    </button>
+                                    <div className="flex flex-col gap-1.5 w-24 shrink-0">
+                                        <button onClick={() => handleActionSelect(getLeftTeam().code, 'TIMEOUT')} disabled={timeouts[getLeftTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-slate-600 hover:text-indigo-600 disabled:opacity-30`}>TIMEOUT ({2 - timeouts[getLeftTeam().code]})</button>
+                                        <button onClick={() => setSubData({ isOpen: true, team: getLeftTeam().code, posIndex: null, playerOut: null })} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-30`}>SUBS ({substitutions[getLeftTeam().code]}/6)</button>
+                                        <button onClick={() => { setChallengeData({ team: getLeftTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getLeftTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-amber-600 hover:bg-amber-50 disabled:opacity-30`}>CHALLENGE</button>
+                                        <button onClick={() => { setSanctionTeam(getLeftTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-rose-600 hover:bg-rose-50 disabled:opacity-30`}>SANCTION</button>
                                     </div>
                                 </div>
 
-                                {/* Center Controls */}
-                                <div className="w-48 flex flex-col items-center justify-center gap-2">
-                                    {workflowStep === 'SERVING' ? (
-                                        <button onClick={() => setWorkflowStep('RALLY')} className="w-full flex-1 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-2xl shadow-lg border-b-4 border-blue-800 active:border-b-0 active:mt-1 flex items-center justify-center gap-2">SERVE 🏐</button>
-                                    ) : (
-                                        <button onClick={() => setWorkflowStep('SERVING')} className="w-full flex-1 bg-yellow-500 hover:bg-yellow-400 text-black rounded-2xl font-bold text-xl shadow-lg border-b-4 border-yellow-700 active:border-b-0 active:mt-1 flex items-center justify-center gap-2">
-                                            <X size={20} /> CANCEL
+                                {/* Center Score & Meta */}
+                                <div className="flex flex-col items-center gap-4 w-52 shrink-0">
+                                    <div className="bg-slate-100 px-4 py-2 rounded-full flex items-center gap-3 shadow-inner">
+                                        <Timer size={14} className="text-slate-400" />
+                                        <span className="font-mono text-base font-black text-slate-700 tabular-nums">{Math.floor(matchDuration / 60)}:{(matchDuration % 60).toString().padStart(2, '0')}</span>
+                                        <button onClick={() => setIsTimerRunning(!isTimerRunning)} className={`p-1.5 rounded-full transition-colors ${isTimerRunning ? 'text-rose-500 bg-rose-100 hover:bg-rose-200' : 'text-emerald-600 bg-emerald-100 hover:bg-emerald-200'}`}>
+                                            {isTimerRunning ? <Pause size={14} /> : <PlayCircle size={14} />}
                                         </button>
-                                    )}
+                                    </div>
+
+                                    <div className="flex items-center gap-4 bg-white px-8 py-4 rounded-[1.5rem] border border-slate-200 shadow-lg">
+                                        <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: teamColors.home }}>{score.home}</span>
+                                        <div className="w-px h-10 bg-slate-100"></div>
+                                        <span className="text-5xl font-black tabular-nums tracking-tighter" style={{ color: teamColors.away }}>{score.away}</span>
+                                    </div>
+
                                     <div className="flex gap-2 w-full">
-                                        <button onClick={handleUndo} disabled={workflowStep !== 'RALLY' && history.length === 0} className={`flex-1 rounded text-xs font-bold text-gray-500 py-2 border ${secondaryBtnClass}`}><RotateCcw size={14} className="mx-auto" /></button>
-                                        <button onClick={() => setIsHomeLeft(!isHomeLeft)} className={`flex-1 rounded text-xs font-bold text-gray-500 py-2 border ${secondaryBtnClass}`}><ArrowRightLeft size={14} className="mx-auto" /></button>
+                                        <button onClick={handleUndo} disabled={workflowStep !== 'RALLY' && history.length === 0} className={`flex-1 rounded-xl py-2.5 border border-slate-100 bg-white shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all disabled:opacity-30`} title="Undo Action"><RotateCcw size={18} className="mx-auto" /></button>
+                                        <button onClick={() => setIsHomeLeft(!isHomeLeft)} className={`flex-1 rounded-xl py-2.5 border border-slate-100 bg-white shadow-sm text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all`} title="Switch Sides"><ArrowRightLeft size={18} className="mx-auto" /></button>
                                     </div>
                                 </div>
 
                                 {/* Right Controls */}
-                                <div className="flex-1 flex items-stretch gap-2">
-                                    <div className="flex flex-col gap-1 w-24">
-                                        <button onClick={() => handleActionSelect(getRightTeam().code, 'TIMEOUT')} disabled={timeouts[getRightTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold border ${secondaryBtnClass}`}>TIMEOUT ({2 - timeouts[getRightTeam().code]})</button>
-                                        <button
-                                            onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')}
-                                            disabled={workflowStep === 'RALLY'}
-                                            className={`flex-1 rounded text-xs font-bold text-blue-600 border ${secondaryBtnClass}`}
-                                        >SUBS ({substitutions[getRightTeam().code]}/6)</button>
-                                        <button onClick={() => { setChallengeData({ team: getRightTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getRightTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-yellow-600 border ${secondaryBtnClass}`}>CHALLENGE</button>
-                                        <button onClick={() => { setSanctionTeam(getRightTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-red-600 border ${secondaryBtnClass}`}>SANCTION</button>
+                                <div className="flex-1 flex items-stretch gap-3">
+                                    <div className="flex flex-col gap-1.5 w-24 shrink-0">
+                                        <button onClick={() => handleActionSelect(getRightTeam().code, 'TIMEOUT')} disabled={timeouts[getRightTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-slate-600 hover:text-indigo-600 disabled:opacity-30`}>TIMEOUT ({2 - timeouts[getRightTeam().code]})</button>
+                                        <button onClick={() => setSubData({ isOpen: true, team: getRightTeam().code, posIndex: null, playerOut: null })} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-indigo-600 hover:bg-indigo-50 disabled:opacity-30`}>SUBS ({substitutions[getRightTeam().code]}/6)</button>
+                                        <button onClick={() => { setChallengeData({ team: getRightTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getRightTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-amber-600 hover:bg-amber-50 disabled:opacity-30`}>CHALLENGE</button>
+                                        <button onClick={() => { setSanctionTeam(getRightTeam().code); setShowSanctionModal(true); }} disabled={workflowStep === 'RALLY'} className={`flex-1 rounded-xl text-[10px] font-black border border-slate-200 bg-white/50 backdrop-blur-sm hover:bg-white hover:shadow-md transition-all duration-200 text-rose-600 hover:bg-rose-50 disabled:opacity-30`}>SANCTION</button>
                                     </div>
-                                    <button onClick={() => handlePoint(getRightTeam().code)} disabled={workflowStep !== 'RALLY'} className={`flex-1 rounded-xl flex items-center justify-center px-6 border-b-4 active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-50 disabled:cursor-not-allowed`} style={{ backgroundColor: getRightTeam().bg, borderColor: 'rgba(0,0,0,0.2)' }}><span className="font-black text-3xl">POINT</span></button>
+                                    <button onClick={() => handlePoint(getRightTeam().code)} disabled={workflowStep !== 'RALLY'} className="flex-1 rounded-[1.5rem] flex items-center justify-center px-6 border-b-8 shadow-lg active:border-b-0 active:mt-1 transition-all text-white disabled:opacity-30 disabled:grayscale group" style={{ backgroundColor: teamColors.away, borderBottomColor: 'rgba(0,0,0,0.2)' }}>
+                                        <span className="font-black text-4xl group-active:scale-95 transition-transform italic">POINT</span>
+                                    </button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex justify-center items-center h-full text-gray-400 italic">Controls locked</div>
+                            <div className="flex-1 flex flex-col justify-center items-center gap-2 bg-slate-50/50 rounded-2xl border-2 border-dashed border-slate-200 text-slate-300">
+                                <AlertTriangle size={32} />
+                                <span className="font-black text-sm uppercase tracking-[0.2em]">Controls Locked</span>
+                            </div>
                         )}
                     </div>
                 </section>
 
-                <aside className={`w-80 border-l hidden lg:flex flex-col z-10 shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
-                    <TeamInfoPanel team={getRightTeam()} align="right" isDarkMode={isDarkMode} onPlayerClick={handleCourtPlayerClick} />
+                {/* Right Sidebar (Team Info) */}
+                <aside className="w-80 bg-white/80 backdrop-blur-xl border border-slate-200 rounded-2xl hidden lg:flex flex-col z-10 shadow-sm overflow-hidden">
+                    <TeamInfoPanel team={getRightTeam()} align="right" onPlayerClick={handleCourtPlayerClick} />
                 </aside>
 
                 {/* NEW: Match History Sidebar */}
-                <aside className={`w-80 ml-4 border-l hidden xl:flex flex-col z-10 shadow-xl transition-colors duration-300 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-gray-200'}`}>
-                    <div className={`p-4 border-b font-bold flex items-center gap-2 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-900 border-slate-700 text-gray-100' : 'bg-gray-50 border-gray-200 text-gray-800'}`}>
-                        <History className="text-indigo-600" size={20} /> Match History
+                <aside className="w-80 bg-white/80 backdrop-blur-xl border border-slate-200 rounded-2xl hidden xl:flex flex-col z-10 shadow-sm overflow-hidden">
+                    <div className="p-4 bg-slate-50/50 border-b border-slate-200 font-bold flex items-center gap-2">
+                        <History className="text-indigo-600" size={18} /> 
+                        <span className="tracking-tight text-slate-700">MATCH HISTORY</span>
                     </div>
 
                     {/* Tabs */}
-                    <div className={`flex overflow-x-auto border-b ${isDarkMode ? 'border-slate-700 bg-slate-800' : 'border-gray-200 bg-gray-50'}`}>
+                    <div className="flex bg-slate-100/50 p-1 border-b border-slate-200 overflow-x-auto scrollbar-hide">
                         {Array.from({ length: matchData.currentSet }, (_, i) => i + 1).map(setNum => (
                             <button
                                 key={setNum}
                                 onClick={() => setActiveHistoryTab(setNum)}
-                                className={`flex-1 py-2 text-xs font-bold border-b-2 transition-colors whitespace-nowrap px-2 ${activeHistoryTab === setNum
-                                        ? 'border-indigo-500 text-indigo-600 bg-indigo-50/10'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                className={`flex-1 py-2 text-[10px] font-black rounded-lg transition-all whitespace-nowrap px-3 ${activeHistoryTab === setNum
+                                        ? 'bg-white text-indigo-600 shadow-sm'
+                                        : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                                     }`}
                             >
-                                Set {setNum}
+                                SET {setNum}
                             </button>
                         ))}
                     </div>
 
-                    <div className={`flex-1 overflow-y-auto p-0 transition-colors ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
+                    <div className="flex-1 overflow-y-auto bg-white/50">
                         {(() => {
                             const setEvents = matchEvents.filter(e => e.set === activeHistoryTab);
 
@@ -1575,130 +1557,72 @@ fetchMatchData();
                             return (
                                 <>
                                     {/* Summary Box */}
-                                    <div className={`border-b border-gray-200 dark:border-slate-700 ${isDarkMode ? 'bg-slate-800/50' : 'bg-white'}`}>
-                                        <div className={`py-2 text-center border-b font-black text-xs ${isDarkMode ? 'border-slate-700 text-gray-200' : 'border-gray-200 text-gray-800'}`}>
-                                            END SET {activeHistoryTab} <span className="text-gray-400 font-medium">- {setEvents.length > 0 ? setEvents[0].time : '--:--'}</span>
+                                    <div className="bg-slate-50 p-3 border-b border-slate-200">
+                                        <div className="text-center font-black text-[10px] text-slate-400 uppercase tracking-widest mb-2">
+                                            SET {activeHistoryTab} SUMMARY
                                         </div>
-                                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1 px-2 py-1.5">
-                                            {/* Home Stats */}
-                                            <div className="flex items-center gap-1 justify-start">
-                                                <Timer className="text-yellow-500 shrink-0" size={12} strokeWidth={2.5} />
-                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.home.timeouts}</span>
-                                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5"></div>
-                                                <Video className="text-yellow-500 shrink-0" size={12} strokeWidth={2.5} />
-                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.home.challenges}</span>
-                                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5"></div>
-                                                <div className="flex -space-x-1 shrink-0">
-                                                    <ArrowDown className="text-red-500" size={11} strokeWidth={3} />
-                                                    <ArrowUp className="text-green-500" size={11} strokeWidth={3} />
-                                                </div>
-                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.home.subs}</span>
+                                        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+                                            <div className="flex items-center gap-2 justify-start bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm">
+                                                <Timer className="text-indigo-400" size={12} />
+                                                <span className="text-xs font-bold text-slate-700">{stats.home.timeouts}</span>
+                                                <ArrowUpDown className="text-emerald-400" size={12} />
+                                                <span className="text-xs font-bold text-slate-700">{stats.home.subs}</span>
                                             </div>
 
-                                            {/* Score */}
-                                            <div className={`flex items-center justify-center gap-0.5 px-1.5 py-1 rounded ${isDarkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
-                                                <span className={`font-bold text-sm px-1 rounded border ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`} style={{ color: teamColors.home }}>
-                                                    {stats.score.split('-')[0] || 0}
-                                                </span>
-                                                <span className="text-[10px] font-bold text-gray-400">:</span>
-                                                <span className={`font-bold text-sm px-1 rounded border ${isDarkMode ? 'bg-slate-600 border-slate-500' : 'bg-white border-gray-200'}`} style={{ color: teamColors.away }}>
-                                                    {stats.score.split('-')[1] || 0}
-                                                </span>
+                                            <div className="bg-indigo-600 px-3 py-1 rounded-full text-white font-black text-sm shadow-md">
+                                                {stats.score}
                                             </div>
 
-                                            {/* Away Stats */}
-                                            <div className="flex items-center gap-1 justify-end">
-                                                <Timer className="text-blue-500 shrink-0" size={12} strokeWidth={2.5} />
-                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.away.timeouts}</span>
-                                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5"></div>
-                                                <Video className="text-blue-500 shrink-0" size={12} strokeWidth={2.5} />
-                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.away.challenges}</span>
-                                                <div className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5"></div>
-                                                <div className="flex -space-x-1 shrink-0">
-                                                    <ArrowDown className="text-red-500" size={11} strokeWidth={3} />
-                                                    <ArrowUp className="text-green-500" size={11} strokeWidth={3} />
-                                                </div>
-                                                <span className={`text-[10px] font-bold ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.away.subs}</span>
+                                            <div className="flex items-center gap-2 justify-end bg-white p-1.5 rounded-xl border border-slate-100 shadow-sm">
+                                                <span className="text-xs font-bold text-slate-700">{stats.away.timeouts}</span>
+                                                <Timer className="text-rose-400" size={12} />
+                                                <span className="text-xs font-bold text-slate-700">{stats.away.subs}</span>
+                                                <ArrowUpDown className="text-emerald-400" size={12} />
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Events List */}
                                     {setEvents.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center h-40 text-gray-400 text-sm italic">
-                                            <FileText size={32} className="mb-2 opacity-20" />
-                                            No events recorded
+                                        <div className="flex flex-col items-center justify-center h-40 text-slate-300 italic">
+                                            <FileText size={32} className="mb-2 opacity-10" />
+                                            <span className="text-xs font-bold uppercase tracking-tight">No events recorded</span>
                                         </div>
                                     ) : (
-                                        <div className="p-2 space-y-2">
+                                        <div className="p-3 space-y-2">
                                             {setEvents.map((ev) => {
                                                 const isHome = ev.metadata?.team === matchData.teamHome;
                                                 const isAway = ev.metadata?.team === matchData.teamAway;
-                                                const borderLeftColor = isHome
-                                                    ? teamColors.home
-                                                    : isAway
-                                                        ? teamColors.away
-                                                        : (isDarkMode ? '#475569' : '#e5e7eb');
+                                                const borderLeftColor = isHome 
+                                                    ? teamColors.home 
+                                                    : isAway 
+                                                        ? teamColors.away 
+                                                        : '#e2e8f0';
 
                                                 const [homeScore, awayScore] = ev.score.split('-');
 
                                                 return (
-                                                    <div key={ev.id} className={`p-2 rounded-md border-l-4 shadow-sm transition-colors ${isDarkMode ? 'bg-slate-700/40' : 'bg-white'}`} style={{ borderLeftColor }}>
+                                                    <div key={ev.id} className="p-2 rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md" style={{ borderLeftWidth: '4px', borderLeftColor }}>
                                                         <div className="flex items-center justify-between gap-2">
-                                                            {/* Left side: Score + Description */}
                                                             <div className="flex items-center gap-2">
-                                                                {/* Score */}
-                                                                <div className="flex items-center gap-0.5 font-mono font-bold text-xs shrink-0">
-                                                                    <span
-                                                                        className={`px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-600 border border-slate-500' : 'bg-gray-50 border border-gray-200'}`}
-                                                                        style={{ color: teamColors.home }}
-                                                                    >{homeScore}</span>
-                                                                    <span className={`text-[10px] ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>:</span>
-                                                                    <span
-                                                                        className={`px-1.5 py-0.5 rounded ${isDarkMode ? 'bg-slate-600 border border-slate-500' : 'bg-gray-50 border border-gray-200'}`}
-                                                                        style={{ color: teamColors.away }}
-                                                                    >{awayScore}</span>
+                                                                <div className="flex items-center gap-0.5 font-mono font-black text-[10px] shrink-0">
+                                                                    <span className="px-1.5 py-0.5 rounded bg-slate-50 border border-slate-100" style={{ color: teamColors.home }}>{homeScore}</span>
+                                                                    <span className="text-slate-300 mx-0.5">:</span>
+                                                                    <span className="px-1.5 py-0.5 rounded bg-slate-50 border border-slate-100" style={{ color: teamColors.away }}>{awayScore}</span>
                                                                 </div>
-                                                                {/* Description */}
-                                                                <div className={`text-xs font-semibold ${isDarkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                                                                <div className="text-xs font-bold text-slate-700">
                                                                     {ev.metadata && (ev.metadata.type === 'SUBSTITUTION' || ev.metadata.type === 'LIBERO') ? (
                                                                         <div className="flex flex-wrap gap-1 items-center">
-                                                                            <span className="text-green-600 dark:text-green-400 font-bold">IN {ev.metadata.in}</span>
-                                                                            <span className="text-gray-400">/</span>
-                                                                            <span className="text-red-600 dark:text-red-400 font-bold">OUT {ev.metadata.out}</span>
-                                                                            {ev.metadata.type === 'LIBERO' && <span className="text-[9px] bg-blue-100 text-blue-800 px-1 rounded">Libero</span>}
-                                                                            <span
-                                                                                className="font-bold text-[11px] ml-auto"
-                                                                                style={{ color: isHome ? teamColors.home : teamColors.away }}
-                                                                            >
-                                                                                {ev.metadata.team}
-                                                                            </span>
+                                                                            <span className="text-indigo-600 font-black uppercase text-[10px]">IN {ev.metadata.in}</span>
+                                                                            <ArrowRightLeft size={10} className="text-slate-300" />
+                                                                            <span className="text-rose-500 font-black uppercase text-[10px]">OUT {ev.metadata.out}</span>
                                                                         </div>
-                                                                    ) : ev.metadata?.team ? (
-                                                                        (() => {
-                                                                            const teamName = ev.metadata.team;
-                                                                            const parts = ev.description.split(teamName);
-                                                                            const teamColor = isHome ? teamColors.home : teamColors.away;
-                                                                            return (
-                                                                                <span>
-                                                                                    {parts[0]}
-                                                                                    <span
-                                                                                        className="font-bold mx-1 whitespace-nowrap"
-                                                                                        style={{ color: teamColor }}
-                                                                                    >
-                                                                                        {teamName}
-                                                                                    </span>
-                                                                                    {parts[1]}
-                                                                                </span>
-                                                                            );
-                                                                        })()
                                                                     ) : (
-                                                                        ev.description
+                                                                        ev.description.replace(ev.metadata?.team || '', '').trim()
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                            {/* Right side: Time */}
-                                                            <div className={`text-[10px] font-bold text-gray-400 flex items-center gap-1 shrink-0`}>
+                                                            <div className="text-[10px] font-bold text-slate-400 flex items-center gap-1 shrink-0">
                                                                 <Clock size={10} /> {ev.time}
                                                             </div>
                                                         </div>
@@ -1737,7 +1661,6 @@ fetchMatchData();
                 awayLiberos={awayLiberos}
                 onSlotClick={openPickerForLineup}
                 onConfirm={handleLineupConfirm}
-                
             />
 
             <MatchLogModal
@@ -1765,7 +1688,7 @@ fetchMatchData();
                 onClose={() => setShowSanctionModal(false)}
                 teamName={sanctionTeam === 'home' ? matchData.teamHome : matchData.teamAway}
                 roster={sanctionTeam === 'home' ? homeRoster : awayRoster}
-                onConfirm={handleSanctionConfirm}
+                onConfirm={handleSanction}
             />
 
             <ChallengeModal
