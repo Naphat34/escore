@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { api } from '../api';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'; 
@@ -52,6 +52,7 @@ export default function TeamDashboard() {
   const [myMatches, setMyMatches] = useState([]);
 
   const [teamInfo, setTeamInfo] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [loading, setLoading] = useState(true);
   const [isEditingTeam, setIsEditingTeam] = useState(false);
   const [teamForm, setTeamForm] = useState({ name: '', code: '', logo_url: '' });
@@ -91,10 +92,22 @@ export default function TeamDashboard() {
   const [staffForm, setStaffForm] = useState({ first_name: '', last_name: '', role: 'Head Coach', gender: 'Male' });
 
   const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    try {
+        await api.logout();
+        localStorage.clear();
+        navigate('/login');
+    } catch (error) {
+        console.error("Logout failed", error);
+        localStorage.clear();
+        navigate('/login');
+    }
+  };
 
   useEffect(() => {
     fetchData();
-  }, [activeTab]);
+  }, [activeTab, fetchData]);
 
   useEffect(() => {
       const fetchTeamInfo = async () => {
@@ -116,7 +129,7 @@ export default function TeamDashboard() {
       fetchTeamInfo();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
         if (activeTab === 'roster') {
@@ -149,7 +162,7 @@ export default function TeamDashboard() {
     } finally {
         setLoading(false);
     }
-  };
+  }, [activeTab, navigate]);
 
   const handlePlayerSubmit = async (e) => {
       e.preventDefault();
@@ -402,7 +415,7 @@ export default function TeamDashboard() {
                 <button onClick={() => setDarkMode(!darkMode)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
                     {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
-                <button onClick={() => { api.logout(); navigate('/login'); }} className="text-sm font-medium text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500 transition">
+                <button onClick={handleLogout} className="text-sm font-medium text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-500 transition">
                     Sign Out
                 </button>
             </div>

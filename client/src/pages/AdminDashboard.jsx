@@ -47,9 +47,13 @@ export default function AdminDashboard() {
     const handleLogout = async () => {
         try {
             await api.logout();
+            localStorage.clear(); // ✅ ลบข้อมูลทั้งหมดออกจาก LocalStorage
             navigate('/login');
         } catch (error) {
             console.error("Logout failed", error);
+            // แม้ API จะพลาด แต่เราควรลบข้อมูลในเครื่องและเด้งออกไปเพื่อความปลอดภัย
+            localStorage.clear();
+            navigate('/login');
         }
     };
 
@@ -170,7 +174,7 @@ export default function AdminDashboard() {
 }
 
 // Helper: Sidebar Menu Button
-function MenuButton({ active, onClick, icon, label, darkMode }) {
+function MenuButton({ active, onClick, icon, label }) {
     return (
         <button
             onClick={onClick}
