@@ -777,24 +777,6 @@ fetchMatchData();
             return;
         }
 
-        const homeCaptain = homeLineup.find(p => p && p.isCaptain);
-        const awayCaptain = awayLineup.find(p => p && p.isCaptain);
-
-        if (!homeCaptain || !awayCaptain) {
-            const missingTeam = !homeCaptain ? matchData.teamHome : matchData.teamAway;
-            alert(`กรุณาเลือกกัปตันทีมสำหรับ ${missingTeam} โดยการเลือกนักกีฬาในสนามให้เป็นกัปตัน`);
-            return;
-        }
-
-        // ตรวจสอบความซ้ำซ้อนของกัปตัน (เผื่อหลุดมา)
-        const homeCapCount = homeLineup.filter(p => p && p.isCaptain).length;
-        const awayCapCount = awayLineup.filter(p => p && p.isCaptain).length;
-
-        if (homeCapCount > 1 || awayCapCount > 1) {
-            alert("สนามหนึ่งสามารถมีกัปตันได้เพียงคนเดียวเท่านั้น");
-            return;
-        }
-
         // ✅ บันทึก Lineup ลงฐานข้อมูล
         try {
             await Promise.all([
@@ -895,21 +877,9 @@ fetchMatchData();
         const setLineup = team === 'home' ? setHomeLineup : setAwayLineup;
         const currentLineup = team === 'home' ? homeLineup : awayLineup;
         
-        const realCaptain = roster.find(p => p.isCaptain);
-        const isPlayerRealCaptain = realCaptain && (player.id === realCaptain.id || player.player_id === realCaptain.player_id);
-        
+        // All players default to not being captains during this phase
         let newLineup = [...currentLineup];
-        let newPlayer = { ...player, isCaptain: false }; // Default to not captain
-
-        if (isPlayerRealCaptain) {
-            // If the selected player is the real captain, assign captaincy to them
-            newPlayer.isCaptain = true;
-            // ✅ กวาดล้างกัปตันคนอื่นออกให้หมด เพื่อความชัวร์ (Strict Single Captain Rule)
-            newLineup = newLineup.map(p => p ? { ...p, isCaptain: false } : p);
-        } else {
-            // If the selected player is NOT the real captain, they definitely shouldn't be captain
-            newPlayer.isCaptain = false;
-        }
+        let newPlayer = { ...player, isCaptain: false };
 
         newLineup[posIndex] = newPlayer;
         setLineup(newLineup);
