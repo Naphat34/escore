@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ArrowRightLeft, AlertCircle, ShieldAlert } from 'lucide-react';
 
 export default function SubstitutionModal({ 
-    isOpen, onClose, teamName, roster, currentLineup, playerOut, posIndex, subTracker, liberoTracker, disqualifiedPlayers = [], onConfirm
+    isOpen, onClose, teamName, roster, currentLineup, playerOut, posIndex, subTracker, disqualifiedPlayers = [], onConfirm
 }) {
     const [selectedPlayerIn, setSelectedPlayerIn] = useState(null);
     const [isExceptional, setIsExceptional] = useState(false); // สถานะกรณีพิเศษ
@@ -54,7 +54,13 @@ export default function SubstitutionModal({
                         const pId = p.id || p.player_id;
                         return pId === posData.starterId;
                     });
-                    ruleMessage = `เปลี่ยนตัวกลับ: ต้องเปลี่ยนตัวจริงเบอร์ ${eligibleBenchPlayers[0]?.number || '?'} กลับเข้าสนามเท่านั้น`;
+                    
+                    if (eligibleBenchPlayers.length > 0) {
+                        ruleMessage = `เปลี่ยนตัวกลับ: ต้องเปลี่ยนตัวจริงเบอร์ ${eligibleBenchPlayers[0].number} กลับเข้าสนามเท่านั้น`;
+                    } else {
+                        ruleMessage = "ไม่พบผู้เล่นตัวจริงในม้านั่งสำรอง";
+                        isError = true;
+                    }
                 }
             } else {
                 // เปลี่ยนตัวครั้งแรกของตำแหน่งนี้: ห้ามซ้ำกับคนที่เคยเปลี่ยนลงไปแล้ว

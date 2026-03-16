@@ -1330,17 +1330,19 @@ fetchMatchData();
             setSubTracker(prev => {
                 const teamTracker = { ...prev[team] };
                 const posData = teamTracker.positions[posIndex];
+                const pInId = playerIn.id || playerIn.player_id;
+                const pOutId = playerOut.id || playerOut.player_id;
 
                 teamTracker.count += 1; // นับเพิ่มโควต้า
 
                 if (posData) {
                     // เปลี่ยนตัวกลับ -> สลับกลับเข้าที่เดิม ล็อกตำแหน่ง
-                    teamTracker.positions[posIndex] = { ...posData, currentOnCourt: playerIn.id, returned: true };
+                    teamTracker.positions[posIndex] = { ...posData, currentOnCourt: pInId, returned: true };
                 } else {
                     // เปลี่ยนตัวครั้งแรก -> จดจำว่าใครคือตัวจริง ใครคือตัวสำรอง
-                    teamTracker.positions[posIndex] = { starterId: playerOut.id, subId: playerIn.id, currentOnCourt: playerIn.id, returned: false };
-                    teamTracker.usedPlayers.push(playerIn.id);
-                    teamTracker.usedPlayers.push(playerOut.id);
+                    teamTracker.positions[posIndex] = { starterId: pOutId, subId: pInId, currentOnCourt: pInId, returned: false };
+                    teamTracker.usedPlayers.push(pInId);
+                    teamTracker.usedPlayers.push(pOutId);
                 }
                 return { ...prev, [team]: teamTracker };
             });
