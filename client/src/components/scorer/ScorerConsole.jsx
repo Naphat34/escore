@@ -1165,7 +1165,10 @@ fetchMatchData();
         }
 
         const currentLiberos = actualTeamCode === 'home' ? homeLiberos : awayLiberos;
-        const isLiberoOnCourt = playerOut.id === currentLiberos.l1?.id || playerOut.id === currentLiberos.l2?.id;
+        const pOutId = playerOut.id || playerOut.player_id;
+        const isLiberoOnCourt = playerOut.isLibero || 
+                                (currentLiberos.l1 && (currentLiberos.l1.id == pOutId || currentLiberos.l1.player_id == pOutId)) || 
+                                (currentLiberos.l2 && (currentLiberos.l2.id == pOutId || currentLiberos.l2.player_id == pOutId));
         const isBackRowForLibero = [0, 4, 5].includes(posIndex);
 
         // CASE 1: Clicked on a Libero on court -> Swap them OUT
@@ -1274,14 +1277,19 @@ fetchMatchData();
 
         if (!posData) {
             // กรณียังไม่เคยเปลี่ยนตัวในตำแหน่งนี้: เลือกใครก็ได้ในคอกสำรอง ที่ "ยังไม่เคยลงสนามในตำแหน่งอื่น" ในเซตนี้
-            validSubs = roster.filter(p => 
-                !currentLineupIds.includes(p.id || p.player_id) && 
-                !tracker.usedPlayers.includes(p.id || p.player_id) && 
-                !p.isLibero
-            );
+            const usedIds = tracker.usedPlayers || [];
+            validSubs = roster.filter(p => {
+                const pId = p.id || p.player_id;
+                return !currentLineupIds.some(cId => cId == pId) && 
+                       !usedIds.some(uId => uId == pId) && 
+                       !p.isLibero;
+            });
         } else {
             // กรณีเคยเปลี่ยนตัวไปแล้ว (สำรองอยู่ในสนาม): บังคับเลือกได้แค่ "ผู้เล่นตัวจริง (Starter)" คนเดิมคนเดียวเท่านั้น
-            validSubs = roster.filter(p => (p.id === posData.starterId) || (p.player_id === posData.starterId));
+            validSubs = roster.filter(p => {
+                const pId = p.id || p.player_id;
+                return pId == posData.starterId;
+            });
         }
 
         if (validSubs.length === 0) {

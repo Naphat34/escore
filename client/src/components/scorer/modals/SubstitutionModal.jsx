@@ -16,14 +16,14 @@ export default function SubstitutionModal({
 
     if (!isOpen) return null;
 
-    const courtIds = currentLineup.filter(p => p).map(p => p?.id || p?.player_id);
+    const courtIds = currentLineup.filter(p => p).map(p => p?.id || p?.player_id || p);
     
     // กรองคนที่โดนแบนตลอดแมตช์ออกไปจากม้านั่งสำรอง
     const availableBench = roster.filter(p => {
         const pId = p.id || p.player_id;
-        return !courtIds.includes(pId) && 
+        return !courtIds.some(cId => cId == pId) && 
                !p.isLibero && 
-               !disqualifiedPlayers.some(dId => dId === pId);
+               !disqualifiedPlayers.some(dId => dId == pId);
     });
     
     // --- 🚨 FIVB SUBSTITUTION LOGIC 🚨 ---
@@ -52,7 +52,7 @@ export default function SubstitutionModal({
                     // เปลี่ยนตัวกลับ: ต้องเป็นผู้เล่นตัวจริงคนเดิมเท่านั้น
                     eligibleBenchPlayers = availableBench.filter(p => {
                         const pId = p.id || p.player_id;
-                        return pId === posData.starterId;
+                        return pId == posData.starterId;
                     });
                     
                     if (eligibleBenchPlayers.length > 0) {
@@ -67,7 +67,7 @@ export default function SubstitutionModal({
                 const usedIds = subTracker.usedPlayers || [];
                 eligibleBenchPlayers = availableBench.filter(p => {
                     const pId = p.id || p.player_id;
-                    return !usedIds.includes(pId);
+                    return !usedIds.some(uId => uId == pId);
                 });
                 ruleMessage = "กรุณาเลือกนักกีฬา";
             }
@@ -147,8 +147,8 @@ export default function SubstitutionModal({
                                             selectedPlayerIn?.id === p.id ? 'bg-white text-green-700' : 'bg-slate-700 text-white'
                                         }`}>{p.number}</div>
                                         <div className="text-left flex-1 overflow-hidden">
-                                            <div className="font-bold truncate">{p.first_name || p.firstname}</div>
-                                            <div className="text-xs opacity-70 truncate">{p.lastname}</div>
+                                            <div className="font-bold truncate">{p.first_name || p.firstname || p.name || `Athlete #${p.number}`}</div>
+                                            <div className="text-xs opacity-70 truncate">{p.lastname || ''}</div>
                                         </div>
                                     </button>
                                 ))
