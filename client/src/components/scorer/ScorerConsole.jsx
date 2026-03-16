@@ -241,7 +241,7 @@ export default function ScorerConsole() {
                 timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft,
                 homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos,
                 history, setsToWin, matchDuration, isTimerRunning, lastLiberoSwap, teamColors,
-                homeLiberoSwaps, awayLiberoSwaps, showTimeoutTimer, timeoutStartTime
+                homeLiberoSwaps, awayLiberoSwaps, showTimeoutTimer, timeoutStartTime, subTracker
             };
 
             // 1. Save to localStorage for local persistence on refresh
@@ -270,6 +270,7 @@ export default function ScorerConsole() {
                 timeoutStartTime,
                 matchDuration,
                 isTimerRunning,
+                subTracker, // ✅ เพิ่มการส่งค่าไปยัง Server
             };
             api.updateLiveState(matchId, liveStateForServer).catch(err => {
                 console.error("Failed to sync state to server:", err);
@@ -279,7 +280,7 @@ export default function ScorerConsole() {
         return () => {
             clearTimeout(debounceTimeoutRef.current);
         };
-    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors, showTimeoutTimer, timeoutStartTime]);
+    }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors, showTimeoutTimer, timeoutStartTime, subTracker]);
 
     // เก็บ ID ผู้เล่นที่ถูกเปลี่ยนตัวออกด้วยกรณีพิเศษ (บาดเจ็บ/ให้ออก) ห้ามลงเล่นทั้งนัด
     const [disqualifiedPlayers, setDisqualifiedPlayers] = useState(() => {
@@ -1336,12 +1337,18 @@ fetchMatchData();
 
             // กรณีปกติ (Normal Substitution) - อัปเดต Tracker
             setSubTracker(prev => {
-                const teamTracker = { ...prev[team] };
+                const newTracker = { ...prev };
+                const teamTracker = { 
+                    ...newTracker[team],
+                    positions: { ...newTracker[team].positions },
+                    usedPlayers: [...newTracker[team].usedPlayers]
+                };
+                
                 const posData = teamTracker.positions[posIndex];
                 const pInId = playerIn.id || playerIn.player_id;
-                const pOutId = playerOut.id || playerOut.player_id;
+                const pOutId = playerOut.id || playerOut.player_id || playerOut; // Handle if playerOut is primitive
 
-                teamTracker.count += 1; // นับเพิ่มโควต้า
+                teamTracker.count += 1;
 
                 if (posData) {
                     // เปลี่ยนตัวกลับ -> สลับกลับเข้าที่เดิม ล็อกตำแหน่ง
@@ -1352,7 +1359,8 @@ fetchMatchData();
                     teamTracker.usedPlayers.push(pInId);
                     teamTracker.usedPlayers.push(pOutId);
                 }
-                return { ...prev, [team]: teamTracker };
+                newTracker[team] = teamTracker;
+                return newTracker;
             });
         }
 
@@ -1370,8 +1378,11 @@ fetchMatchData();
         // --- 3. บันทึกประวัติลง Database ---
         // แนบ Flag isExceptional ไปให้ระบบหลังบ้านรู้ด้วย (เผื่อไปใช้ตอนปริ้นท์ใบบันทึกคะแนน)
         await saveEventToBackend('SUBSTITUTION', team, {
-            player_id: playerIn.id,
-            details: { out: playerOut.id, isExceptional }
+            player_id: playerIn.id || playerIn.player_id,
+            details: { 
+                out: playerOut.id || playerOut.player_id || playerOut, 
+                isExceptional 
+            }
         });
 
         setSubData({ isOpen: false, team: null, posIndex: null, playerOut: null });

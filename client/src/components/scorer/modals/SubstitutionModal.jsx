@@ -9,10 +9,10 @@ export default function SubstitutionModal({
 
     useEffect(() => {
         if (isOpen) {
-            setSelectedPlayerIn(null);
-            setIsExceptional(false);
+            if (selectedPlayerIn !== null) setSelectedPlayerIn(null);
+            if (isExceptional !== false) setIsExceptional(false);
         }
-    }, [isOpen]);
+    }, [isOpen, selectedPlayerIn, isExceptional]);
 
     if (!isOpen) return null;
 
@@ -101,10 +101,12 @@ export default function SubstitutionModal({
                     <div className="w-1/3 flex flex-col items-center justify-center bg-slate-800 border border-slate-700 rounded-xl p-4 relative">
                         <span className="text-red-400 font-bold uppercase mb-2 tracking-widest text-sm">Player Out</span>
                         <div className="w-24 h-24 rounded-full bg-red-600 flex items-center justify-center text-4xl font-black text-white shadow-lg mb-4">
-                            {playerOut?.number || '?'}
+                            {playerOut?.number || (typeof playerOut === 'string' || typeof playerOut === 'number' ? '?' : '?')}
                         </div>
                         <div className="text-center mb-6">
-                            <p className="text-white font-bold text-lg">{playerOut?.first_name || playerOut?.firstname || 'Unknown'}</p>
+                            <p className="text-white font-bold text-lg">
+                                {playerOut?.first_name || playerOut?.firstname || playerOut?.name || (playerOut?.number ? `Athlete #${playerOut.number}` : (typeof playerOut === 'string' || typeof playerOut === 'number' ? `Athlete ID: ${playerOut}` : 'Unknown'))}
+                            </p>
                             <p className="text-slate-400 text-sm">Position {posIndex + 1}</p>
                         </div>
 
