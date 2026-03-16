@@ -767,6 +767,15 @@ fetchMatchData();
             return;
         }
 
+        const homeHasCaptain = homeLineup.some(p => p && p.isCaptain);
+        const awayHasCaptain = awayLineup.some(p => p && p.isCaptain);
+
+        if (!homeHasCaptain || !awayHasCaptain) {
+            const missingTeam = !homeHasCaptain ? matchData.teamHome : matchData.teamAway;
+            alert(`กรุณาเลือกกัปตันทีมสำหรับ ${missingTeam} โดยการเลือกนักกีฬาที่เป็นกัปตันตัวจริงลงสนาม`);
+            return;
+        }
+
         // ✅ บันทึก Lineup ลงฐานข้อมูล
         try {
             await Promise.all([
@@ -863,145 +872,43 @@ fetchMatchData();
             return;
         }
 
-        if (team === 'home') {
-            if (posIndex === 'l1' || posIndex === 'l2') setHomeLiberos(prev => ({ ...prev, [posIndex]: player }));
-            else {
-                const roster = homeRoster;
-                const currentLineup = homeLineup;
-                const realCaptain = roster.find(p => p.isCaptain);
-                let newPlayer = { ...player, isCaptain: false };
+        const roster = team === 'home' ? homeRoster : awayRoster;
+        const setLineup = team === 'home' ? setHomeLineup : setAwayLineup;
+        const currentLineup = team === 'home' ? homeLineup : awayLineup;
+        
+        const realCaptain = roster.find(p => p.isCaptain);
+        const isPlayerRealCaptain = realCaptain && (player.id === realCaptain.id || player.player_id === realCaptain.player_id);
+        
+        let newLineup = [...currentLineup];
+        let newPlayer = { ...player, isCaptain: false }; // Default to not captain
 
-                // ถ้าผู้เล่นที่เลือกเป็นกัปตันตัวจริง และยังไม่มีกัปตันในสนาม
-                if (realCaptain && (player.id === realCaptain.id || player.player_id === realCaptain.player_id)) {
-                    const hasCaptainOnCourt = currentLineup.some(p => p && p.isCaptain);
-                    if (!hasCaptainOnCourt) {
-                        newPlayer.isCaptain = true;
-                    }
-                }
-
-                const n = [...homeLineup]; n[posIndex] = newPlayer; setHomeLineup(n);
-            }
+        if (isPlayerRealCaptain) {
+            // If the selected player is the real captain, assign captaincy to them
+            newPlayer.isCaptain = true;
+            // And remove captaincy from any other player currently on court
+            newLineup = newLineup.map(p => p ? { ...p, isCaptain: false } : p);
         } else {
-            if (posIndex === 'l1' || posIndex === 'l2') setAwayLiberos(prev => ({ ...prev, [posIndex]: player }));
-            else {
-                const roster = awayRoster;
-                const currentLineup = awayLineup;
-                const realCaptain = roster.find(p => p.isCaptain);
-                let newPlayer = { ...player, isCaptain: false };
+            // If the selected player is NOT the real captain
+            // Check if the real captain is already on court at a different position
+            const realCaptainAlreadyOnCourt = newLineup.some((p, idx) =>
+                idx !== posIndex && p && realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)
+            );
 
-                // ถ้าผู้เล่นที่เลือกเป็นกัปตันตัวจริง และยังไม่มีกัปตันในสนาม
-                if (realCaptain && (player.id === realCaptain.id || player.player_id === realCaptain.player_id)) {
-                    const hasCaptainOnCourt = currentLineup.some(p => p && p.isCaptain);
-                    if (!hasCaptainOnCourt) {
-                        newPlayer.isCaptain = true;
-                    }
-                }
-
-                const n = [...awayLineup]; n[posIndex] = newPlayer; setAwayLineup(n);
+            if (!realCaptainAlreadyOnCourt) {
+                // If the real captain is NOT on court, and the selected player is not the real captain
+                // Then, if the player being replaced (at posIndex) was a captain,
+                // we need to ensure no one else inherits captaincy automatically.
+                // The system will later prompt to assign a court captain if needed.
+                newPlayer.isCaptain = false; // Ensure the new player doesn't become captain by accident
             }
+            // If real captain IS on court, then newPlayer should definitely not be captain.
+            // (This is already handled by newPlayer.isCaptain = false;)
         }
+
+        newLineup[posIndex] = newPlayer;
+        setLineup(newLineup);
         setShowPlayerPicker(false);
     };
-
-    const handleSubConfirm = (playerOut, playerIn) => {
-    if (!playerOut || !playerIn || !subTeam) return;
-    saveStateToHistory();
-
-    const teamCode = subTeam;
-    const currentLineup = teamCode === 'home' ? homeLineup : awayLineup;
-    const setLineup = teamCode === 'home' ? setHomeLineup : setAwayLineup;
-    
-    // ค้นหาตำแหน่ง Index ของคนที่ถูกเปลี่ยนออก
-    const posIndex = currentLineup.findIndex(p => p && (p.id || p.player_id) === (playerOut.id || playerOut.player_id));
-    if (posIndex === -1) {
-        console.error("Substitution Error: Player not found.");
-        return;
-    }
-
-    // ==========================================
-    // 1. บันทึกประวัติการเปลี่ยนตัว (FIVB Rule: ห้ามสลับคู่)
-    // ==========================================
-    setSubTracker(prev => {
-        const teamTracker = prev[teamCode];
-        const currentPosData = teamTracker.positions[posIndex];
-        const newPositions = { ...teamTracker.positions };
-        let newUsedPlayers = [...teamTracker.usedPlayers];
-
-        const outId = playerOut.id || playerOut.player_id;
-        const inId = playerIn.id || playerIn.player_id;
-
-        if (!currentPosData) {
-            newPositions[posIndex] = { starterId: outId, subId: inId, returned: false };
-            newUsedPlayers.push(inId); 
-        } else {
-            newPositions[posIndex].returned = true; // ล็อคตำแหน่งนี้ถาวร
-        }
-
-        return {
-            ...prev,
-            [teamCode]: {
-                ...teamTracker, count: teamTracker.count + 1,
-                positions: newPositions, usedPlayers: newUsedPlayers
-            }
-        };
-    });
-
-    // ==========================================
-    // 2. LOGIC กัปตันทีม (Captain & Court Captain)
-    // ==========================================
-    const roster = teamCode === 'home' ? homeRoster : awayRoster;
-    // หากัปตันตัวจริงจากรายชื่อดั้งเดิม
-    const realCaptain = roster.find(p => p.isCaptain); 
-    
-    let newLineup = [...currentLineup];
-    
-    // จับผู้เล่นใหม่ใส่ลงสนามไปก่อน (และริบ C ออกไว้ก่อนเผื่อพกติดมา)
-    newLineup[posIndex] = { ...playerIn, isCaptain: false };
-
-    // สแกนสนามว่าตอนนี้ "กัปตันตัวจริง" ยืนอยู่ในสนามไหม?
-    const isRealCaptainOnCourt = newLineup.some(p => 
-        p && realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)
-    );
-
-    if (isRealCaptainOnCourt) {
-        // ✅ กรณีที่ 1: กัปตันตัวจริงอยู่บนสนาม! 
-        // -> กวาดล้าง Court Captain และมอบ C ให้กัปตันตัวจริงคนเดียว
-        newLineup = newLineup.map(p => {
-            if (!p) return p;
-            
-            // ถ้าเป็นกัปตันตัวจริง มอบ isCaptain = true
-            if (realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)) {
-                return { ...p, isCaptain: true };
-            }
-            
-            // 🚨 ถ้าเป็นคนอื่น บังคับ isCaptain = false ทั้งหมด (นี่คือจุดที่เอา C ออกจาก Court Captain)
-            return { ...p, isCaptain: false }; 
-        });
-    } else {
-        // ✅ กรณีที่ 2: กัปตันตัวจริง "ไม่" อยู่บนสนาม
-        // เช็คเผื่อระบบบั๊กมี C เกิน 1 คน
-        const courtCaptainsCount = newLineup.filter(p => p && p.isCaptain).length;
-        if (courtCaptainsCount > 1) {
-            newLineup[posIndex].isCaptain = false;
-        }
-        
-        // หมายเหตุ: ถ้าคนที่ถูกเปลี่ยนออกคือ Court Captain สนามจะว่างเปล่าไม่มี C ทันที 
-        // ซึ่งถูกต้องแล้ว! ระบบ handleCourtPlayerClick จะเด้ง Alert บังคับให้ตั้งกัปตันเกมส์ใหม่ในคลิกถัดไป
-    }
-    // ==========================================
-
-    setLineup(newLineup);
-
-    if (typeof setSubCounts === 'function') {
-        setSubCounts(prev => ({ ...prev, [teamCode]: prev[teamCode] + 1 }));
-    } else if (typeof setSubstitutions === 'function') {
-        setSubstitutions(prev => ({ ...prev, [teamCode]: prev[teamCode] + 1 }));
-    }
-
-    saveEventToBackend('SUBSTITUTION', teamCode, { player_id: playerIn.id || playerIn.player_id, details: { out: playerOut.id || playerOut.player_id } });
-    setShowSubModal(false);
-    setSubTeam(null);
-};
 
     const handleSanctionConfirm = (player, cardType) => {
         if (!player || !cardType || !sanctionTeam) return;
@@ -1364,16 +1271,43 @@ fetchMatchData();
             });
         }
 
-        // --- 2. อัปเดต Lineup บนหน้าจอ ---
-        if (team === 'home') {
-            const newLineup = [...homeLineup];
-            newLineup[posIndex] = playerIn;
-            setHomeLineup(newLineup);
+        // --- 2. อัปเดต Lineup บนหน้าจอ พร้อม LOGIC กัปตันทีม (Captain & Court Captain) ---
+        const roster = team === 'home' ? homeRoster : awayRoster;
+        const realCaptain = roster.find(p => p.isCaptain);
+        const currentLineup = team === 'home' ? homeLineup : awayLineup;
+        const setLineup = team === 'home' ? setHomeLineup : setAwayLineup;
+
+        let newLineup = [...currentLineup];
+        // จับผู้เล่นใหม่ใส่ลงสนามไปก่อน (และริบ C ออกไว้ก่อนเผื่อพกติดมา)
+        newLineup[posIndex] = { ...playerIn, isCaptain: false };
+
+        // สแกนสนามว่าตอนนี้ "กัปตันตัวจริง" ยืนอยู่ในสนามไหม?
+        const isRealCaptainOnCourt = newLineup.some(p => 
+            p && realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)
+        );
+
+        if (isRealCaptainOnCourt) {
+            // ✅ กรณีที่ 1: กัปตันตัวจริงอยู่บนสนาม! 
+            // -> กวาดล้าง Court Captain และมอบ C ให้กัปตันตัวจริงคนเดียว
+            newLineup = newLineup.map(p => {
+                if (!p) return p;
+                if (realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)) {
+                    return { ...p, isCaptain: true };
+                }
+                return { ...p, isCaptain: false }; 
+            });
         } else {
-            const newLineup = [...awayLineup];
-            newLineup[posIndex] = playerIn;
-            setAwayLineup(newLineup);
+            // ✅ กรณีที่ 2: กัปตันตัวจริง "ไม่" อยู่บนสนาม
+            // เช็คเผื่อระบบบั๊กมี C เกิน 1 คน
+            const courtCaptainsCount = newLineup.filter(p => p && p.isCaptain).length;
+            if (courtCaptainsCount > 1) {
+                newLineup[posIndex].isCaptain = false;
+            }
+            // หมายเหตุ: ถ้าคนที่ถูกเปลี่ยนออกคือ Court Captain สนามจะว่างเปล่าไม่มี C ทันที 
+            // ซึ่งถูกต้องแล้ว! ระบบ handleCourtPlayerClick จะเด้ง Alert บังคับให้ตั้งกัปตันเกมส์ใหม่ในคลิกถัดไป
         }
+
+        setLineup(newLineup);
 
         // --- 3. บันทึกประวัติลง Database ---
         // แนบ Flag isExceptional ไปให้ระบบหลังบ้านรู้ด้วย (เผื่อไปใช้ตอนปริ้นท์ใบบันทึกคะแนน)
