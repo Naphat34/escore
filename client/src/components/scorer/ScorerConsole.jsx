@@ -187,9 +187,12 @@ export default function ScorerConsole() {
         playerOut: null
     });
 
-    const [subTracker, setSubTracker] = useState({
-        home: { count: 0, positions: {}, usedPlayers: [] },
-        away: { count: 0, positions: {}, usedPlayers: [] }
+    const [subTracker, setSubTracker] = useState(() => {
+        const saved = localStorage.getItem(`match_${matchId}_subTracker`);
+        return saved ? JSON.parse(saved) : {
+            home: { count: 0, positions: {}, usedPlayers: [] },
+            away: { count: 0, positions: {}, usedPlayers: [] }
+        };
     });
     const [lastLiberoSwap, setLastLiberoSwap] = useState(() => loadState('lastLiberoSwap', null));
 
@@ -321,6 +324,10 @@ export default function ScorerConsole() {
     useEffect(() => {
         localStorage.setItem(`match_${matchId}_liberoTracker`, JSON.stringify(liberoTracker));
     }, [liberoTracker, matchId]);
+
+    useEffect(() => {
+        localStorage.setItem(`match_${matchId}_subTracker`, JSON.stringify(subTracker));
+    }, [subTracker, matchId]);
 
 
 
@@ -1328,10 +1335,10 @@ fetchMatchData();
 
                 if (posData) {
                     // เปลี่ยนตัวกลับ -> สลับกลับเข้าที่เดิม ล็อกตำแหน่ง
-                    teamTracker.positions[posIndex] = { ...posData, currentOnCourt: playerIn.id, isClosed: true };
+                    teamTracker.positions[posIndex] = { ...posData, currentOnCourt: playerIn.id, returned: true };
                 } else {
                     // เปลี่ยนตัวครั้งแรก -> จดจำว่าใครคือตัวจริง ใครคือตัวสำรอง
-                    teamTracker.positions[posIndex] = { starterId: playerOut.id, subId: playerIn.id, currentOnCourt: playerIn.id, isClosed: false };
+                    teamTracker.positions[posIndex] = { starterId: playerOut.id, subId: playerIn.id, currentOnCourt: playerIn.id, returned: false };
                     teamTracker.usedPlayers.push(playerIn.id);
                     teamTracker.usedPlayers.push(playerOut.id);
                 }

@@ -16,15 +16,16 @@ export default function SubstitutionModal({
 
     if (!isOpen) return null;
 
-    const courtIds = currentLineup.filter(p => p).map(p => p?.id || p);
-    const replacedPlayerId = liberoTracker?.replacedPlayer?.id;
+    const courtIds = currentLineup.filter(p => p).map(p => p?.id || p?.player_id);
+    const replacedPlayerId = liberoTracker?.replacedPlayer?.id || liberoTracker?.replacedPlayer?.player_id;
     
     // กรองคนที่โดนแบนตลอดแมตช์ออกไปจากม้านั่งสำรอง
-    const availableBench = roster.filter(p => 
-        !courtIds.includes(p.id) && 
-        !p.isLibero && 
-        !disqualifiedPlayers.includes(p.id)
-    );
+    const availableBench = roster.filter(p => {
+        const pId = p.id || p.player_id;
+        return !courtIds.includes(pId) && 
+               !p.isLibero && 
+               !disqualifiedPlayers.some(dId => dId === pId);
+    });
     
     // --- 🚨 FIVB SUBSTITUTION LOGIC 🚨 ---
     let eligibleBenchPlayers = [];
@@ -50,13 +51,19 @@ export default function SubstitutionModal({
                     eligibleBenchPlayers = [];
                 } else {
                     // เปลี่ยนตัวกลับ: ต้องเป็นผู้เล่นตัวจริงคนเดิมเท่านั้น
-                    eligibleBenchPlayers = availableBench.filter(p => p.id === posData.starterId);
+                    eligibleBenchPlayers = availableBench.filter(p => {
+                        const pId = p.id || p.player_id;
+                        return pId === posData.starterId;
+                    });
                     ruleMessage = `เปลี่ยนตัวกลับ: ต้องเปลี่ยนตัวจริงเบอร์ ${eligibleBenchPlayers[0]?.number || '?'} กลับเข้าสนามเท่านั้น`;
                 }
             } else {
                 // เปลี่ยนตัวครั้งแรกของตำแหน่งนี้: ห้ามซ้ำกับคนที่เคยเปลี่ยนลงไปแล้ว
                 const usedIds = subTracker.usedPlayers || [];
-                eligibleBenchPlayers = availableBench.filter(p => !usedIds.includes(p.id));
+                eligibleBenchPlayers = availableBench.filter(p => {
+                    const pId = p.id || p.player_id;
+                    return !usedIds.includes(pId);
+                });
                 ruleMessage = "กรุณาเลือกนักกีฬา";
             }
         }
@@ -135,7 +142,7 @@ export default function SubstitutionModal({
                                             selectedPlayerIn?.id === p.id ? 'bg-white text-green-700' : 'bg-slate-700 text-white'
                                         }`}>{p.number}</div>
                                         <div className="text-left flex-1 overflow-hidden">
-                                            <div className="font-bold truncate">{p.firs_name || p.firstname}</div>
+                                            <div className="font-bold truncate">{p.first_name || p.firstname}</div>
                                             <div className="text-xs opacity-70 truncate">{p.lastname}</div>
                                         </div>
                                     </button>
