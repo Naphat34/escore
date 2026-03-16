@@ -1727,7 +1727,7 @@ fetchMatchData();
                 posIndex={subData.posIndex}
                 subTracker={subData.team ? subTracker[subData.team] : null}
                 liberoTracker={subData.team ? liberoTracker[subData.team] : null}
-                disqualifiedPlayers={disqualifiedPlayers} // ✅ เพิ่ม Prop นี้
+                disqualifiedPlayers={subData.team ? disqualifiedPlayers[subData.team] : []} // ✅ ส่งเฉพาะอาเรย์ของทีมนั้น
                 onConfirm={handleSubstitutionConfirm}
             />
 
@@ -1772,7 +1772,7 @@ fetchMatchData();
                 lineup={liberoActionData.team === 'home' ? homeLineup : awayLineup}
                 liberos={liberoActionData.team === 'home' ? homeLiberos : awayLiberos}
                 tracker={liberoActionData.team ? liberoTracker[liberoActionData.team] : {}}
-                disqualifiedPlayers={disqualifiedPlayers}
+                disqualifiedPlayers={liberoActionData.team ? disqualifiedPlayers[liberoActionData.team] : []}
                 onConfirm={handleLiberoConfirm}
             />
         </div>
