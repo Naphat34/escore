@@ -81,6 +81,10 @@ const LineupModal = ({ isOpen,  teamHome, teamAway, homeLineup, awayLineup, home
                     <div className="text-sm text-slate-400">Select players for each position</div>
                 </div>
                 <div className="flex-1 overflow-y-auto p-6">
+                    <div className="bg-slate-800/50 p-3 rounded-xl mb-6 border border-slate-700 text-xs text-slate-400 flex items-center gap-2">
+                        <CheckCircle size={16} className="text-indigo-400" />
+                        <span>Tip: Select a player first, then click them again if you need to designate them as the Captain if the team's regular captain is not in the starting lineup.</span>
+                    </div>
                     <div className="flex gap-8 min-w-[800px]">
                         {renderTeamSlots(teamHome, 'home', homeLineup, homeLiberos)}
                         <div className="w-px bg-slate-700 self-stretch mx-2"></div>

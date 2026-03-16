@@ -777,12 +777,21 @@ fetchMatchData();
             return;
         }
 
-        const homeHasCaptain = homeLineup.some(p => p && p.isCaptain);
-        const awayHasCaptain = awayLineup.some(p => p && p.isCaptain);
+        const homeCaptain = homeLineup.find(p => p && p.isCaptain);
+        const awayCaptain = awayLineup.find(p => p && p.isCaptain);
 
-        if (!homeHasCaptain || !awayHasCaptain) {
-            const missingTeam = !homeHasCaptain ? matchData.teamHome : matchData.teamAway;
-            alert(`กรุณาเลือกกัปตันทีมสำหรับ ${missingTeam} โดยการเลือกนักกีฬาที่เป็นกัปตันตัวจริงลงสนาม`);
+        if (!homeCaptain || !awayCaptain) {
+            const missingTeam = !homeCaptain ? matchData.teamHome : matchData.teamAway;
+            alert(`กรุณาเลือกกัปตันทีมสำหรับ ${missingTeam} โดยการเลือกนักกีฬาในสนามให้เป็นกัปตัน`);
+            return;
+        }
+
+        // ตรวจสอบความซ้ำซ้อนของกัปตัน (เผื่อหลุดมา)
+        const homeCapCount = homeLineup.filter(p => p && p.isCaptain).length;
+        const awayCapCount = awayLineup.filter(p => p && p.isCaptain).length;
+
+        if (homeCapCount > 1 || awayCapCount > 1) {
+            alert("สนามหนึ่งสามารถมีกัปตันได้เพียงคนเดียวเท่านั้น");
             return;
         }
 
@@ -1280,33 +1289,74 @@ fetchMatchData();
         // จับผู้เล่นใหม่ใส่ลงสนามไปก่อน (และริบ C ออกไว้ก่อนเผื่อพกติดมา)
         newLineup[posIndex] = { ...playerIn, isCaptain: false };
 
-        // สแกนสนามว่าตอนนี้ "กัปตันตัวจริง" ยืนอยู่ในสนามไหม?
-        const isRealCaptainOnCourt = newLineup.some(p => 
+        // --- กฎเหล็ก: ในสนามต้องมีกัปตัน (C) แค่คนเดียวเท่านั้น ---
+        // 1. หาว่ากัปตันตัวจริง (Real Captain) อยู่ในสนามตำแหน่งไหน?
+        const realCaptainIdx = newLineup.findIndex(p => 
             p && realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)
         );
 
-        if (isRealCaptainOnCourt) {
+        if (realCaptainIdx !== -1) {
             // ✅ กรณีที่ 1: กัปตันตัวจริงอยู่บนสนาม! 
-            // -> กวาดล้าง Court Captain และมอบ C ให้กัปตันตัวจริงคนเดียว
-            newLineup = newLineup.map(p => {
+            // -> ให้คนนั้นเป็น C คนเดียว คนอื่น (รวมถึง Court Captain เดิม) ต้องโดนริบ C
+            newLineup = newLineup.map((p, idx) => {
                 if (!p) return p;
-                if (realCaptain && (p.id === realCaptain.id || p.player_id === realCaptain.player_id)) {
-                    return { ...p, isCaptain: true };
-                }
-                return { ...p, isCaptain: false }; 
+                return { ...p, isCaptain: (idx === realCaptainIdx) };
             });
+            setLineup(newLineup);
         } else {
             // ✅ กรณีที่ 2: กัปตันตัวจริง "ไม่" อยู่บนสนาม
-            // เช็คเผื่อระบบบั๊กมี C เกิน 1 คน
-            const courtCaptainsCount = newLineup.filter(p => p && p.isCaptain).length;
-            if (courtCaptainsCount > 1) {
-                newLineup[posIndex].isCaptain = false;
-            }
-            // หมายเหตุ: ถ้าคนที่ถูกเปลี่ยนออกคือ Court Captain สนามจะว่างเปล่าไม่มี C ทันที 
-            // ซึ่งถูกต้องแล้ว! ระบบ handleCourtPlayerClick จะเด้ง Alert บังคับให้ตั้งกัปตันเกมส์ใหม่ในคลิกถัดไป
-        }
+            // -> ตรวจสอบว่าในคนที่เหลือบนสนาม มีใครเป็น Court Captain (isCaptain: true) อยู่ไหม?
+            const existingCourtCaptains = newLineup.filter(p => p && p.isCaptain);
+            
+            if (existingCourtCaptains.length === 0) {
+                // ⚠️ ไม่มีกัปตัน! (อาจเพราะกัปตันจริงพึ่งถูกเปลี่ยนออก หรือ Court Cap เดิมออก)
+                // ต้องบังคับให้ตั้ง Court Captain ทันที
+                setTimeout(async () => {
+                    const { value: selectedIdx } = await Swal.fire({
+                        title: 'Appoint Court Captain',
+                        text: 'The captain has left the court. Please designate a new Court Captain:',
+                        input: 'select',
+                        inputOptions: newLineup.reduce((acc, p, idx) => {
+                            if (p) acc[idx] = `#${p.number} ${p.firstname || p.name}`;
+                            return acc;
+                        }, {}),
+                        inputPlaceholder: 'Select a player',
+                        showCancelButton: false,
+                        allowOutsideClick: false,
+                        confirmButtonText: 'Confirm Captain',
+                        inputValidator: (value) => {
+                            if (!value) return 'You must choose a captain!';
+                        }
+                    });
 
-        setLineup(newLineup);
+                    if (selectedIdx !== undefined) {
+                        const finalLineup = newLineup.map((p, idx) => {
+                            if (!p) return p;
+                            // ตั้งเป็น C แค่ตำแหน่งที่เลือก ตำแหน่งอื่นริบหมด
+                            return { ...p, isCaptain: (idx.toString() === selectedIdx.toString()) };
+                        });
+                        setLineup(finalLineup);
+                    }
+                }, 500); 
+            } else if (existingCourtCaptains.length > 1) {
+                // ถ้าดันมี C มากกว่าหนึ่ง (ซึ่งไม่ควรเกิด) ให้เหลือแค่คนแรกที่เจอ
+                let foundFirst = false;
+                const cleanedLineup = newLineup.map(p => {
+                    if (p && p.isCaptain) {
+                        if (!foundFirst) {
+                            foundFirst = true;
+                            return p;
+                        }
+                        return { ...p, isCaptain: false };
+                    }
+                    return p;
+                });
+                setLineup(cleanedLineup);
+            } else {
+                // มี C คนเดียวพอดีอยู่แล้ว
+                setLineup(newLineup);
+            }
+        }
 
         // --- 3. จัดการการตัดสิทธิ์ (Disqualify) หากเป็นกรณีพิเศษ ---
         if (isExceptional) {
