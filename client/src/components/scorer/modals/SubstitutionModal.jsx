@@ -7,12 +7,13 @@ export default function SubstitutionModal({
     const [selectedPlayerIn, setSelectedPlayerIn] = useState(null);
     const [isExceptional, setIsExceptional] = useState(false); // สถานะกรณีพิเศษ
 
+    // รีเซ็ตค่าเมื่อเปิด Modal เท่านั้น
     useEffect(() => {
         if (isOpen) {
-            if (selectedPlayerIn !== null) setSelectedPlayerIn(null);
-            if (isExceptional !== false) setIsExceptional(false);
+            setSelectedPlayerIn(null);
+            setIsExceptional(false);
         }
-    }, [isOpen, selectedPlayerIn, isExceptional]);
+    }, [isOpen]);
 
     if (!isOpen) return null;
 

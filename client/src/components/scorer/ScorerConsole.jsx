@@ -267,7 +267,7 @@ export default function ScorerConsole() {
     }, [matchId, matchData, workflowStep, score, setsWon, completedSets, activeAction, timeouts, challenges, substitutions, matchEvents, servingTeam, isHomeLeft, homeRoster, awayRoster, homeLineup, awayLineup, homeLiberos, awayLiberos, history, setsToWin, matchDuration, isTimerRunning, homeLiberoSwaps, awayLiberoSwaps, lastLiberoSwap, teamColors, showTimeoutTimer, timeoutStartTime, subTracker]);
 
     // เก็บ ID ผู้เล่นที่ถูกเปลี่ยนตัวออกด้วยกรณีพิเศษ (บาดเจ็บ/ให้ออก) ห้ามลงเล่นทั้งนัด
-    const [disqualifiedPlayers] = useState(() => {
+    const [disqualifiedPlayers, setDisqualifiedPlayers] = useState(() => {
         const saved = localStorage.getItem(`match_${matchId}_disqualified`);
         return saved ? JSON.parse(saved) : { home: [], away: [] };
     });
@@ -1291,7 +1291,16 @@ fetchMatchData();
 
         setLineup(newLineup);
 
-        // --- 3. บันทึกประวัติลง Database ---
+        // --- 3. จัดการการตัดสิทธิ์ (Disqualify) หากเป็นกรณีพิเศษ ---
+        if (isExceptional) {
+            const pOutId = playerOut.id || playerOut.player_id || playerOut;
+            setDisqualifiedPlayers(prev => ({
+                ...prev,
+                [team]: [...prev[team], pOutId]
+            }));
+        }
+
+        // --- 4. บันทึกประวัติลง Database ---
         // แนบ Flag isExceptional ไปให้ระบบหลังบ้านรู้ด้วย (เผื่อไปใช้ตอนปริ้นท์ใบบันทึกคะแนน)
         await saveEventToBackend('SUBSTITUTION', team, {
             player_id: playerIn.id || playerIn.player_id,
