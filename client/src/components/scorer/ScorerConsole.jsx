@@ -1519,6 +1519,7 @@ fetchMatchData();
                                         <button onClick={() => handleActionSelect(getLeftTeam().code, 'TIMEOUT')} disabled={timeouts[getLeftTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold border ${secondaryBtnClass}`}>TIMEOUT ({2 - timeouts[getLeftTeam().code]})</button>
                                         <button
                                             onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')}
+                                            disabled={workflowStep === 'RALLY'}
                                             className={`flex-1 rounded text-xs font-bold text-blue-600 border ${secondaryBtnClass}`}
                                         >SUBS ({substitutions[getLeftTeam().code]}/6)</button>
                                         <button onClick={() => { setChallengeData({ team: getLeftTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getLeftTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-yellow-600 border ${secondaryBtnClass}`}>CHALLENGE</button>
@@ -1547,6 +1548,7 @@ fetchMatchData();
                                         <button onClick={() => handleActionSelect(getRightTeam().code, 'TIMEOUT')} disabled={timeouts[getRightTeam().code] >= 2 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold border ${secondaryBtnClass}`}>TIMEOUT ({2 - timeouts[getRightTeam().code]})</button>
                                         <button
                                             onClick={() => Swal.fire('คำแนะนำ', 'กรุณาคลิกที่ผู้เล่นในสนาม ที่ต้องการเปลี่ยนตัวออก', 'info')}
+                                            disabled={workflowStep === 'RALLY'}
                                             className={`flex-1 rounded text-xs font-bold text-blue-600 border ${secondaryBtnClass}`}
                                         >SUBS ({substitutions[getRightTeam().code]}/6)</button>
                                         <button onClick={() => { setChallengeData({ team: getRightTeam().code }); setShowChallengeModal(true); }} disabled={challenges[getRightTeam().code] <= 0 || workflowStep === 'RALLY'} className={`flex-1 rounded text-xs font-bold text-yellow-600 border ${secondaryBtnClass}`}>CHALLENGE</button>
