@@ -330,7 +330,7 @@ exports.addPlayerToMyTeam = async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Database error" });
+    res.status(500).json({ error: `Database error: ${err.message}` });
   }
 };
 
@@ -370,7 +370,7 @@ exports.updatePlayer = async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Database error" });
+    res.status(500).json({ error: `Database error: ${err.message}` });
   }
 };
 
@@ -461,7 +461,7 @@ exports.getAllPlayers = async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Database error" });
+    res.status(500).json({ error: `Database error: ${err.message}` });
   }
 };
 
@@ -477,7 +477,7 @@ exports.getPlayersByTeam = async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching players by team:", err);
-    res.status(500).json({ error: "Database error" });
+    res.status(500).json({ error: `Database error: ${err.message}` });
   }
 };
 
@@ -494,7 +494,7 @@ exports.getStaffByTeam = async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching staff by team:", err);
-    res.status(500).json({ error: "Database error" });
+    res.status(500).json({ error: `Database error: ${err.message}` });
   }
 };
 
