@@ -486,10 +486,10 @@ export default function TeamDashboard() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <Input label="First Name" value={playerForm.first_name} required
+                                <Input label="First Name" value={playerForm.first_name}
                                     onChange={e => setPlayerForm({...playerForm, first_name: e.target.value})} 
                                 />
-                                <Input label="Last Name" value={playerForm.last_name} required
+                                <Input label="Last Name" value={playerForm.last_name}
                                     onChange={e => setPlayerForm({...playerForm, last_name: e.target.value})} 
                                 />
                             </div>
@@ -512,7 +512,7 @@ export default function TeamDashboard() {
                                 />
                             </div>
                             
-                            <Input label="Date of Birth" type="date" value={playerForm.birth_date} required
+                            <Input label="Date of Birth" type="date" value={playerForm.birth_date}
                                 onChange={e => setPlayerForm({...playerForm, birth_date: e.target.value})} 
                             />
 
