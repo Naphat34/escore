@@ -105,30 +105,6 @@ export default function TeamDashboard() {
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, [activeTab, fetchData]);
-
-    useEffect(() => {
-        const fetchTeamInfo = async () => {
-            try {
-                const [resTeam, resStaff] = await Promise.all([
-                    api.getMyTeam(),
-                    api.getMyStaff()
-                ]);
-                const info = resTeam.data;
-                const headCoach = resStaff.data.find(s => s.role === 'Head Coach') || resStaff.data[0];
-                if (headCoach) {
-                    info.coach = `${headCoach.first_name} ${headCoach.last_name}`;
-                }
-                setTeamInfo(info);
-            } catch (err) {
-                console.error("Error fetching team info:", err);
-            }
-        };
-        fetchTeamInfo();
-    }, []);
-
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
@@ -163,6 +139,31 @@ export default function TeamDashboard() {
             setLoading(false);
         }
     }, [activeTab, navigate]);
+
+    useEffect(() => {
+        fetchData();
+    }, [activeTab, fetchData]);
+
+    useEffect(() => {
+        const fetchTeamInfo = async () => {
+            try {
+                const [resTeam, resStaff] = await Promise.all([
+                    api.getMyTeam(),
+                    api.getMyStaff()
+                ]);
+                const info = resTeam.data;
+                const headCoach = resStaff.data.find(s => s.role === 'Head Coach') || resStaff.data[0];
+                if (headCoach) {
+                    info.coach = `${headCoach.first_name} ${headCoach.last_name}`;
+                }
+                setTeamInfo(info);
+            } catch (err) {
+                console.error("Error fetching team info:", err);
+            }
+        };
+        fetchTeamInfo();
+    }, []);
+
 
 
     const handlePlayerSubmit = async (e) => {
@@ -647,8 +648,8 @@ export default function TeamDashboard() {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border shadow-sm ${p.position === 'L' ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/50 dark:text-orange-300 dark:border-orange-700' :
-                                                                    p.position === 'S' ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700' :
-                                                                        'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-700'
+                                                                p.position === 'S' ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700' :
+                                                                    'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-700'
                                                                 }`}>
                                                                 {p.position}
                                                             </span>
@@ -1023,10 +1024,10 @@ export default function TeamDashboard() {
                                     <div><div className="text-2xl font-black text-gray-800 dark:text-gray-100">{statsData.attack_kills ?? 0}</div><div className="text-xs text-gray-500">Kills</div></div>
                                     <div><div className="text-2xl font-black text-gray-800 dark:text-gray-100">{statsData.attack_errors ?? 0}</div><div className="text-xs text-gray-500">Errors</div></div>
                                     <div><div className={`text-2xl font-black ${parseFloat(statsData.attack_efficiency ?? 0) >= 40 ? 'text-emerald-600 dark:text-emerald-400' :
-                                            parseFloat(statsData.attack_efficiency ?? 0) >= 25 ? 'text-green-600 dark:text-green-400' :
-                                                parseFloat(statsData.attack_efficiency ?? 0) >= 10 ? 'text-blue-600 dark:text-blue-400' :
-                                                    parseFloat(statsData.attack_efficiency ?? 0) >= 0 ? 'text-gray-800 dark:text-gray-100' :
-                                                        'text-red-500 dark:text-red-400'
+                                        parseFloat(statsData.attack_efficiency ?? 0) >= 25 ? 'text-green-600 dark:text-green-400' :
+                                            parseFloat(statsData.attack_efficiency ?? 0) >= 10 ? 'text-blue-600 dark:text-blue-400' :
+                                                parseFloat(statsData.attack_efficiency ?? 0) >= 0 ? 'text-gray-800 dark:text-gray-100' :
+                                                    'text-red-500 dark:text-red-400'
                                         }`}>{statsData.attack_efficiency ?? 0}%</div><div className="text-xs text-gray-500">Eff</div></div>
                                 </div>
                             </div>
@@ -1085,8 +1086,8 @@ function FilterButton({ active, onClick, label }) {
         <button
             onClick={onClick}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${active
-                    ? 'bg-indigo-600 text-white shadow'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                ? 'bg-indigo-600 text-white shadow'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
                 }`}
         >
             {label}
