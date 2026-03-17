@@ -105,30 +105,6 @@ export default function TeamDashboard() {
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [activeTab, fetchData]);
-
-  useEffect(() => {
-      const fetchTeamInfo = async () => {
-          try {
-              const [resTeam, resStaff] = await Promise.all([
-                  api.getMyTeam(),
-                  api.getMyStaff()
-              ]);
-              const info = resTeam.data;
-              const headCoach = resStaff.data.find(s => s.role === 'Head Coach') || resStaff.data[0];
-              if (headCoach) {
-                  info.coach = `${headCoach.first_name} ${headCoach.last_name}`;
-              }
-              setTeamInfo(info);
-          } catch (err) {
-              console.error("Error fetching team info:", err);
-          }
-      };
-      fetchTeamInfo();
-  }, []);
-
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -163,6 +139,31 @@ export default function TeamDashboard() {
         setLoading(false);
     }
   }, [activeTab, navigate]);
+
+  useEffect(() => {
+    fetchData();
+  }, [activeTab, fetchData]);
+
+  useEffect(() => {
+      const fetchTeamInfo = async () => {
+          try {
+              const [resTeam, resStaff] = await Promise.all([
+                  api.getMyTeam(),
+                  api.getMyStaff()
+              ]);
+              const info = resTeam.data;
+              const headCoach = resStaff.data.find(s => s.role === 'Head Coach') || resStaff.data[0];
+              if (headCoach) {
+                  info.coach = `${headCoach.first_name} ${headCoach.last_name}`;
+              }
+              setTeamInfo(info);
+          } catch (err) {
+              console.error("Error fetching team info:", err);
+          }
+      };
+      fetchTeamInfo();
+  }, []);
+
 
 
   const handlePlayerSubmit = async (e) => {
