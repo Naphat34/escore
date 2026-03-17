@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, MapPin, Swords, Edit2, Trash2 } from 'lucide-react';
 import TeamLogoDisplay from './TeamLogoDisplay';
 import { EmptyState } from '../pages/AdminShared';
+import { formatThaiDate, formatThaiTime } from '../utils';
 
 const MatchList = ({
     matches,
@@ -56,10 +57,10 @@ const MatchList = ({
                                 <Calendar size={12} className="mr-1.5 shrink-0" />
                                 {m.start_time ? (
                                     <div className="flex items-center gap-1">
-                                        <span>{new Date(m.start_time).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}</span>
+                                        <span>{formatThaiDate(m.start_time, { day: 'numeric', month: 'short' })}</span>
                                         <span className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-0.5"></span>
                                         <span className="font-bold text-indigo-600 dark:text-indigo-400">
-                                            {new Date(m.start_time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                                            {formatThaiTime(m.start_time)}
                                         </span>
                                     </div>
                                 ) : 'TBD'}
@@ -102,7 +103,7 @@ const MatchList = ({
                                                     try {
                                                         const sets = typeof m.set_scores === 'string' ? JSON.parse(m.set_scores) : (Array.isArray(m.set_scores) ? m.set_scores : null);
                                                         return sets ? sets.join(', ') : null;
-                                                    } catch (e) { return m.set_scores; }
+                                                    } catch { return m.set_scores; }
                                                 })()}
                                             </div>
                                         </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import client from '../../api'; // Axios instance ของคุณ
 import { Trophy, Calendar, MapPin, Users, ArrowRight, LogIn } from 'lucide-react';
+import { formatThaiDate } from '../../utils';
 
 export default function LandingPage() {
     const navigate = useNavigate();
@@ -108,7 +109,7 @@ export default function LandingPage() {
                                     <div className="space-y-2 text-sm text-gray-600 mb-6">
                                         <div className="flex items-center gap-2">
                                             <Calendar size={16} className="text-gray-400" />
-                                            {new Date(comp.start_date).toLocaleDateString('th-TH')}
+                                            {formatThaiDate(comp.start_date)}
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <MapPin size={16} className="text-gray-400" />

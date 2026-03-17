@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import client from '../api';
 import { Calendar, MapPin, Clock, Shield, Filter } from 'lucide-react';
 import { EmptyState } from './AdminShared';
+import { formatThaiDate, formatThaiTime } from '../utils';
 
 export default function HomeTab({ darkMode }) {
     const [competitions, setCompetitions] = useState([]);
@@ -175,7 +176,7 @@ export default function HomeTab({ darkMode }) {
                                                                 try {
                                                                     const sets = typeof match.set_scores === 'string' ? JSON.parse(match.set_scores) : (Array.isArray(match.set_scores) ? match.set_scores : null);
                                                                     return sets ? sets.join(', ') : null;
-                                                                } catch (e) { return match.set_scores; }
+                                                                } catch { return match.set_scores; }
                                                             })()}
                                                         </div>
                                                     )}
@@ -204,8 +205,8 @@ export default function HomeTab({ darkMode }) {
 
                                     {/* Right: Meta */}
                                     <div className="flex flex-row md:flex-col gap-4 md:gap-1 text-sm text-gray-500 dark:text-gray-400 min-w-[160px] justify-center md:justify-end text-center md:text-right border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700 pt-3 md:pt-0 md:pl-6 w-full md:w-auto">
-                                        <div className="flex items-center justify-center md:justify-end gap-2"><Calendar size={14} className="text-indigo-400"/> {match.start_time ? new Date(match.start_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Date TBD'}</div>
-                                        <div className="flex items-center justify-center md:justify-end gap-2"><Clock size={14} className="text-indigo-400"/> {match.start_time ? new Date(match.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Time TBD'}</div>
+                                        <div className="flex items-center justify-center md:justify-end gap-2"><Calendar size={14} className="text-indigo-400"/> {match.start_time ? formatThaiDate(match.start_time) : 'Date TBD'}</div>
+                                        <div className="flex items-center justify-center md:justify-end gap-2"><Clock size={14} className="text-indigo-400"/> {match.start_time ? formatThaiTime(match.start_time) : 'Time TBD'}</div>
                                         <div className="flex items-center justify-center md:justify-end gap-2"><MapPin size={14} className="text-indigo-400"/> {match.location || 'Location TBD'}</div>
                                     </div>
                                 </div>

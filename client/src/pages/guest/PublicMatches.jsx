@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import client from '../../api';
 import { Calendar, Clock, MapPin, Trophy, Filter, Activity, LogIn } from 'lucide-react';
+import { formatThaiDate, formatThaiTime } from '../../utils';
 
 export default function PublicMatches() {
     const navigate = useNavigate();
@@ -49,9 +50,8 @@ export default function PublicMatches() {
     const groupMatchesByDate = () => {
         const groups = {};
         matches.forEach(match => {
-            // แปลงวันที่เป็น String สวยๆ เช่น "2024-02-14" -> "Saturday, 14 Feb 2024"
-            const dateObj = new Date(match.match_date);
-            const dateStr = dateObj.toLocaleDateString('th-TH', {
+            // แปลงวันที่เป็น String สวยๆ เช่น "วันพุธที่ 17 มี.ค. 2569"
+            const dateStr = formatThaiDate(match.match_date, {
                 weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
             });
 
@@ -153,7 +153,7 @@ export default function PublicMatches() {
                                             <div className="flex items-center gap-4">
                                                 <span className="flex items-center gap-1 font-medium text-gray-700">
                                                     <Clock size={14} className="text-indigo-500"/> 
-                                                    {m.start_time.slice(0, 5)} น.
+                                                    {formatThaiTime(m.start_time)} น.
                                                 </span>
                                                 <span className="hidden sm:flex items-center gap-1">
                                                     <MapPin size={14}/> {m.stadium_name || 'สนามกีฬากลาง'}

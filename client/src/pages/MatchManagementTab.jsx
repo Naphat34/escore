@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Toast, Input, Button } from './AdminShared';
+import { formatThaiDate, formatThaiTime } from '../utils';
 
 export default function MatchManagementTab({ darkMode }) {
     // --- State Management ---
@@ -294,7 +295,7 @@ export default function MatchManagementTab({ darkMode }) {
                 await api.deleteMatch(id);
                 setMatches(prev => prev.filter(m => m.id !== id));
                 Toast.fire({ icon: 'success', title: 'Deleted successfully' });
-            } catch (err) {
+            } catch {
                 Toast.fire({ icon: 'error', title: 'Delete failed' });
             }
         }
@@ -537,11 +538,11 @@ export default function MatchManagementTab({ darkMode }) {
                                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                                     <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
                                         <Calendar size={12} className="text-indigo-400"/> 
-                                        {match.start_time ? new Date(match.start_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'TBD'}
+                                        {match.start_time ? formatThaiDate(match.start_time, { day: 'numeric', month: 'short' }) : 'TBD'}
                                     </div>
                                     <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
                                         <Clock size={12} className="text-indigo-400"/> 
-                                        {match.start_time ? new Date(match.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBD'}
+                                        {match.start_time ? formatThaiTime(match.start_time) : 'TBD'}
                                     </div>
                                     <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
                                         <MapPin size={12} className="text-indigo-400"/> 

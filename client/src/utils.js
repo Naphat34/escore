@@ -13,3 +13,40 @@ export function getCookie(name) {
 export function removeCookie(name) {
   document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
 }
+
+/**
+ * Formats a date string or object to Thai Buddhist Era format.
+ * @param {Date|string} date - The date to format.
+ * @param {Object} options - Intl.DateTimeFormat options.
+ * @returns {string} Formatted date.
+ */
+export function formatThaiDate(date, options = { day: 'numeric', month: 'short', year: 'numeric' }) {
+  if (!date) return 'TBD';
+  return new Date(date).toLocaleDateString('th-TH', {
+    ...options
+  });
+}
+
+/**
+ * Formats a date string or object to 24-hour time format (Thai locale).
+ * @param {Date|string} date - The date to format.
+ * @returns {string} Formatted time.
+ */
+export function formatThaiTime(date) {
+  if (!date) return 'TBD';
+  return new Date(date).toLocaleTimeString('th-TH', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+}
+
+/**
+ * Formats a date string or object to both Thai Date and 24-hour Time.
+ * @param {Date|string} date - The date to format.
+ * @returns {string} Formatted date and time.
+ */
+export function formatThaiDateTime(date) {
+  if (!date) return 'TBD';
+  return `${formatThaiDate(date)} ${formatThaiTime(date)}`;
+}
