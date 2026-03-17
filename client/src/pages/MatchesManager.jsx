@@ -3,6 +3,7 @@ import api from '../api'; // Path to your api setup
 import { Trophy, Calendar, CheckCircle, Edit3, Save, X, PlusCircle, Shield } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Toast, Input, Button, EmptyState } from './AdminShared';
+import { formatForInput, formatThaiDateTime } from '../utils';
 
 export default function MatchesManager({ competition, onClose }) {
     const competitionId = competition?.id;
@@ -177,7 +178,7 @@ export default function MatchesManager({ competition, onClose }) {
             match_number: match.match_number || '',
             home_team_id: match.home_team_id || '',
             away_team_id: match.away_team_id || '',
-            start_time: match.start_time ? match.start_time.slice(0, 16) : '', // format datetime-local
+            start_time: match.start_time ? formatForInput(match.start_time) : '', // format local input
             location: match.location || '',
             gender: match.gender || 'Female',
             pool_name: match.pool_name || 'A'
@@ -423,6 +424,11 @@ export default function MatchesManager({ competition, onClose }) {
                                         }}
                                     />
                                 </div>
+                                {newMatchForm.start_time && (
+                                    <p className="text-[10px] text-indigo-500 font-medium mt-1">
+                                        Selected: {formatThaiDateTime(newMatchForm.start_time)}
+                                    </p>
+                                )}
                             </div>
                                 <Input label="Location" value={newMatchForm.location} onChange={e => setNewMatchForm({ ...newMatchForm, location: e.target.value })} placeholder="Court 1" />
                             </div>

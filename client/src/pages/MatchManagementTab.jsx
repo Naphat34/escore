@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Toast, Input, Button } from './AdminShared';
-import { formatThaiDate, formatThaiTime, formatThaiDateTime } from '../utils';
+import { formatThaiDate, formatThaiTime, formatThaiDateTime, formatForInput } from '../utils';
 
 export default function MatchManagementTab({ darkMode }) {
     // --- State Management ---
@@ -224,7 +224,7 @@ export default function MatchManagementTab({ darkMode }) {
             id: match.id,
             home_team_id: match.home_team_id || '',
             away_team_id: match.away_team_id || '',
-            start_time: match.start_time ? match.start_time.slice(0, 16) : '', // Format for datetime-local
+            start_time: match.start_time ? formatForInput(match.start_time) : '', // Format for local input
             location: match.location || '',
             match_number: match.match_number,
             round_name: match.round_name || 'Round 1',

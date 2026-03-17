@@ -50,3 +50,22 @@ export function formatThaiDateTime(date) {
   if (!date) return 'TBD';
   return `${formatThaiDate(date)} ${formatThaiTime(date)}`;
 }
+/**
+ * Converts a date to local YYYY-MM-DDTHH:mm format for input fields.
+ * Handles both JS Date objects and ISO strings.
+ * @param {Date|string} date - The date to format.
+ * @returns {string} Formatted date string for input value.
+ */
+export function formatForInput(date) {
+  if (!date) return '';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
