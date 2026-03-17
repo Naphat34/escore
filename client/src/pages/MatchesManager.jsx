@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import api from '../api'; // Path to your api setup
 import { Trophy, Calendar, CheckCircle, Edit3, Save, X, PlusCircle, Shield } from 'lucide-react';
 import Swal from 'sweetalert2';
@@ -35,9 +35,9 @@ export default function MatchesManager({ competition, onClose }) {
 
     useEffect(() => {
         fetchData();
-    }, [competitionId]);
+    }, [fetchData]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             // 1. ดึงแมตช์
@@ -54,7 +54,7 @@ export default function MatchesManager({ competition, onClose }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [competitionId]);
 
     const handleGenerateMatches = async () => {
         const result = await Swal.fire({
@@ -402,7 +402,27 @@ export default function MatchesManager({ competition, onClose }) {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <Input label="Start Time" type="datetime-local" value={newMatchForm.start_time} onChange={e => setNewMatchForm({ ...newMatchForm, start_time: e.target.value })} />
+                            <div className="space-y-4">
+                                <label className="block text-xs font-bold uppercase mb-1 text-gray-500">Start Date & Time (24h)</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Input 
+                                        type="date" 
+                                        value={newMatchForm.start_time ? newMatchForm.start_time.split('T')[0] : ''}
+                                        onChange={e => {
+                                            const timePart = newMatchForm.start_time?.includes('T') ? newMatchForm.start_time.split('T')[1] : '00:00';
+                                            setNewMatchForm({...newMatchForm, start_time: `${e.target.value}T${timePart}`});
+                                        }}
+                                    />
+                                    <Input 
+                                        type="time" 
+                                        value={newMatchForm.start_time?.includes('T') ? newMatchForm.start_time.split('T')[1] : ''}
+                                        onChange={e => {
+                                            const datePart = newMatchForm.start_time?.includes('T') ? newMatchForm.start_time.split('T')[0] : new Date().toISOString().split('T')[0];
+                                            setNewMatchForm({...newMatchForm, start_time: `${datePart}T${e.target.value}`});
+                                        }}
+                                    />
+                                </div>
+                            </div>
                                 <Input label="Location" value={newMatchForm.location} onChange={e => setNewMatchForm({ ...newMatchForm, location: e.target.value })} placeholder="Court 1" />
                             </div>
 

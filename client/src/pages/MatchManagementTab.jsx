@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import client, { api } from '../api'; 
 import {
     Swords, PlusCircle, X, Calendar, MapPin, Edit2, Trash2,
@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Toast, Input, Button } from './AdminShared';
-import { formatThaiDate, formatThaiTime } from '../utils';
+import { formatThaiDate, formatThaiTime, formatThaiDateTime } from '../utils';
 
 export default function MatchManagementTab({ darkMode }) {
     // --- State Management ---
@@ -55,7 +55,7 @@ export default function MatchManagementTab({ darkMode }) {
     // --- 2. Load Matches & Teams when BaseName or FilterGender Changes ---
     useEffect(() => {
         fetchMatchData();
-    }, [selectedBaseName, filterGender, competitions]);
+    }, [fetchMatchData]);
 
     // --- API Functions ---
     const fetchCompetitions = async () => {
@@ -130,7 +130,7 @@ export default function MatchManagementTab({ darkMode }) {
         }
     };
 
-    const fetchMatchData = async () => {
+    const fetchMatchData = useCallback(async () => {
         if (!selectedBaseName) return;
 
         setLoading(true);
@@ -197,7 +197,7 @@ export default function MatchManagementTab({ darkMode }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedBaseName, filterGender, competitions]);
 
     // --- Handlers ---
     const handleOpenCreate = () => {
@@ -711,17 +711,37 @@ export default function MatchManagementTab({ darkMode }) {
 
                             {/* Row 3: Time & Location */}
                             <div className="grid grid-cols-2 gap-6">
-                                <div className="space-y-2">
+                                <div className="space-y-4">
                                     <label className={`flex items-center gap-2 text-sm font-bold uppercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                        <Clock size={16} className="text-indigo-500" /> Start Time
+                                        <Clock size={16} className="text-indigo-500" /> Start Date & Time
                                     </label>
-                                    <Input 
-                                        type="datetime-local" 
-                                        value={matchForm.start_time}
-                                        onChange={e => setMatchForm({...matchForm, start_time: e.target.value})}
-                                        darkMode={darkMode}
-                                        className="w-full"
-                                    />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <Input 
+                                            type="date" 
+                                            value={matchForm.start_time ? matchForm.start_time.split('T')[0] : ''}
+                                            onChange={e => {
+                                                const timePart = matchForm.start_time?.includes('T') ? matchForm.start_time.split('T')[1] : '00:00';
+                                                setMatchForm({...matchForm, start_time: `${e.target.value}T${timePart}`});
+                                            }}
+                                            darkMode={darkMode}
+                                            className="w-full"
+                                        />
+                                        <Input 
+                                            type="time" 
+                                            value={matchForm.start_time?.includes('T') ? matchForm.start_time.split('T')[1] : ''}
+                                            onChange={e => {
+                                                const datePart = matchForm.start_time?.includes('T') ? matchForm.start_time.split('T')[0] : new Date().toISOString().split('T')[0];
+                                                setMatchForm({...matchForm, start_time: `${datePart}T${e.target.value}`});
+                                            }}
+                                            darkMode={darkMode}
+                                            className="w-full"
+                                        />
+                                    </div>
+                                    {matchForm.start_time && (
+                                        <p className="text-[10px] text-indigo-500 font-medium">
+                                            Selected: {formatThaiDateTime(matchForm.start_time)}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
                                     <label className={`flex items-center gap-2 text-sm font-bold uppercase ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -821,7 +841,7 @@ export default function MatchManagementTab({ darkMode }) {
                                 <button type="button" onClick={() => setScoringMatch(null)} className="px-6 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium">
                                     Cancel
                                 </button>
-                                <button onClick={handleScoreSubmit} className="px-8 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center gap-2">
+                                <button onClick={handleSaveScore} className="px-8 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center gap-2">
                                     <Save size={20} />
                                     Update Score
                                 </button>
