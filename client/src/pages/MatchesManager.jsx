@@ -33,9 +33,6 @@ export default function MatchesManager({ competition, onClose }) {
         sets_detail: ["", "", "", "", ""] // รองรับ 5 เซต
     });
 
-    useEffect(() => {
-        fetchData();
-    }, [fetchData]);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -55,6 +52,10 @@ export default function MatchesManager({ competition, onClose }) {
             setLoading(false);
         }
     }, [competitionId]);
+    
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleGenerateMatches = async () => {
         const result = await Swal.fire({

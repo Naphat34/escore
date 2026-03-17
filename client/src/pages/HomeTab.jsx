@@ -12,19 +12,6 @@ export default function HomeTab({ darkMode }) {
     const [loading, setLoading] = useState(false);
     const [filterStatus, setFilterStatus] = useState('all');
 
-    useEffect(() => {
-        fetchCompetitions();
-    }, []);
-
-    useEffect(() => {
-        if (selectedCompetition) {
-            fetchMatches(selectedCompetition.id);
-            fetchTeams(selectedCompetition.id);
-        } else {
-            setMatches([]);
-            setTeams([]);
-        }
-    }, [selectedCompetition]);
 
     const fetchCompetitions = async () => {
         try {
@@ -59,6 +46,20 @@ export default function HomeTab({ darkMode }) {
             setTeams(res.data);
         } catch (err) { console.error(err); }
     };
+
+    useEffect(() => {
+        fetchCompetitions();
+    }, []);
+
+    useEffect(() => {
+        if (selectedCompetition) {
+            fetchMatches(selectedCompetition.id);
+            fetchTeams(selectedCompetition.id);
+        } else {
+            setMatches([]);
+            setTeams([]);
+        }
+    }, [selectedCompetition]);
 
     const filteredMatches = matches.filter(m => {
         if (filterStatus === 'all') return true;

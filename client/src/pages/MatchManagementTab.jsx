@@ -46,16 +46,6 @@ export default function MatchManagementTab({ darkMode }) {
         set_scores: [], // e.g., ["25-20", "25-18", "25-22"]
     });
 
-    // --- 1. Load Initial Data (Competitions & Stadiums) ---
-    useEffect(() => {
-        fetchCompetitions();
-        fetchStadiums();
-    }, []);
-
-    // --- 2. Load Matches & Teams when BaseName or FilterGender Changes ---
-    useEffect(() => {
-        fetchMatchData();
-    }, [fetchMatchData]);
 
     // --- API Functions ---
     const fetchCompetitions = async () => {
@@ -198,6 +188,17 @@ export default function MatchManagementTab({ darkMode }) {
             setLoading(false);
         }
     }, [selectedBaseName, filterGender, competitions]);
+
+    // --- 1. Load Initial Data (Competitions & Stadiums) ---
+    useEffect(() => {
+        fetchCompetitions();
+        fetchStadiums();
+    }, []);
+
+    // --- 2. Load Matches & Teams when BaseName or FilterGender Changes ---
+    useEffect(() => {
+        fetchMatchData();
+    }, [fetchMatchData]);
 
     // --- Handlers ---
     const handleOpenCreate = () => {
