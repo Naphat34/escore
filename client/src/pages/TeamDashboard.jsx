@@ -93,41 +93,6 @@ export default function TeamDashboard() {
 
   const navigate = useNavigate();
   
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-        if (activeTab === 'roster') {
-            const res = await api.getMyPlayers();
-            setPlayers(res.data);
-        } else if (activeTab === 'staff') {
-            const res = await api.getMyStaff();
-            setStaff(res.data);
-        } else if (activeTab === 'competitions') {
-            const [resOpen, resMy] = await Promise.all([
-                api.getOpenCompetitions(),
-                api.getMyCompetitions()
-            ]);
-            // กรองรายการที่สมัครไปแล้วออกจากรายการที่เปิดรับสมัคร
-            const myCompIds = resMy.data.map(c => c.id);
-            setOpenCompetitions(resOpen.data.filter(c => c.status === 'open' && !myCompIds.includes(c.id)));
-            setMyCompetitions(resMy.data);
-        } else if (activeTab === 'stats') {
-            const res = await api.getMyPlayersStats();
-            setPlayerStats(res.data);
-        } else if (activeTab === 'schedule') {
-            const res = await api.getMyMatches();
-            setMyMatches(res.data);
-        }
-    } catch (err) {
-        console.error(err);
-        if (err.response && err.response.status === 401) {
-            navigate('/login');
-        }
-    } finally {
-        setLoading(false);
-    }
-  }, [activeTab, navigate]);
-
   const handleLogout = async () => {
     try {
         await api.logout();
@@ -163,6 +128,41 @@ export default function TeamDashboard() {
       };
       fetchTeamInfo();
   }, []);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+        if (activeTab === 'roster') {
+            const res = await api.getMyPlayers();
+            setPlayers(res.data);
+        } else if (activeTab === 'staff') {
+            const res = await api.getMyStaff();
+            setStaff(res.data);
+        } else if (activeTab === 'competitions') {
+            const [resOpen, resMy] = await Promise.all([
+                api.getOpenCompetitions(),
+                api.getMyCompetitions()
+            ]);
+            // กรองรายการที่สมัครไปแล้วออกจากรายการที่เปิดรับสมัคร
+            const myCompIds = resMy.data.map(c => c.id);
+            setOpenCompetitions(resOpen.data.filter(c => c.status === 'open' && !myCompIds.includes(c.id)));
+            setMyCompetitions(resMy.data);
+        } else if (activeTab === 'stats') {
+            const res = await api.getMyPlayersStats();
+            setPlayerStats(res.data);
+        } else if (activeTab === 'schedule') {
+            const res = await api.getMyMatches();
+            setMyMatches(res.data);
+        }
+    } catch (err) {
+        console.error(err);
+        if (err.response && err.response.status === 401) {
+            navigate('/login');
+        }
+    } finally {
+        setLoading(false);
+    }
+  }, [activeTab, navigate]);
 
 
   const handlePlayerSubmit = async (e) => {
@@ -486,10 +486,10 @@ export default function TeamDashboard() {
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <Input label="First Name" value={playerForm.first_name}
+                                <Input label="First Name" value={playerForm.first_name} required
                                     onChange={e => setPlayerForm({...playerForm, first_name: e.target.value})} 
                                 />
-                                <Input label="Last Name" value={playerForm.last_name}
+                                <Input label="Last Name" value={playerForm.last_name} required
                                     onChange={e => setPlayerForm({...playerForm, last_name: e.target.value})} 
                                 />
                             </div>
@@ -512,7 +512,7 @@ export default function TeamDashboard() {
                                 />
                             </div>
                             
-                            <Input label="Date of Birth" type="date" value={playerForm.birth_date}
+                            <Input label="Date of Birth" type="date" value={playerForm.birth_date} required
                                 onChange={e => setPlayerForm({...playerForm, birth_date: e.target.value})} 
                             />
 

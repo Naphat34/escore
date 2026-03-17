@@ -310,11 +310,6 @@ exports.addPlayerToMyTeam = async (req, res) => {
 
     const { first_name, last_name, number, position, height_cm, weight, birth_date, is_captain, gender, nickname, nationality, photo } = req.body;
 
-    // Convert empty strings to null for optional fields
-    const dbFirstName = first_name || null;
-    const dbLastName = last_name || null;
-    const dbBirthDate = birth_date || null;
-
     // --- [เพิ่มส่วนนี้] Logic: ถ้าตั้งคนนี้เป็นกัปตัน ให้ปลดกัปตันคนเก่าออก ---
     if (is_captain === true || is_captain === 'true') {
         await db.query('UPDATE players SET is_captain = false WHERE team_id = $1', [teamId]);
@@ -324,13 +319,13 @@ exports.addPlayerToMyTeam = async (req, res) => {
     const result = await db.query(
       `INSERT INTO players (team_id, first_name, last_name, number, position, height_cm, weight, birth_date, is_captain, gender, nickname, nationality, photo)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
-      [teamId, dbFirstName, dbLastName, number, position, height_cm || null, weight || null, dbBirthDate, is_captain || false, gender, nickname || null, nationality || null, photo || null]
+      [teamId, first_name, last_name, number, position, height_cm, weight, birth_date, is_captain || false, gender, nickname, nationality, photo]
     );
 
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: `Database error: ${err.message}` });
+    res.status(500).json({ error: "Database error" });
   }
 };
 
@@ -339,11 +334,6 @@ exports.updatePlayer = async (req, res) => {
   try {
     const { id } = req.params;
     const { first_name, last_name, number, position, height_cm, weight, birth_date, is_captain, gender, nickname, nationality, photo } = req.body;
-
-    // Convert empty strings to null for optional fields
-    const dbFirstName = first_name || null;
-    const dbLastName = last_name || null;
-    const dbBirthDate = birth_date || null;
 
     // --- [LOGIC กัปตัน] ---
     if (is_captain === true || is_captain === 'true') {
@@ -362,7 +352,7 @@ exports.updatePlayer = async (req, res) => {
       `UPDATE players 
        SET first_name=$1, last_name=$2, number=$3, position=$4, height_cm=$5, weight=$6, birth_date=$7, is_captain=$8, gender=$9, nickname=$10, nationality=$11, photo=$12
        WHERE id=$13 RETURNING *`,
-      [dbFirstName, dbLastName, number, position, height_cm || null, weight || null, dbBirthDate, is_captain, gender, nickname || null, nationality || null, photo || null, id]
+      [first_name, last_name, number, position, height_cm, weight, birth_date, is_captain, gender, nickname, nationality, photo, id]
     );
 
     if (result.rows.length === 0) return res.status(404).json({ error: "Player not found" });
@@ -370,7 +360,7 @@ exports.updatePlayer = async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: `Database error: ${err.message}` });
+    res.status(500).json({ error: "Database error" });
   }
 };
 
