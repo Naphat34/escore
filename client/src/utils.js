@@ -23,7 +23,8 @@ export function removeCookie(name) {
 export function formatThaiDate(date, options = { day: 'numeric', month: 'short', year: 'numeric' }) {
   if (!date) return 'TBD';
   return new Date(date).toLocaleDateString('th-TH', {
-    ...options
+    ...options,
+    calendar: 'buddhist'
   });
 }
 
