@@ -52,9 +52,9 @@ export default function TeamDashboard() {
     const [myMatches, setMyMatches] = useState([]);
 
     const [teamInfo, setTeamInfo] = useState(null);
-    // eslint-disable-next-line no-unused-vars
     const [loading, setLoading] = useState(true);
     const [isEditingTeam, setIsEditingTeam] = useState(false);
+    const [isCreatingTeam, setIsCreatingTeam] = useState(false);
     const [teamForm, setTeamForm] = useState({ name: '', code: '', logo_url: '' });
 
     const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
@@ -146,19 +146,32 @@ export default function TeamDashboard() {
 
     useEffect(() => {
         const fetchTeamInfo = async () => {
+            setLoading(true); // Ensure loading is true when fetching team info
             try {
-                const [resTeam, resStaff] = await Promise.all([
-                    api.getMyTeam(),
-                    api.getMyStaff()
-                ]);
+                const resTeam = await api.getMyTeam();
                 const info = resTeam.data;
-                const headCoach = resStaff.data.find(s => s.role === 'Head Coach') || resStaff.data[0];
-                if (headCoach) {
-                    info.coach = `${headCoach.first_name} ${headCoach.last_name}`;
+
+                try {
+                    const resStaff = await api.getMyStaff();
+                    const headCoach = resStaff.data.find(s => s.role === 'Head Coach') || resStaff.data[0];
+                    if (headCoach) {
+                        info.coach = `${headCoach.first_name} ${headCoach.last_name}`;
+                    }
+                } catch {
+                    // No staff found yet or error fetching staff
                 }
+
                 setTeamInfo(info);
+                setIsCreatingTeam(false);
             } catch (err) {
-                console.error("Error fetching team info:", err);
+                if (err.response?.status === 400) {
+                    setTeamInfo(null);
+                    setIsCreatingTeam(true);
+                } else {
+                    console.error("Error fetching team info:", err);
+                }
+            } finally {
+                setLoading(false);
             }
         };
         fetchTeamInfo();
@@ -376,6 +389,20 @@ export default function TeamDashboard() {
         }
     };
 
+    const handleCreateTeam = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await api.createMyTeam(teamForm);
+            setTeamInfo(res.data);
+            setIsCreatingTeam(false);
+            Toast.fire({ icon: 'success', title: 'Team created successfully' });
+            fetchData();
+        } catch (err) {
+            console.error(err);
+            Toast.fire({ icon: 'error', title: err.response?.data?.error || 'Failed to create team' });
+        }
+    };
+
     const handleUpdateTeam = async (e) => {
         e.preventDefault();
         try {
@@ -388,6 +415,101 @@ export default function TeamDashboard() {
             Toast.fire({ icon: 'error', title: 'Failed to update team' });
         }
     };
+
+    const handleDeleteTeam = async () => {
+        const result = await Swal.fire({
+            title: 'Delete Team?',
+            text: "This will permanently delete your team and all associated data (players, staff, matches). This action cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await api.deleteMyTeam();
+                setTeamInfo(null);
+                setIsCreatingTeam(true);
+                setIsEditingTeam(false);
+                setPlayers([]);
+                setStaff([]);
+                Swal.fire('Deleted!', 'Your team has been deleted.', 'success');
+            } catch (err) {
+                console.error(err);
+                Toast.fire({ icon: 'error', title: 'Failed to delete team' });
+            }
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-gray-500 font-medium">Loading Dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (isCreatingTeam) {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 flex flex-col items-center justify-center p-4">
+                <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-8">
+                    <div className="text-center mb-8">
+                        <div className="bg-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-200 dark:shadow-none">
+                            <Shield className="text-white w-8 h-8" />
+                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Create Your Team</h1>
+                        <p className="text-gray-500 dark:text-gray-400 mt-2">Welcome! Start by setting up your team profile.</p>
+                    </div>
+
+                    <form onSubmit={handleCreateTeam} className="space-y-5">
+                        <Input 
+                            label="Team Name" 
+                            placeholder="e.g. Bangkok Volley Club" 
+                            value={teamForm.name} 
+                            required 
+                            onChange={e => setTeamForm({ ...teamForm, name: e.target.value })} 
+                        />
+                        <Input 
+                            label="Team Code (Abbreviation)" 
+                            placeholder="e.g. BVC" 
+                            value={teamForm.code} 
+                            required 
+                            onChange={e => setTeamForm({ ...teamForm, code: e.target.value })} 
+                        />
+                        <Input 
+                            label="Logo URL" 
+                            placeholder="https://example.com/logo.png" 
+                            value={teamForm.logo_url} 
+                            onChange={e => setTeamForm({ ...teamForm, logo_url: e.target.value })} 
+                        />
+                        
+                        <div className="pt-4 flex flex-col gap-3">
+                            <Button 
+                                type="submit" 
+                                label="Create Team Profile" 
+                                icon={<Shield size={20} />} 
+                                full 
+                                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 py-3 text-lg" 
+                            />
+                            <button 
+                                type="button"
+                                onClick={handleLogout}
+                                className="text-sm text-gray-500 hover:text-red-500 dark:text-gray-400 transition flex items-center justify-center gap-1"
+                            >
+                                <LogOut size={16} /> Sign Out
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-10 transition-colors duration-300">
@@ -989,6 +1111,17 @@ export default function TeamDashboard() {
                                 <Input label="Logo URL" value={teamForm.logo_url} onChange={e => setTeamForm({ ...teamForm, logo_url: e.target.value })} placeholder="https://..." />
 
                                 <Button type="submit" label="Save Changes" full />
+                                
+                                <div className="pt-6 border-t border-gray-100 dark:border-gray-700 mt-6">
+                                    <p className="text-xs text-red-500 font-bold uppercase mb-2">Danger Zone</p>
+                                    <button 
+                                        type="button"
+                                        onClick={handleDeleteTeam}
+                                        className="w-full py-2 px-4 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <Trash2 size={16} /> Delete Team
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>

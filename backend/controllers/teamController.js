@@ -675,3 +675,59 @@ exports.getPublicTeamsList = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// ✅ [เพิ่ม] ลบทีมของตัวเอง (เจ้าหน้าที่ทีมลบเอง)
+exports.deleteMyTeam = async (req, res) => {
+  const client = await db.pool.connect();
+  try {
+    const userId = req.user.id;
+    
+    // 1. หา team_id ของ User
+    const userRes = await client.query('SELECT team_id FROM users WHERE id = $1', [userId]);
+    const teamId = userRes.rows[0]?.team_id;
+
+    if (!teamId) {
+      return res.status(400).json({ error: "You do not belong to any team." });
+    }
+
+    await client.query('BEGIN');
+
+    // 2. ปลดทุกคนที่สังกัดทีมนี้ออก (รวมถึงตัวเอง)
+    await client.query('UPDATE users SET team_id = NULL WHERE team_id = $1', [teamId]);
+
+    // 3. ลบข้อมูลสมาชิกในทีม (Players, Staff)
+    await client.query('DELETE FROM players WHERE team_id = $1', [teamId]);
+    await client.query('DELETE FROM team_staff WHERE team_id = $1', [teamId]);
+
+    // 4. ลบข้อมูลการสมัครแข่งขัน
+    await client.query('DELETE FROM team_competitions WHERE team_id = $1', [teamId]);
+
+    // 5. ค้นหาแมตช์ทั้งหมดที่ทีมนี้เกี่ยวข้อง เพื่อลบข้อมูลที่เชื่อมโยง
+    const matchesRes = await client.query(
+      'SELECT id FROM matches WHERE home_team_id = $1 OR away_team_id = $1',
+      [teamId]
+    );
+    const matchIds = matchesRes.rows.map(m => m.id);
+
+    if (matchIds.length > 0) {
+      await client.query('DELETE FROM match_sets WHERE match_id = ANY($1)', [matchIds]);
+      await client.query('DELETE FROM match_actions WHERE match_id = ANY($1)', [matchIds]);
+      await client.query('DELETE FROM match_events WHERE match_id = ANY($1)', [matchIds]);
+      await client.query('DELETE FROM match_lineups WHERE match_id = ANY($1)', [matchIds]);
+      await client.query('DELETE FROM matches WHERE id = ANY($1)', [matchIds]);
+    }
+
+    // 6. ลบทีม
+    await client.query('DELETE FROM teams WHERE id = $1', [teamId]);
+
+    await client.query('COMMIT');
+    res.json({ message: "Team and all associated data deleted successfully" });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error("Error in deleteMyTeam:", err);
+    res.status(500).json({ error: err.message });
+  } finally {
+    client.release();
+  }
+};

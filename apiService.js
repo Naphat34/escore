@@ -15,9 +15,10 @@ const getTeamsByCompetition = (competitionId) => api.get(`/admin/competitions/${
 const createTeam = (data) => api.post('/admin/teams', data);
 const updateTeam = (id, data) => api.put(`/admin/teams/${id}`, data);
 const deleteTeam = (id) => api.delete(`/admin/teams/${id}`);
-const getMyTeam = () => api.get('/teams/my-team');
-const updateMyTeam = (data) => api.put('/teams/my-team', data);
-const createMyTeam = (data) => api.post('/teams', data);
+const getMyTeam = () => api.get('/my-team');
+const updateMyTeam = (data) => api.put('/my-team', data);
+const createMyTeam = (data) => api.post('/my-team/create', data);
+const deleteMyTeam = () => api.delete('/my-team');
 
 // --- Players ---
 const getPlayersByTeam = (teamId) => api.get(`/teams/${teamId}/players`);
@@ -74,6 +75,7 @@ export const apiService = {
     getMyTeam,
     updateMyTeam,
     createMyTeam,
+    deleteMyTeam,
     getPlayersByTeam,
     getMyPlayers,
     addPlayer,

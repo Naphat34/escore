@@ -57,6 +57,7 @@ router.use('/scorer', scorerRoutes);
 router.get('/my-team', teamController.getMyTeam);
 router.post('/my-team/create', teamController.createMyTeam);
 router.put('/my-team', teamController.updateMyTeam);
+router.delete('/my-team', teamController.deleteMyTeam);
 router.get('/my-team/players', teamController.getMyPlayers);
 router.post('/my-team/players', teamController.addPlayerToMyTeam);
 router.put('/my-team/players/:id', teamController.updatePlayer);
