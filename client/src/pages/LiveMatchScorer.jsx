@@ -3,7 +3,8 @@ import {
     User, Activity, CheckCircle, XCircle, PlayCircle, RotateCcw, 
     ArrowRightLeft, Clock, AlertTriangle, FileText 
 } from 'lucide-react';
-import client, { api } from '../api'; 
+import { api } from '../api';
+import { generateScoresheetPDF } from '../utils/pdfGenerator';
 import Swal from 'sweetalert2';
 import LineupSelector from '../components/LineupSelector';
 
@@ -252,29 +253,6 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     const [homeLineupConfirmed, setHomeLineupConfirmed] = useState(false);
     const [awayLineupConfirmed, setAwayLineupConfirmed] = useState(false);
 
-    // Effect to check if both lineups are confirmed
-    useEffect(() => {
-        if (homeLineupConfirmed && awayLineupConfirmed) {
-            setLineupSubmitted(true);
-            
-            // Add Lineup to Action Log
-            const homeNumbers = homeRotation.map(p => p.number).join(', ');
-            const awayNumbers = awayRotation.map(p => p.number).join(', ');
-            
-            setActionLog(prev => [{
-                id: Date.now(),
-                set_number: currentSet,
-                team_id: null,
-                player_id: null,
-                skill: 'LINEUP_CONFIRM',
-                grade: '!',
-                score_home: pointScore.home,
-                score_away: pointScore.away,
-                description: `Lineup Confirmed - ${matchData.home_team}: [${homeNumbers}] | ${matchData.away_team}: [${awayNumbers}]`,
-                time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-            }, ...prev]);
-        }
-    }, [homeLineupConfirmed, awayLineupConfirmed]);
 
     // Team Compositions
     const [homeStarters, setHomeStarters] = useState([]);
@@ -315,6 +293,30 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     
     // History for Undo
     const [history, setHistory] = useState([]);
+
+    // Effect to check if both lineups are confirmed
+    useEffect(() => {
+        if (homeLineupConfirmed && awayLineupConfirmed) {
+            setLineupSubmitted(true);
+            
+            // Add Lineup to Action Log
+            const homeNumbers = homeRotation.map(p => p.number).join(', ');
+            const awayNumbers = awayRotation.map(p => p.number).join(', ');
+            
+            setActionLog(prev => [{
+                id: Date.now(),
+                set_number: currentSet,
+                team_id: null,
+                player_id: null,
+                skill: 'LINEUP_CONFIRM',
+                grade: '!',
+                score_home: pointScore.home,
+                score_away: pointScore.away,
+                description: `Lineup Confirmed - ${matchData.home_team}: [${homeNumbers}] | ${matchData.away_team}: [${awayNumbers}]`,
+                time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+            }, ...prev]);
+        }
+    }, [homeLineupConfirmed, awayLineupConfirmed, homeRotation, awayRotation, currentSet, pointScore, matchData]);
 
     // ------------------------------------------------------------------------
     // LOCAL STORAGE SYNC FOR REFEREE VIEW
@@ -756,15 +758,35 @@ export default function LiveMatchScorer({ match, onClose, isReadOnly = false }) 
     // PDF GENERATION
     // ------------------------------------------------------------------------
     
-    const generatePDF = () => {
-        console.log("Generating PDF:", { matchData, setScores, actionLog });
-        
-        Swal.fire({
-            title: 'Scoresheet Generated',
-            text: 'The official FIVB scoresheet has been prepared.',
-            icon: 'success',
-            confirmButtonColor: '#10b981'
-        });
+    const generatePDF = async () => {
+        try {
+            Swal.fire({
+                title: 'Preparing Scoresheet...',
+                text: 'Fetching match data and generating PDF',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const response = await api.getMatchScoresheetData(match.id);
+            generateScoresheetPDF(response.data);
+
+            Swal.fire({
+                title: 'Scoresheet Generated',
+                text: 'The official FIVB scoresheet has been downloaded.',
+                icon: 'success',
+                confirmButtonColor: '#10b981'
+            });
+        } catch (error) {
+            console.error("PDF Generation Error:", error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to generate PDF scoresheet: ' + error.message,
+                icon: 'error',
+                confirmButtonColor: '#ef4444'
+            });
+        }
     };
 
     // ------------------------------------------------------------------------

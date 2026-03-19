@@ -137,6 +137,7 @@ export const api = {
   // อัปเดตข้อมูลเจ้าหน้าที่ในแมตช์
   updateMatchOfficials: (matchId, data) => apiClient.put(`/scorer/match/${matchId}/officials`, data),
   endSet: (matchId, data) => apiClient.post(`/scorer/match/${matchId}/end-set`, data),
+  getMatchScoresheetData: (matchId) => apiClient.get(`/scorer/match/${matchId}/scoresheet`),
 };
 
 export default apiClient;

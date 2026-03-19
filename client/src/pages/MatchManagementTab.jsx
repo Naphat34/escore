@@ -2,11 +2,12 @@ import React, { useEffect, useState, useCallback } from 'react';
 import client, { api } from '../api'; 
 import {
     Swords, PlusCircle, X, Calendar, MapPin, Edit2, Trash2,
-    Printer, ListFilter, Save, Clock, Shield, Trophy
+    Printer, ListFilter, Save, Clock, Shield, Trophy, FileText
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { Toast, Input, Button } from './AdminShared';
 import { formatThaiDate, formatThaiTime, formatThaiDateTime, formatForInput } from '../utils';
+import { generateScoresheetPDF } from '../utils/pdfGenerator';
 
 export default function MatchManagementTab({ darkMode }) {
     // --- State Management ---
@@ -328,6 +329,31 @@ export default function MatchManagementTab({ darkMode }) {
         setScoringMatch(match);
     };
 
+    const handleExportPDF = async (matchId) => {
+        try {
+            Swal.fire({
+                title: 'Preparing Scoresheet...',
+                text: 'Fetching match data...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const response = await api.getMatchScoresheetData(matchId);
+            generateScoresheetPDF(response.data);
+
+            Swal.close();
+        } catch (error) {
+            console.error("PDF Export Error:", error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Failed to generate PDF: ' + error.message,
+                icon: 'error'
+            });
+        }
+    };
+
     const handleSaveScore = async () => {
         if (!scoringMatch) return;
 
@@ -586,6 +612,11 @@ export default function MatchManagementTab({ darkMode }) {
                                                 <button onClick={() => handleDeleteMatch(match.id)} className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/40 rounded-xl transition-all" title="Delete">
                                                     <Trash2 size={16} />
                                                 </button>
+                                                {match.status === 'completed' && (
+                                                    <button onClick={() => handleExportPDF(match.id)} className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/40 rounded-xl transition-all" title="Export PDF">
+                                                        <FileText size={16} />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
