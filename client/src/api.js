@@ -138,6 +138,7 @@ export const api = {
   updateMatchOfficials: (matchId, data) => apiClient.put(`/scorer/match/${matchId}/officials`, data),
   endSet: (matchId, data) => apiClient.post(`/scorer/match/${matchId}/end-set`, data),
   getMatchScoresheetData: (matchId) => apiClient.get(`/scorer/match/${matchId}/scoresheet`),
+  getMatchRosterData: (matchId) => apiClient.get(`/scorer/match/${matchId}/roster`),
 };
 
 export default apiClient;

@@ -18,6 +18,7 @@ if (!scorerController.updateLiveState) {
 router.get('/match/:matchId', scorerController.getMatchDetails);
 router.get('/match/:matchId/events', scorerController.getMatchEvents);
 router.get('/match/:matchId/lineup', scorerController.getMatchLineup);
+router.get('/match/:matchId/roster', scorerController.getMatchRosterData);
 router.get('/match/:matchId/scoresheet', scorerController.getMatchScoresheetData);
 
 // POST Actions

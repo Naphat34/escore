@@ -530,6 +530,84 @@ module.exports = {  // ✅ สำคัญ: ต้องมี module.exports �
         }
     },
 
+    // 🚀 เพิ่มฟังก์ชันดึงข้อมูลสำหรับ Match Roster PDF
+    async getMatchRosterData(req, res) {
+        try {
+            const { matchId } = req.params;
+
+            // 1. ดึงรายละเอียดแมตช์ และ Competition (Category, Age Group)
+            const matchResult = await db.query(`
+                SELECT 
+                    m.*, 
+                    t1.name as home_team_name, t1.code as home_team_code,
+                    t2.name as away_team_name, t2.code as away_team_code,
+                    c.name as competition_name, c.title as competition_title, 
+                    c.gender as competition_gender, c.sport as competition_sport,
+                    ag.name as age_group_name,
+                    s.name as stadium_name, s.city as stadium_city
+                FROM matches m
+                LEFT JOIN teams t1 ON m.home_team_id = t1.id
+                LEFT JOIN teams t2 ON m.away_team_id = t2.id
+                LEFT JOIN competitions c ON m.competition_id = c.id
+                LEFT JOIN age_groups ag ON c.age_group_id = ag.id
+                LEFT JOIN stadiums s ON m.location = s.name OR m.location = s.id::text
+                WHERE m.id = $1
+            `, [matchId]);
+
+            if (matchResult.rows.length === 0) {
+                return res.status(404).json({ error: "Match not found" });
+            }
+
+            const match = matchResult.rows[0];
+
+            // 2. ดึงนักกีฬา และระบุ Captain/Libero
+            const homePlayers = await db.query(`
+                SELECT id, first_name, last_name, number, position, is_captain 
+                FROM players 
+                WHERE team_id = $1 
+                ORDER BY number ASC
+            `, [match.home_team_id]);
+
+            const awayPlayers = await db.query(`
+                SELECT id, first_name, last_name, number, position, is_captain 
+                FROM players 
+                WHERE team_id = $1 
+                ORDER BY number ASC
+            `, [match.away_team_id]);
+
+            // 3. ดึงสตาฟทีม
+            const homeStaff = await db.query(`
+                SELECT first_name, last_name, role 
+                FROM team_staff 
+                WHERE team_id = $1 
+                ORDER BY role ASC
+            `, [match.home_team_id]);
+
+            const awayStaff = await db.query(`
+                SELECT first_name, last_name, role 
+                FROM team_staff 
+                WHERE team_id = $1 
+                ORDER BY role ASC
+            `, [match.away_team_id]);
+
+            res.json({
+                match,
+                home: {
+                    players: homePlayers.rows,
+                    staff: homeStaff.rows
+                },
+                away: {
+                    players: awayPlayers.rows,
+                    staff: awayStaff.rows
+                }
+            });
+
+        } catch (err) {
+            console.error("Get Match Roster Data Error:", err);
+            res.status(500).json({ error: "Database error: " + err.message });
+        }
+    },
+
     // 🚀 เพิ่มฟังก์ชันดึงข้อมูลจัดทำ Scoresheet PDF
     async getMatchScoresheetData(req, res) {
         try {

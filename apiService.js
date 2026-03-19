@@ -37,6 +37,8 @@ const getMatchesByCompetition = (competitionId) => api.get(`/competitions/${comp
 const createMatch = (data) => api.post('/matches', data);
 const updateMatch = (id, data) => api.put(`/matches/${id}`, data);
 const deleteMatch = (id) => api.delete(`/matches/${id}`);
+const getMatchScoresheetData = (matchId) => api.get(`/scorer/match/${matchId}/scoresheet`);
+const getMatchRosterData = (matchId) => api.get(`/scorer/match/${matchId}/roster`);
 const updateMatchResult = (id, data) => api.put(`/matches/${id}/result`, data);
 
 // --- Match Actions (E-Score) ---
@@ -101,5 +103,7 @@ export const apiService = {
     approveUser,
     getMyCompetitions,
     joinCompetition,
-    leaveCompetition
+    leaveCompetition,
+    getMatchScoresheetData,
+    getMatchRosterData
 };
