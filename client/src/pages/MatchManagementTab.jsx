@@ -259,10 +259,13 @@ export default function MatchManagementTab({ darkMode }) {
                 return Toast.fire({ icon: 'error', title: `No competition found for gender: ${matchForm.gender}` });
             }
         }
+        // แล้วแปลงเป็น .toISOString() เพื่อให้มีข้อมูลเขตเวลาที่ถูกต้องส่งไป Server
+    const formattedStartTime = matchForm.start_time ? new Date(matchForm.start_time).toISOString() : null;   
 
         const payload = {
             ...matchForm,
-            competition_id: targetCompId
+            competition_id: targetCompId,
+            start_time: formattedStartTime
         };
 
         try {
