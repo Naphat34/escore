@@ -417,11 +417,28 @@ exports.deleteTeam = async (req, res) => {
     await client.query('DELETE FROM players WHERE team_id = $1', [id]);
     await client.query('DELETE FROM team_staff WHERE team_id = $1', [id]);
 
-    // 3. ลบข้อมูลการสมัครแข่งขันและแมตช์ที่เกี่ยวข้อง
+    // 3. ลบข้อมูลการสมัครแข่งขัน
     await client.query('DELETE FROM team_competitions WHERE team_id = $1', [id]);
-    await client.query('DELETE FROM matches WHERE team_a_id = $1 OR team_b_id = $1', [id]);
 
-    // 4. ลบทีม
+    // 4. ค้นหาแมตช์ทั้งหมดที่ทีมนี้เกี่ยวข้อง เพื่อลบข้อมูลที่เชื่อมโยง (Sets, Actions, Events, Lineups)
+    const matchesRes = await client.query(
+      'SELECT id FROM matches WHERE home_team_id = $1 OR away_team_id = $1',
+      [id]
+    );
+    const matchIds = matchesRes.rows.map(m => m.id);
+
+    if (matchIds.length > 0) {
+      // ลบข้อมูลรายเซต, สถิติ, และรายชื่อผู้เล่นในแต่ละแมตช์
+      await client.query('DELETE FROM match_sets WHERE match_id = ANY($1)', [matchIds]);
+      await client.query('DELETE FROM match_actions WHERE match_id = ANY($1)', [matchIds]);
+      await client.query('DELETE FROM match_events WHERE match_id = ANY($1)', [matchIds]);
+      await client.query('DELETE FROM match_lineups WHERE match_id = ANY($1)', [matchIds]);
+      
+      // ลบแมตช์จริง
+      await client.query('DELETE FROM matches WHERE id = ANY($1)', [matchIds]);
+    }
+
+    // 5. ลบทีม
     const result = await client.query('DELETE FROM teams WHERE id = $1', [id]);
 
     await client.query('COMMIT');
