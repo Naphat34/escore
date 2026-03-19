@@ -461,118 +461,138 @@ export default function MatchManagementTab({ darkMode }) {
                     </div>
                 </div>
             ) : (
-                <div className="space-y-6">
-                    {matches.map((match) => (
-                        <div key={match.id} className={`group relative p-4 rounded-2xl border transition-all hover:shadow-xl hover:scale-[1.01] ${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-750 border-gray-600' : 'bg-white border-gray-200 shadow-md'}`}>
-                            
-                            {/* 1. Top Header: Match #, Round, Gender */}
-                            <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700">
-                                <div className="flex items-center gap-3">
-                                    <div className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/40 rounded-lg border border-indigo-100 dark:border-indigo-800">
-                                        <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-tighter">Match #{match.match_number}</span>
-                                    </div>
-                                    <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{match.round_name}</div>
-                                </div>
-                                <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border-2 ${
-                                    match.gender === 'Female' 
-                                        ? 'bg-pink-50 text-pink-600 border-pink-200 dark:bg-pink-900/30 dark:text-pink-400 dark:border-pink-800' 
-                                        : match.gender === 'Mix'
-                                            ? 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800'
-                                            : 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
-                                }`}>
-                                    {match.gender || 'Male'}
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col md:flex-row items-center gap-4">
-                                {/* 2. Teams Selection */}
-                                <div className="flex-1 flex flex-row items-center justify-center gap-2 md:gap-6 w-full">
-                                    {/* Home Team */}
-                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-end gap-3 w-full">
-                                        <div className="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight break-words text-center md:text-right order-2 md:order-1">
-                                            {registeredTeams.find(t => t.id == match.home_team_id)?.name || match.home_team || 'TBD'}
-                                        </div>
-                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-white dark:border-gray-800 shadow-sm order-1 md:order-2 shrink-0">
-                                            {registeredTeams.find(t => t.id == match.home_team_id)?.logo_url ? (
-                                                <img src={registeredTeams.find(t => t.id == match.home_team_id).logo_url} alt="Home" className="w-full h-full object-contain p-1.5" />
-                                            ) : (
-                                                <Shield size={20} className="text-gray-400" />
-                                            )}
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Score / VS Center */}
-                                    <div className="flex flex-col items-center shrink-0 px-2">
-                                        {(match.status === 'completed' || match.home_set_score > 0 || match.away_set_score > 0) ? (
-                                            <div className="flex flex-col items-center">
-                                                <div className="px-4 py-1.5 rounded-xl bg-gray-900 dark:bg-gray-700 text-white font-mono text-xl font-bold tracking-widest shadow-md">
-                                                    {match.home_set_score} - {match.away_set_score}
+                <div className={`overflow-hidden rounded-2xl border ${darkMode ? 'border-gray-700 bg-gray-800/50' : 'border-gray-200 bg-white shadow-sm'}`}>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse min-w-[900px]">
+                            <thead>
+                                <tr className={`${darkMode ? 'bg-gray-800/80 text-gray-400' : 'bg-gray-50 text-gray-500'} text-[10px] font-bold uppercase tracking-wider border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                    <th className="px-6 py-4">#</th>
+                                    <th className="px-6 py-4">Round / Pool</th>
+                                    <th className="px-6 py-4">Teams</th>
+                                    <th className="px-6 py-4 text-center">Score</th>
+                                    <th className="px-6 py-4">Schedule</th>
+                                    <th className="px-6 py-4">Location</th>
+                                    <th className="px-6 py-4">Gender</th>
+                                    <th className="px-6 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className={`divide-y ${darkMode ? 'divide-gray-700' : 'divide-gray-100'}`}>
+                                {matches.map((match) => (
+                                    <tr key={match.id} className={`group transition-colors hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10`}>
+                                        <td className="px-6 py-4">
+                                            <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                                {match.match_number}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="font-bold text-sm text-gray-900 dark:text-white leading-snug">
+                                                {match.round_name}
+                                            </div>
+                                            {match.pool_name && (
+                                                <div className="flex items-center gap-1 mt-0.5">
+                                                    <span className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-[9px] font-bold text-gray-500 uppercase">
+                                                        Pool {match.pool_name}
+                                                    </span>
                                                 </div>
-                                                {match.set_scores && (
-                                                    <div className="text-[10px] text-gray-500 mt-1 font-medium">
-                                                        {typeof match.set_scores === 'string' ? JSON.parse(match.set_scores).join(', ') : Array.isArray(match.set_scores) ? match.set_scores.join(', ') : ''}
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col gap-2 min-w-[180px]">
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="w-6 h-6 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm shrink-0">
+                                                        {registeredTeams.find(t => t.id == match.home_team_id)?.logo_url ? (
+                                                            <img src={registeredTeams.find(t => t.id == match.home_team_id).logo_url} alt="" className="w-full h-full object-contain p-0.5" />
+                                                        ) : <Shield size={12} className="text-gray-300" />}
+                                                    </div>
+                                                    <span className={`text-[13px] font-bold truncate ${match.home_set_score > match.away_set_score && match.status === 'completed' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                                                        {registeredTeams.find(t => t.id == match.home_team_id)?.name || match.home_team || 'TBD'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="w-6 h-6 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden border border-gray-100 dark:border-gray-700 shadow-sm shrink-0">
+                                                        {registeredTeams.find(t => t.id == match.away_team_id)?.logo_url ? (
+                                                            <img src={registeredTeams.find(t => t.id == match.away_team_id).logo_url} alt="" className="w-full h-full object-contain p-0.5" />
+                                                        ) : <Shield size={12} className="text-gray-300" />}
+                                                    </div>
+                                                    <span className={`text-[13px] font-bold truncate ${match.away_set_score > match.home_set_score && match.status === 'completed' ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                                                        {registeredTeams.find(t => t.id == match.away_team_id)?.name || match.away_team || 'TBD'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {(match.status === 'completed' || match.home_set_score > 0 || match.away_set_score > 0) ? (
+                                                <div className="flex flex-col items-center">
+                                                    <div className={`px-3 py-1 rounded-lg font-mono text-base font-black tracking-widest shadow-sm ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-900 text-white'}`}>
+                                                        {match.home_set_score} - {match.away_set_score}
+                                                    </div>
+                                                    {match.set_scores && (
+                                                        <div className="text-[10px] text-gray-500 mt-1 font-medium whitespace-nowrap">
+                                                            {typeof match.set_scores === 'string' ? JSON.parse(match.set_scores).join(', ') : Array.isArray(match.set_scores) ? match.set_scores.join(', ') : ''}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col items-center">
+                                                    <span className="text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase tracking-tighter">vs</span>
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col gap-1.5 min-w-[120px]">
+                                                <div className="flex items-center gap-2 text-xs font-bold text-gray-600 dark:text-gray-300">
+                                                    <Calendar size={14} className="text-indigo-500" />
+                                                    {match.start_time ? formatThaiDate(match.start_time, { day: 'numeric', month: 'short' }) : 'TBD'}
+                                                </div>
+                                                <div className="flex items-center gap-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                                                    <Clock size={14} className="text-indigo-400" />
+                                                    {match.start_time ? formatThaiTime(match.start_time) : 'TBD'}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300 max-w-[150px]">
+                                                <MapPin size={14} className="text-rose-500 shrink-0" />
+                                                <span className="truncate">{match.location || 'TBD'}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col items-start gap-1.5">
+                                                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border-2 ${
+                                                    match.gender === 'Female' 
+                                                        ? 'bg-pink-50 text-pink-600 border-pink-100 dark:bg-pink-900/30 dark:text-pink-400 dark:border-pink-800' 
+                                                        : match.gender === 'Mix'
+                                                            ? 'bg-purple-50 text-purple-600 border-purple-100 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800'
+                                                            : 'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
+                                                }`}>
+                                                    {match.gender || 'Male'}
+                                                </span>
+                                                {match.status === 'completed' && (
+                                                    <div className="flex items-center gap-1 text-[9px] font-bold text-emerald-600 uppercase">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                                        Completed
                                                     </div>
                                                 )}
                                             </div>
-                                        ) : (
-                                            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 text-[10px] font-black text-gray-400 dark:text-gray-500">
-                                                VS
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button onClick={() => handleEditMatch(match)} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/40 rounded-xl transition-all" title="Edit">
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button onClick={() => openScoreModal(match)} className="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/40 rounded-xl transition-all" title="Score">
+                                                    <Trophy size={16} />
+                                                </button>
+                                                <button onClick={() => handleDeleteMatch(match.id)} className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/40 rounded-xl transition-all" title="Delete">
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </div>
-                                        )}
-                                    </div>
-                                    
-                                    {/* Away Team */}
-                                    <div className="flex-1 flex flex-col md:flex-row items-center justify-start gap-3 w-full">
-                                        <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden border-2 border-white dark:border-gray-800 shadow-sm shrink-0">
-                                            {registeredTeams.find(t => t.id == match.away_team_id)?.logo_url ? (
-                                                <img src={registeredTeams.find(t => t.id == match.away_team_id).logo_url} alt="Away" className="w-full h-full object-contain p-1.5" />
-                                            ) : (
-                                                <Shield size={20} className="text-gray-400" />
-                                            )}
-                                        </div>
-                                        <div className="font-bold text-base md:text-lg text-gray-900 dark:text-white leading-tight break-words text-center md:text-left">
-                                            {registeredTeams.find(t => t.id == match.away_team_id)?.name || match.away_team || 'TBD'}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* 3. Footer: Meta Info & Actions */}
-                            <div className="flex flex-col md:flex-row items-center justify-between mt-4 pt-3 border-t border-gray-50 dark:border-gray-700 gap-4">
-                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
-                                        <Calendar size={12} className="text-indigo-400"/> 
-                                        {match.start_time ? formatThaiDate(match.start_time, { day: 'numeric', month: 'short' }) : 'TBD'}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
-                                        <Clock size={12} className="text-indigo-400"/> 
-                                        {match.start_time ? formatThaiTime(match.start_time) : 'TBD'}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 px-2 py-1 rounded-md">
-                                        <MapPin size={12} className="text-indigo-400"/> 
-                                        {match.location || 'TBD'}
-                                    </div>
-                                    {match.status === 'completed' && (
-                                        <div className="px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold border border-green-100 dark:border-green-800">
-                                            Official Result
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="flex items-center gap-1">
-                                    <button onClick={() => handleEditMatch(match)} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all" title="Edit">
-                                        <Edit2 size={16} />
-                                    </button>
-                                    <button onClick={() => openScoreModal(match)} className="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-lg transition-all" title="Score">
-                                        <Trophy size={16} />
-                                    </button>
-                                    <button onClick={() => handleDeleteMatch(match.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all" title="Delete">
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
 
