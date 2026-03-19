@@ -243,14 +243,16 @@ export default function TeamRankingTab({ darkMode }) {
                 return { ...t, setRatio, pointRatio, setRatioVal: t.sets_lost === 0 ? 9999 : t.sets_won / t.sets_lost, pointRatioVal: t.points_lost === 0 ? 9999 : t.points_won / t.points_lost };
             });
 
-            // เรียงลำดับ: แมตช์ชนะ > คะแนน > Set Ratio > Point Ratio
+            // เรียงลำดับตามความสำคัญ: 1. คะแนน (Points) > 2. จำนวนแมตช์ที่ชนะ (Won Matches) > 3. Set Ratio > 4. Point Ratio
             standingsArray.sort((a, b) => {
-                // FIVB Standard: Won Matches first, then Points
-                // แต่บางลีกใช้ Points ก่อน Won Matches (ตามโจทย์ข้อ 1: Rank เลื่อนขึ้นลงตาม Points)
-                if (b.points !== a.points) return b.points - a.points;
-                if (b.won !== a.won) return b.won - a.won;
-                if (b.setRatioVal !== a.setRatioVal) return b.setRatioVal - a.setRatioVal;
-                return b.pointRatioVal - a.pointRatioVal;
+                // จัดเรียงจาก คะแนน (Points) มากไปหาน้อย
+                if (b.points !== a.points) return (b.points || 0) - (a.points || 0);
+                // ถ้าคะแนนเท่ากัน ให้ดูจำนวนแมตช์ที่ชนะ (Won Matches)
+                if (b.won !== a.won) return (b.won || 0) - (a.won || 0);
+                // ถ้ายังเท่ากัน ให้ดู Set Ratio
+                if (b.setRatioVal !== a.setRatioVal) return (b.setRatioVal || 0) - (a.setRatioVal || 0);
+                // สุดท้ายดู Point Ratio
+                return (b.pointRatioVal || 0) - (a.pointRatioVal || 0);
             });
 
             setStandings(standingsArray);
