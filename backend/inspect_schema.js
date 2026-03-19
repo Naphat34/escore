@@ -2,7 +2,8 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
+  connectionString: 'postgres://postgres:1234@localhost:5432/postgres',
+  ssl: false
 });
 
 async function run() {
@@ -10,7 +11,7 @@ async function run() {
     const res = await pool.query(`
       SELECT table_name, column_name 
       FROM information_schema.columns 
-      WHERE table_name IN ('matches', 'teams', 'team_competitions') 
+      WHERE table_name IN ('matches', 'teams', 'competitions', 'referees', 'scorers', 'line_judges') 
       ORDER BY table_name, ordinal_position
     `);
     console.log(JSON.stringify(res.rows, null, 2));
