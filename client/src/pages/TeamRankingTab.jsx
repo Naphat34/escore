@@ -14,6 +14,8 @@ export default function TeamRankingTab({ darkMode }) {
     const [viewingHistoryTeam, setViewingHistoryTeam] = useState(null); // ทีมที่กำลังดูประวัติ
     const [resultCols, setResultCols] = useState([]); // เก็บชื่อคอลัมน์ผลการแข่งขัน (เช่น 3-0, 3-1)
     const [availableGenders, setAvailableGenders] = useState([]); // เก็บเพศที่มีในรายการนั้นๆ
+    const [pools, setPools] = useState([]); // รายชื่อ Pool ทั้งหมดในรายการนี้
+    const [selectedPool, setSelectedPool] = useState(''); // Pool ที่เลือกใช้งาน
 
     useEffect(() => {
         fetchCompetitions();
@@ -36,7 +38,7 @@ export default function TeamRankingTab({ darkMode }) {
         } else {
             setStandings([]);
         }
-    }, [selectedBaseName, genderFilter, competitions]);
+    }, [selectedBaseName, genderFilter, competitions, selectedPool]);
 
     // เมื่อเลือกรายการแข่งขัน (Base Name) ให้หาว่ามีเพศอะไรบ้าง
     useEffect(() => {
@@ -93,7 +95,26 @@ export default function TeamRankingTab({ darkMode }) {
 
             const matches = matchesRes.data;
             setAllMatches(matches); // เก็บแมตช์ดิบไว้ใช้งาน
-            const teams = teamsRes.data;
+            let teams = teamsRes.data;
+
+            // --- [NEW] จัดการ Pool Filtering ---
+            // 1. หา Pool ทั้งหมดที่มีในรายการนี้ (จาก matches)
+            const uniquePools = [...new Set(matches.map(m => m.pool_name).filter(Boolean))].sort();
+            setPools(uniquePools);
+
+            // 2. ถ้ามี Pool และมีการเลือก Pool ให้กรองข้อมูล
+            let filteredMatches = matches;
+            if (selectedPool) {
+                filteredMatches = matches.filter(m => m.pool_name === selectedPool);
+                
+                // กรองเฉพาะทีมที่มีแข่งใน Pool นี้
+                const teamIdsInPool = new Set();
+                filteredMatches.forEach(m => {
+                    if (m.home_team_id) teamIdsInPool.add(m.home_team_id);
+                    if (m.away_team_id) teamIdsInPool.add(m.away_team_id);
+                });
+                teams = teams.filter(t => teamIdsInPool.has(t.id));
+            }
 
             // 1. หา max_sets ของรายการนี้เพื่อสร้างคอลัมน์ Result Details
             const selectedComp = competitions.find(c => c.id == compId);
@@ -128,7 +149,7 @@ export default function TeamRankingTab({ darkMode }) {
             });
 
             // คำนวณคะแนนจากแมตช์ที่แข่งจบแล้ว (completed)
-            matches.forEach(m => {
+            filteredMatches.forEach(m => {
                 // ไม่ต้องกรองเพศซ้ำซ้อน เพราะเราเลือก Competition ID ตามเพศมาแล้ว
                 if (m.status === 'completed') {
                     const homeId = m.home_team_id;
@@ -286,6 +307,23 @@ export default function TeamRankingTab({ darkMode }) {
                                 ))}
                             </div>
                         </div>
+                        {pools.length > 0 && (
+                            <div>
+                                <label className={`block text-xs font-bold uppercase mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    Pool
+                                </label>
+                                <select
+                                    className={`w-full px-3 py-1.5 rounded-lg border text-sm transition focus:ring-2 focus:ring-indigo-500 outline-none ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                                    value={selectedPool}
+                                    onChange={(e) => setSelectedPool(e.target.value)}
+                                >
+                                    <option value="">All Pools</option>
+                                    {pools.map(p => (
+                                        <option key={p} value={p}>{p}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
